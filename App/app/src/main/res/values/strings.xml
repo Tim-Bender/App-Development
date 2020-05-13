@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">Main</string>
+    <string name="spudniklogo">spudniklogo</string>
+    <string name="s4logo">s4logo</string>
+    <string name="diagnostic_tool">Diagnostic Tool</string>
+    <string name="vdev1_0">vDev1.0</string>
+    <string name="bluetoothlogo">bluetoothlogo</string>
+    <string name="todo">TODO</string>
+    <string name="heartratepicture">heartratepicture</string>
+    <string name="title_activity_home">home</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="textview">TextView</string>
+    <string name="what_do_you_want_to_do">What do you want to do?</string>
+    <string name="run_diagnostic_tool">Run Diagnostic Tool</string>
+    <string name="update_implement_software">Update Implement Software</string>
+    <string name="log_implement_io_data">Log Implement Io Data</string>
+    <string name="view_tool_settings">View Tool Settings</string>
+</resources>
