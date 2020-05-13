@@ -32,6 +32,7 @@
             android:layout_width="match_parent"
             android:layout_height="140dp"
             android:layout_marginTop="10dp"
+            android:onClick="diagTool"
             android:text="@string/run_diagnostic_tool" />
 
         <Button
@@ -39,6 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="140dp"
             android:layout_marginTop="10dp"
+            android:onClick="update"
             android:text="@string/update_implement_software" />
 
         <Button
@@ -46,6 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="140dp"
             android:layout_marginTop="10dp"
+            android:onClick="logData"
             android:text="@string/log_implement_io_data" />
 
         <Button
@@ -53,6 +56,8 @@
             android:layout_width="match_parent"
             android:layout_height="125dp"
             android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
+            android:onClick="settings"
             android:text="@string/view_tool_settings" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,4 +22,11 @@
     <string name="update_implement_software">Update Implement Software</string>
     <string name="log_implement_io_data">Log Implement Io Data</string>
     <string name="view_tool_settings">View Tool Settings</string>
+    <string name="_0">0%</string>
+    <string name="loading_0">Loading 0%</string>
+    <string name="loading">loading...</string>
+    <string name="Loading">Loading...</string>
+    <string name="title_activity_serialnumber">serialnumber</string>
+    <string name="enter_implement_serial_number">Enter Implement Serial Number</string>
+    <string name="e_g_6640_55_150">(e.g. 6640-55-150)</string>
 </resources>
