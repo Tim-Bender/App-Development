@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.View;
+import android.widget.Toast;
 
 public class home extends AppCompatActivity {
 
@@ -14,6 +15,7 @@ public class home extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         setTitle("Home");
+        Toast.makeText(this,"Welcome!",Toast.LENGTH_LONG).show();
     }
     public void diagTool(View view){
         Intent i = new Intent(getBaseContext(), inputserial.class);

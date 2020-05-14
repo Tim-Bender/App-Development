@@ -9,7 +9,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:background="#BFE6E1E1"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -28,16 +28,58 @@
             android:textSize="24sp"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/editText"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:autofillHints=""
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/inputid"
+                android:layout_width="277dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:autofillHints=""
+                android:ems="10"
+                android:hint="@string/e_g_6640_55_150"
+                android:inputType="number|numberPassword"
+                android:textColorHighlight="#F40303"
+                android:textColorHint="#373535"
+                android:textColorLink="#FF0000"
+                android:textCursorDrawable="@color/design_default_color_error" />
+
+            <Button
+                android:id="@+id/gobutton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|left"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_weight="1"
+                android:onClick="go"
+                android:text="Go" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="match_parent"
+            android:layout_height="199dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="50dp"
+            android:contentDescription="@string/spudnikplate"
+            app:srcCompat="@drawable/spudnikplate" />
+
+        <EditText
+            android:id="@+id/editText2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginRight="20dp"
             android:ems="10"
-            android:hint="@string/e_g_6640_55_150"
-            android:inputType="number|numberPassword"
-            android:textColorHighlight="#F40303"
-            android:textColorLink="#FF0000"
-            android:textCursorDrawable="@color/design_default_color_error" />
+            android:gravity="start|top"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            android:text="@string/the_implement_s_serial_number_can_be_found_on_the_front_of_the_machine_close_to_the_implement_s_drawbar_on_the_main_frame_the_serial_number_is_printed_on_an_aluminum_tag_that_looks_similar_to_the_image_above" />
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

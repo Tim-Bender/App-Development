@@ -29,4 +29,9 @@
     <string name="title_activity_serialnumber">serialnumber</string>
     <string name="enter_implement_serial_number">Enter Implement Serial Number</string>
     <string name="e_g_6640_55_150">(e.g. 6640-55-150)</string>
+    <string name="spudnikplate">spudnikplate</string>
+    <string name="the_implement_s_serial_number_can_be_found_on_the_front_of_the_machine_close_to_the_implement_s_drawbar_on_the_main_frame_the_serial_number_is_printed_on_an_aluminum_tag_that_looks_similar_to_the_image_above">The implement\'s serial number can be found on the front of the machine, close to the implement\'s drawbar on the main frame. The serial number is printed on an aluminum tag that looks similar to the image above.</string>
+    <string name="back">Back</string>
+    <string name="title_activity_connectorselect">connectorselect</string>
+    <string name="which_s4_input_or_output_connector_would_you_like_to_view_diagnostics_for">Which S4 Input or Output connector would you like to view diagnostics for?</string>
 </resources>
