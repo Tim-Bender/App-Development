@@ -14,17 +14,20 @@ public class connection {
     private String id,direction,name,units,plug,s4,type;
 
     //construtor is overloaded. Either pass in no data, and add later using add/getter methods, or pass it all in at the same time.
-    connection(String id,String dir, String nm, String un, String pl, String s, String type){
+    connection(String id,String dir, String s, String nm, String un, String type){
         this.id = id;
         this.direction = dir;
         this.name = nm;
         this.units = un;
-        this.plug = pl;
         this.s4 = s;
         this.type = type;
     }
     //overloaded default constructor. If using this, you must add all the information using set methods
     connection(){
+    }
+
+    public String toString(){
+        return (this.id+" " + this.direction + " " + this.name + " " + this.units + " " + this.units + " " + this.type);
     }
 
     //set methods

@@ -7,6 +7,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.View;
 import android.widget.Toast;
+/**
+ * Author: Timothy Bender
+ * timothy.bender@spudnik.com
+ * 530-414-6778
+ * Please see README before updating anything
+ */
 
 public class home extends AppCompatActivity {
 
@@ -20,20 +26,20 @@ public class home extends AppCompatActivity {
     public void diagTool(View view){
         Intent i = new Intent(getBaseContext(), inputserial.class);
         startActivity(i);
-        finish();
+
 
     }
 
     public void update(View view){
         Intent i = new Intent(getBaseContext(), inputserial.class);
         startActivity(i);
-        finish();
+
     }
 
     public void logData(View view){
         Intent i = new Intent(getBaseContext(), inputserial.class);
         startActivity(i);
-        finish();
+
     }
 
     public void settings(View view){

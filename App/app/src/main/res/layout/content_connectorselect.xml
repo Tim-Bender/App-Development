@@ -28,7 +28,7 @@
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/editText"
+            android:id="@+id/connectorinput"
             android:layout_width="269dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -44,6 +44,7 @@
             android:layout_height="99dp"
             android:layout_gravity="center"
             android:layout_marginTop="10dp"
+            android:onClick="up"
             app:srcCompat="@android:drawable/arrow_up_float" />
 
         <ImageButton
@@ -51,6 +52,7 @@
             android:layout_width="95dp"
             android:layout_height="99dp"
             android:layout_gravity="center"
+            android:onClick="down"
             app:srcCompat="@android:drawable/arrow_down_float" />
 
         <LinearLayout
@@ -66,6 +68,7 @@
                 android:layout_width="100dp"
                 android:layout_height="80dp"
                 android:layout_weight="1"
+                android:onClick="back"
                 android:text="@string/back" />
 
             <Button
@@ -73,7 +76,9 @@
                 android:layout_width="100dp"
                 android:layout_height="80dp"
                 android:layout_weight="1"
+                android:onClick="next"
                 android:text="@string/next" />
         </LinearLayout>
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

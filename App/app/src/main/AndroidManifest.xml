@@ -10,9 +10,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".selectpin"
+            android:label="@string/title_activity_selectpin"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
             android:name=".connectorselect"
             android:label="@string/title_activity_connectorselect"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".inputserial" />
         <activity
             android:name=".home"
