@@ -1,17 +1,13 @@
 package com.example.main;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 
 /**
  * Author: Timothy Bender
@@ -23,10 +19,23 @@ import java.nio.charset.Charset;
 public class inputserial extends AppCompatActivity implements Runnable {
     public vehicle myvehicle;
     boolean empty = true;
+    private EditText edittext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inputserial);
+        this.edittext = findViewById(R.id.inputid);
+        this.edittext.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)){
+                    go(getCurrentFocus());
+                    return true;
+                }
+
+                return false;
+            }
+        });
     }
 
 
@@ -35,37 +44,25 @@ public class inputserial extends AppCompatActivity implements Runnable {
      */
     public void go(View view){
         this.empty = true;
-        EditText edittext = findViewById(R.id.inputid);
         String vehicleId = edittext.getText().toString();
-        this.myvehicle = new vehicle(vehicleId);
-        Toast.makeText(this, vehicleId, Toast.LENGTH_LONG).show();
-        InputStream is = getResources().openRawResource(R.raw.parsedtest);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-        String line = null;
-        try{
-            while((line = reader.readLine()) != null) {
-                String[] tokens = line.split(",");
-                if (testConnection(vehicleId,tokens[0])) {
-                    this.empty = false;
-                    connection newConnection = new connection(tokens[0], tokens[1], tokens[2], tokens[3], tokens[4], tokens[5]);
-                    this.myvehicle.addConnection(newConnection);
-                    if(!myvehicle.getUniqueConnections().contains(tokens[1])){
-                        myvehicle.addUniqueconnection(tokens[1]);
-                    }
-                    //System.out.println(newConnection);
-                }
+        if(!(edittext.getText().length() < 2)) {
+            InputStream is = getResources().openRawResource(R.raw.parsedtest);
+            this.myvehicle = new vehicle(vehicleId);
+            this.myvehicle.setIs(is);
+            if(!myvehicle.getConnections().isEmpty()) {
+                Toast.makeText(this, vehicleId, Toast.LENGTH_LONG).show();
+                Intent i = new Intent(getBaseContext(), connectorselect.class);
+                i.putExtra("myvehicle", myvehicle);
+                startActivity(i);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            else{
+                Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
+            }
         }
-        if(this.empty){
-            Toast.makeText(this, "Not a valid code", Toast.LENGTH_SHORT).show();
+        else{
+            Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
         }
-        else {
-            Intent i = new Intent(getBaseContext(), connectorselect.class);
-            i.putExtra("vehicle", myvehicle);
-            startActivity(i);
-        }
+
 
     }
 
@@ -75,7 +72,7 @@ public class inputserial extends AppCompatActivity implements Runnable {
             if(s.charAt(i) == 'X'){
                 return true;
             }
-            if(i<s.length()-1){
+            if(i<s.length()-1 && i > 2){
                 if(s.charAt(i) == '5' && s.charAt(i+1) == '5'){
                     return true;
                 }

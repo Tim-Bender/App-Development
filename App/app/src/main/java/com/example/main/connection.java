@@ -1,6 +1,9 @@
 package com.example.main;
 
-public class connection {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class connection implements Parcelable {
     /**
      * Author: Timothy Bender
      * timothy.bender@spudnik.com
@@ -25,6 +28,29 @@ public class connection {
     //overloaded default constructor. If using this, you must add all the information using set methods
     connection(){
     }
+
+
+    protected connection(Parcel in) {
+        id = in.readString();
+        direction = in.readString();
+        name = in.readString();
+        units = in.readString();
+        plug = in.readString();
+        s4 = in.readString();
+        type = in.readString();
+    }
+
+    public static final Creator<connection> CREATOR = new Creator<connection>() {
+        @Override
+        public connection createFromParcel(Parcel in) {
+            return new connection(in);
+        }
+
+        @Override
+        public connection[] newArray(int size) {
+            return new connection[size];
+        }
+    };
 
     public String toString(){
         return (this.id+" " + this.direction + " " + this.name + " " + this.units + " " + this.units + " " + this.type);
@@ -89,5 +115,19 @@ public class connection {
         return this.units;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(direction);
+        dest.writeString(name);
+        dest.writeString(units);
+        dest.writeString(plug);
+        dest.writeString(s4);
+        dest.writeString(type);
+    }
 }

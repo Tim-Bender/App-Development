@@ -29,35 +29,43 @@
 
         <Button
             android:id="@+id/button2"
+            style="@android:style/Widget.Button"
             android:layout_width="match_parent"
             android:layout_height="140dp"
             android:layout_marginTop="10dp"
             android:onClick="diagTool"
-            android:text="@string/run_diagnostic_tool" />
+            android:text="@string/run_diagnostic_tool"
+            android:textSize="24sp" />
 
         <Button
             android:id="@+id/button3"
+            style="@android:style/Widget.Button"
             android:layout_width="match_parent"
             android:layout_height="140dp"
             android:layout_marginTop="10dp"
             android:onClick="update"
-            android:text="@string/update_implement_software" />
+            android:text="@string/update_implement_software"
+            android:textSize="24sp" />
 
         <Button
             android:id="@+id/button4"
+            style="@android:style/Widget.Button"
             android:layout_width="match_parent"
             android:layout_height="140dp"
             android:layout_marginTop="10dp"
             android:onClick="logData"
-            android:text="@string/log_implement_io_data" />
+            android:text="@string/log_implement_io_data"
+            android:textSize="24sp" />
 
         <Button
             android:id="@+id/button5"
+            style="@android:style/Widget.Button"
             android:layout_width="match_parent"
             android:layout_height="125dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="20dp"
             android:onClick="settings"
-            android:text="@string/view_tool_settings" />
+            android:text="@string/view_tool_settings"
+            android:textSize="24sp" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

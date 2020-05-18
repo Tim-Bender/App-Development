@@ -1,40 +1,58 @@
 package com.example.main;
 
-import android.app.ActionBar;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
 import android.view.View;
-import android.widget.EditText;
-import android.widget.ScrollView;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.w3c.dom.Text;
+
+import java.io.InputStream;
 
 public class selectpin extends AppCompatActivity {
-    vehicle myvehicle;
-
+    private vehicle myvehicle;
+    private TextView  textView;
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selectpin);
-        this.myvehicle = getIntent().getParcelableExtra("vehicle");
+        InputStream is = getResources().openRawResource(R.raw.parsedtest);
+        this.myvehicle = getIntent().getParcelableExtra("myvehicle");
+        this.myvehicle.setIs(is);
 
-        ScrollView scrollView = findViewById(R.id.pins);
-        TextView b = new TextView(this);
-        String tempdirection = "Out1";
-        for(connection connection : myvehicle.getConnections()){
-            if(connection.getDirection() == tempdirection){
-                b.setWidth(ActionBar.LayoutParams.MATCH_PARENT);
-                b.setHeight(ActionBar.LayoutParams.WRAP_CONTENT);
-                b.setText("Pin " + connection.getS4() + ": " + connection.getName());
-                scrollView.addView(b);
+        this.textView = findViewById(R.id.connectorid);
+        String temp = this.myvehicle.getUniqueConnections().get(this.myvehicle.getLoc());
+        String s1 = temp.substring(0,1).toUpperCase();
+        this.textView.setText(s1 + temp.substring(1));
+
+        LinearLayout layout = findViewById(R.id.pins);
+        if(this.myvehicle.getConnections().get(0) != null) {
+            for (connection c : this.myvehicle.getConnections()) {
+                if (c.getDirection().contains(temp.toLowerCase())) {
+                    System.out.println("Adding button");
+                    Button btn = new Button(this);
+                    btn.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
+                    btn.setText("Pin" + c.getS4() + " Signal:  " + c.getName());
+                    layout.addView(btn);
+                }
             }
-
         }
+        else{
+            Toast.makeText(this, "No Pins Available", Toast.LENGTH_SHORT).show();
+            TextView textView = new TextView(this);
+            textView.setText("No pin information available");
+            layout.addView(textView);
+        }
+
+    }
+
+    public void Back(View view){
+        finish();
     }
 
 }
