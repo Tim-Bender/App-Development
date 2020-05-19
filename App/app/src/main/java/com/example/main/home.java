@@ -53,7 +53,12 @@ public class home extends AppCompatActivity {
     }
 
     public void settings(View view){
-
+        /*try{
+            Intent i = new Intent(getBaseContext(), settings.class);
+            startActivity(i);
+        }catch(Exception e){
+            e.printStackTrace();
+        }*/
 
     }
 
