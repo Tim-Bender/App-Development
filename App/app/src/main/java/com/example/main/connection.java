@@ -3,7 +3,7 @@ package com.example.main;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class connection implements Parcelable {
+public class connection implements Parcelable,Comparable<connection> {
     /**
      * Author: Timothy Bender
      * timothy.bender@spudnik.com
@@ -15,7 +15,8 @@ public class connection implements Parcelable {
      * This class will be used by vehicle, in an array list implementation to store all the connections for one machine.
      */
     private String id,direction,name,units,plug,s4,type;
-
+    public static final int SORT_BY_DIRECTION = 0,SORT_BY_S4 = 1,SORT_BY_NAME = 2, SORT_BY_UNITS = 3, SORT_BY_TYPE = 4;
+    private static int SORT_BY = 0;
     //construtor is overloaded. Either pass in no data, and add later using add/getter methods, or pass it all in at the same time.
     connection(String id,String dir, String s, String nm, String un, String type){
         this.id = id;
@@ -39,6 +40,21 @@ public class connection implements Parcelable {
         s4 = in.readString();
         type = in.readString();
     }
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(direction);
+        dest.writeString(name);
+        dest.writeString(units);
+        dest.writeString(plug);
+        dest.writeString(s4);
+        dest.writeString(type);
+    }
 
     public static final Creator<connection> CREATOR = new Creator<connection>() {
         @Override
@@ -51,6 +67,45 @@ public class connection implements Parcelable {
             return new connection[size];
         }
     };
+
+
+    @Override
+    public int compareTo(connection o) {
+        try {
+            if (o != null) {
+                switch (this.SORT_BY) {
+                    case SORT_BY_DIRECTION:
+                        return (Integer.compare(this.convertStringToInt(this.direction),this.convertStringToInt(o.direction)));
+                    case SORT_BY_NAME:
+                        return (Integer.compare(this.convertStringToInt(this.name),this.convertStringToInt(o.name)));
+                    case SORT_BY_TYPE:
+                        return (Integer.compare(this.convertStringToInt(this.type),this.convertStringToInt(o.type)));
+                    case SORT_BY_UNITS:
+                        return (Integer.compare(this.convertStringToInt(this.units),this.convertStringToInt(o.units)));
+                    default:
+                        return (Integer.compare(this.convertStringToInt(this.s4),this.convertStringToInt(o.s4)));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return(this.getS4().compareTo(o.getS4()));
+    }
+
+    public int convertStringToInt(String str1){
+       str1 = str1.replaceAll("\\D+","");
+        return(Integer.parseInt(str1));
+
+    }
+
+
+    public static int getSortBy() {
+        return SORT_BY;
+    }
+
+    public static void setSortBy(int sortBy) {
+        SORT_BY = sortBy;
+    }
 
     public String toString(){
         return (this.id+" " + this.direction + " " + this.name + " " + this.units + " " + this.units + " " + this.type);
@@ -115,19 +170,6 @@ public class connection implements Parcelable {
         return this.units;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(id);
-        dest.writeString(direction);
-        dest.writeString(name);
-        dest.writeString(units);
-        dest.writeString(plug);
-        dest.writeString(s4);
-        dest.writeString(type);
-    }
+    public connection getConnectionObject(){return this;}
 }

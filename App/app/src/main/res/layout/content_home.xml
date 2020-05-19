@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,6 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
+            android:layout_weight="1"
             android:gravity="center"
             android:text="@string/what_do_you_want_to_do"
             android:textColor="#000000"
@@ -33,6 +35,8 @@
             android:layout_width="match_parent"
             android:layout_height="140dp"
             android:layout_marginTop="10dp"
+            android:layout_weight="2"
+            android:drawableLeft="@drawable/tinyheartbeattransparent"
             android:onClick="diagTool"
             android:text="@string/run_diagnostic_tool"
             android:textSize="24sp" />
@@ -43,6 +47,8 @@
             android:layout_width="match_parent"
             android:layout_height="140dp"
             android:layout_marginTop="10dp"
+            android:layout_weight="2"
+            android:drawableLeft="@drawable/tinygreenarrowtransparent"
             android:onClick="update"
             android:text="@string/update_implement_software"
             android:textSize="24sp" />
@@ -53,6 +59,8 @@
             android:layout_width="match_parent"
             android:layout_height="140dp"
             android:layout_marginTop="10dp"
+            android:layout_weight="2"
+            android:drawableLeft="@drawable/binarytexttransparent"
             android:onClick="logData"
             android:text="@string/log_implement_io_data"
             android:textSize="24sp" />
@@ -64,6 +72,8 @@
             android:layout_height="125dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="20dp"
+            android:layout_weight="2"
+            android:drawableLeft="@drawable/cogwheeltransparent"
             android:onClick="settings"
             android:text="@string/view_tool_settings"
             android:textSize="24sp" />
