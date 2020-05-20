@@ -2,6 +2,8 @@ package com.example.main;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -10,6 +12,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 import java.io.InputStream;
+import java.util.PriorityQueue;
+import java.util.Set;
 
 /**
  * Author: Timothy Bender
@@ -40,6 +44,26 @@ public class inputserial extends AppCompatActivity {
             }
         });} catch (Exception e) {
             Toast.makeText(this, "Unidentified Error", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+        try {
+            BluetoothAdapter myAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (myAdapter == null) {
+                System.out.println("Not supported");
+            }
+            if (!myAdapter.isEnabled()) {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, 1);
+            }
+            Set<BluetoothDevice> pairedDevices = myAdapter.getBondedDevices();
+            if (pairedDevices.size() > 0) {
+                for (BluetoothDevice device : pairedDevices) {
+                    String deviceName = device.getName();
+                    String hardWareAddress = device.getAddress();
+                }
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Bluetooth Failed", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
 
