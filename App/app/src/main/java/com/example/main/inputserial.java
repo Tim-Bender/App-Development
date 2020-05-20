@@ -1,6 +1,7 @@
 package com.example.main;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -41,6 +42,7 @@ public class inputserial extends AppCompatActivity {
             Toast.makeText(this, "Unidentified Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
+
 
     }
 

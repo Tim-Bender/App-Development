@@ -85,6 +85,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="30dp"
+                android:layout_weight="1"
                 android:autofillHints=""
                 android:backgroundTint="#FF0000"
                 android:ems="10"
@@ -101,7 +102,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="30dp"
+                android:layout_marginStart="20dp"
+                android:layout_weight="2"
                 android:onClick="go"
                 android:text="@string/next" />
         </LinearLayout>
