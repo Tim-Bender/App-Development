@@ -1,6 +1,7 @@
 package com.example.main;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -17,11 +18,15 @@ public class MainActivity extends AppCompatActivity {
     private TextView textView;
     private int progressStatus = 0;
     private Handler handler = new Handler();
+    private Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setTitle("Loading");
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        this.toolbar.setTitleTextColor(Color.WHITE);
         try {
             this.progressBar = findViewById(R.id.loadingbar);
             this.progressBar.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);

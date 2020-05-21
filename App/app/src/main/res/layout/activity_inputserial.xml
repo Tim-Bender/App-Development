@@ -5,17 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#C9706B6B"
+    android:fitsSystemWindows="true"
     tools:context=".inputserial">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="50dp"
         android:background="#BFE6E1E1"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="0dp">
 
         <TextView
             android:id="@+id/textView5"
@@ -45,6 +45,7 @@
                 android:backgroundTint="#FF0000"
                 android:ems="10"
                 android:hint="(e.g. GENAG)"
+                android:inputType="textShortMessage"
                 android:textColorHighlight="#F40303"
                 android:textColorHint="#373535"
                 android:textColorLink="#FF0000"
@@ -76,6 +77,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="10dp"
             android:layout_weight="1"
             android:orientation="horizontal">
 
@@ -104,6 +107,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="20dp"
                 android:layout_weight="2"
+                android:background="@drawable/buttongradient"
                 android:onClick="go"
                 android:text="@string/next" />
         </LinearLayout>
@@ -134,4 +138,9 @@
             android:text="@string/the_implement_s_serial_number_can_be_found_on_the_front_of_the_machine_close_to_the_implement_s_drawbar_on_the_main_frame_the_serial_number_is_printed_on_an_aluminum_tag_that_looks_similar_to_the_image_above" />
 
     </LinearLayout>
+
+    <include
+        layout="@layout/toolbar"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="3dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

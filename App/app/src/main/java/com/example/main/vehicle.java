@@ -19,7 +19,7 @@ import java.util.Collections;
 /* This vehicle class will contain all necessary information about the vehicle the user needs. It will receive a vehicle id from android kernel,
  * Search through for it. Then store information about each connection.
  */
-public class vehicle implements Parcelable {
+public class vehicle  implements Parcelable {
 
     //vehicle id input by the user, passed through by the android kernel
     private String vehicleId;
@@ -28,6 +28,7 @@ public class vehicle implements Parcelable {
     private ArrayList<connection> connections = new ArrayList<>();
     private ArrayList<String> uniqueConnections = new ArrayList<>();
     private ArrayList<String> uniquePins = new ArrayList<>();
+    private ArrayList<String> dealers = new ArrayList<>();
     private int loc = 0,pinCount=0;
     private InputStream is;
     public static final int SORT_BY_DIRECTION = 0,SORT_BY_S4 = 1,SORT_BY_NAME = 2, SORT_BY_UNITS = 3, SORT_BY_TYPE = 4;
@@ -43,6 +44,7 @@ public class vehicle implements Parcelable {
         uniqueConnections = in.createStringArrayList();
         loc = in.readInt();
         pinCount = in.readInt();
+        dealers = in.createStringArrayList();
     }
     @Override
     public void writeToParcel(Parcel dest, int flags) {
@@ -50,6 +52,7 @@ public class vehicle implements Parcelable {
         dest.writeStringList(uniqueConnections);
         dest.writeInt(loc);
         dest.writeInt(pinCount);
+        dest.writeStringList(dealers);
     }
 
     public static final Creator<vehicle> CREATOR = new Creator<vehicle>() {
@@ -92,6 +95,24 @@ public class vehicle implements Parcelable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    protected void buildDealers(InputStream i){
+        try{
+            BufferedReader reader = new BufferedReader(new InputStreamReader(i, Charset.forName("UTF-8")));
+            String line;
+            while((line = reader.readLine()) != null) {
+                line = line.toLowerCase().trim();
+                if (!this.dealers.contains(line)) {
+                    this.dealers.add(line);
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    protected boolean checkDealer(String dealerid){
+        return this.dealers.contains(dealerid);
     }
 
     //This will test whether or not an input'ed machine id is valid or not.
@@ -197,12 +218,17 @@ public class vehicle implements Parcelable {
         this.loc = loc;
     }
 
+    protected void setDeaer(ArrayList<String> dealers){
+        this.dealers = dealers;
+    }
+    protected ArrayList<String> getDealer(){
+        return this.dealers;
+    }
+
     protected void setIs(InputStream s){
         this.is = s;
-        //if(this.is != null) {
-        //    buildDataBase();
-        //}
     }
+
     public String toString(){
         return ("Id: "+ this.vehicleId + "\n Connections: " + this.connections.size() + "\n Unique Connections: " + this.uniqueConnections.size());
     }
@@ -214,5 +240,4 @@ public class vehicle implements Parcelable {
     protected void setUniquePins(ArrayList<String> uniquePins) {
         this.uniquePins = uniquePins;
     }
-
 }

@@ -1,8 +1,12 @@
 package com.example.main;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import android.view.View;
 import android.widget.Toast;
 
@@ -14,12 +18,17 @@ import android.widget.Toast;
  */
 
 public class home extends AppCompatActivity {
-
+    Toolbar myToolBar;
+    Context context;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
-        this.setTitle("Home Page");
+        context = this;
+        setContentView(R.layout.content_home);
+        this.myToolBar = findViewById(R.id.toolbar);
+        setSupportActionBar(myToolBar);
+        setTitle("Home");
+        this.myToolBar.setTitleTextColor(Color.WHITE);
         Toast.makeText(this,"Welcome!",Toast.LENGTH_LONG).show();
     }
     public void diagTool(View view){

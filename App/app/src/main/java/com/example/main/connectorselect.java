@@ -3,8 +3,11 @@ package com.example.main;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
@@ -21,11 +24,15 @@ import java.io.InputStream;
 public class connectorselect extends AppCompatActivity {
     private vehicle myvehicle;
     EditText editText;
+    Toolbar toolbar;
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_connectorselect);
+        setContentView(R.layout.content_connectorselect);
+        this.toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        this.toolbar.setTitleTextColor(Color.WHITE);
         try {
             InputStream is = getResources().openRawResource(R.raw.parsedtest);
             setTitle("Connector Selection");

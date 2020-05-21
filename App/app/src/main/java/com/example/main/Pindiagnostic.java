@@ -1,6 +1,7 @@
 package com.example.main;
 
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -22,10 +23,11 @@ public class Pindiagnostic extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pindiagnostic);
+        setContentView(R.layout.content_pindiagnostic);
         try {
             Toolbar toolbar = findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
+            toolbar.setTitleTextColor(Color.WHITE);
             InputStream is = getResources().openRawResource(R.raw.parsedtest);
             this.myvehicle = getIntent().getParcelableExtra("myvehicle");
             assert this.myvehicle != null;
@@ -33,14 +35,7 @@ public class Pindiagnostic extends AppCompatActivity {
             this.myvehicle.setIs(is);
 
             updateValues();
-            FloatingActionButton fab = findViewById(R.id.fab);
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            });
+
         } catch (Resources.NotFoundException e) {
             Toast.makeText(this, "File Not Found Exception", Toast.LENGTH_SHORT).show();
             e.printStackTrace();

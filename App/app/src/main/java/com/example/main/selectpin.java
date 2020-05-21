@@ -2,8 +2,11 @@ package com.example.main;
 
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -11,16 +14,23 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class selectpin extends AppCompatActivity {
     private vehicle myvehicle;
     private TextView  textView;
+    private ArrayList<connection> connections = new ArrayList<>();
+    private Toolbar toolbar;
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_selectpin);
+        setContentView(R.layout.content_selectpin);
+        this.toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         setTitle("Pin Selection");
+        this.toolbar.setTitleTextColor(Color.WHITE);
+
         try {
             InputStream is = getResources().openRawResource(R.raw.parsedtest);
             this.myvehicle = getIntent().getParcelableExtra("myvehicle");
@@ -35,6 +45,7 @@ public class selectpin extends AppCompatActivity {
             this.textView.setText(s1 + temp.substring(1));
 
             LinearLayout layout = findViewById(R.id.pins);
+
             if (!this.myvehicle.getConnections().isEmpty()) {
                 for (connection c : this.myvehicle.getConnections()) {
                     if (c.getDirection().contains(temp.toLowerCase())) {
@@ -42,17 +53,23 @@ public class selectpin extends AppCompatActivity {
                             this.myvehicle.addUniquePin(c.getS4());
                             this.myvehicle.setPinCount(this.myvehicle.getPinCount() + 1);
                         }
-                        Button btn = new Button(this);
+                        this.connections.add(c);
+                        final Button btn = new Button(this);
                         btn.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+                        btn.setTextSize(18);
+                        btn.setTextColor(Color.BLACK);
+                        btn.setGravity(Gravity.BOTTOM);
+                        btn.setTag(c);
                         btn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                //null for now
+                                pinSelected((connection) v.getTag());
                             }
                         });
                         btn.setText("Pin" + c.getS4() + " Signal:  " + c.getName());
                         btn.setGravity(Gravity.START);
                         layout.addView(btn);
+
                     }
                 }
             } else {
@@ -67,6 +84,12 @@ public class selectpin extends AppCompatActivity {
             Toast.makeText(this, "File Not Found Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
+    }
+
+    public void pinSelected(connection o){
+        Toast.makeText(this, o.toString(), Toast.LENGTH_SHORT).show();
+
+
     }
 
 }
