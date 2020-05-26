@@ -109,23 +109,21 @@
 
             <Button
                 android:id="@+id/gobutton"
-                style="@android:style/Widget.Button"
+                style="@style/Widget.AppCompat.Button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="10dp"
-                android:background="@drawable/buttongradient"
                 android:onClick="go"
                 android:text="@string/next"
                 android:textColor="#000000"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textSize="18sp" />
         </LinearLayout>
 
         <Switch
             android:id="@+id/helptoggle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_marginStart="20dp"
             android:layout_weight="1"
@@ -152,7 +150,7 @@
             android:layout_marginRight="20dp"
             android:layout_weight="2"
             android:ems="10"
-            android:gravity="start|top"
+            android:gravity="center"
             android:importantForAutofill="no"
             android:inputType="textMultiLine"
             android:text="The implement's serial number can be found on the front of the machine. It is printed on an aluminum tag similar to the one above."

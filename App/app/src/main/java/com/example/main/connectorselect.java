@@ -10,9 +10,13 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * Author: Timothy Bender
@@ -25,6 +29,7 @@ public class connectorselect extends AppCompatActivity {
     private vehicle myvehicle;
     EditText editText;
     Toolbar toolbar;
+    Spinner mySpinner;
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +38,7 @@ public class connectorselect extends AppCompatActivity {
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         this.toolbar.setTitleTextColor(Color.WHITE);
+        this.mySpinner = findViewById(R.id.myconnectorspinner);
         try {
             InputStream is = getResources().openRawResource(R.raw.parsedtest);
             setTitle("Connector Selection");
@@ -43,6 +49,10 @@ public class connectorselect extends AppCompatActivity {
             if (this.myvehicle != null) {
                 this.myvehicle.setIs(is);
             }
+            List<String> connections = this.myvehicle.getUniqueConnections();
+            ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,connections);
+            dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            this.mySpinner.setAdapter(dataAdapter);
             this.editText = findViewById(R.id.connectorinput);
             this.editText.setOnKeyListener(new View.OnKeyListener() {
                 @Override
@@ -56,6 +66,22 @@ public class connectorselect extends AppCompatActivity {
                 }
             });
 
+            this.mySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    Object item = parent.getItemAtPosition(position);
+                    String temp = item.toString();
+                    String s1 = temp.substring(0, 1).toUpperCase();
+                    editText.setText(s1 + temp.substring(1));
+                    myvehicle.setLoc(position);
+                    System.out.println("This is position" + position);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
             if (!this.myvehicle.getUniqueConnections().isEmpty()) {
                 String temp = this.myvehicle.getUniqueConnections().get(this.myvehicle.getLoc());
                 String s1 = temp.substring(0, 1).toUpperCase();
@@ -75,7 +101,7 @@ public class connectorselect extends AppCompatActivity {
 
     //circularly go through the list of unique connections.
     @SuppressLint("SetTextI18n")
-    public void up(View view) {
+    public void down(View view) {
         try {
             if (!this.myvehicle.getUniqueConnections().isEmpty()) {
                 this.myvehicle.setLoc(this.myvehicle.getLoc() + 1);
@@ -98,7 +124,7 @@ public class connectorselect extends AppCompatActivity {
     }
 
     @SuppressLint("SetTextI18n")
-    public void down(View view){
+    public void up(View view){
         try {
             if (!this.myvehicle.getUniqueConnections().isEmpty()) {
                 this.myvehicle.setLoc(this.myvehicle.getLoc() - 1);

@@ -31,47 +31,65 @@
             android:textSize="26sp"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/connectorinput"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_gravity="center"
             android:layout_weight="1"
-            android:backgroundTint="#FF0000"
-            android:ems="10"
-            android:gravity="center"
-            android:importantForAutofill="no"
-            android:inputType="textPersonName"
-            android:selectAllOnFocus="false"
-            android:shadowColor="#FFFFFF"
-            android:textColorHighlight="#000000"
-            android:textColorLink="#000000"
-            android:textCursorDrawable="@color/black"
-            android:textSize="24sp" />
+            android:orientation="horizontal">
+
+            <Space
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.35" />
+
+            <EditText
+                android:id="@+id/connectorinput"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="2.3"
+                android:backgroundTint="#FF0000"
+                android:ems="10"
+                android:gravity="center"
+                android:importantForAutofill="no"
+                android:inputType="textPersonName"
+                android:selectAllOnFocus="false"
+                android:shadowColor="#FFFFFF"
+                android:textColorHighlight="#000000"
+                android:textColorLink="#000000"
+                android:textCursorDrawable="@color/black"
+                android:textSize="24sp" />
+
+            <Spinner
+                android:id="@+id/myconnectorspinner"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="1.35"
+                android:textAlignment="center" />
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/imageButton"
             android:layout_width="95dp"
             android:layout_height="0px"
             android:layout_gravity="center"
-            android:layout_weight="1.5"
-            android:background="@drawable/buttongradientvert"
+            android:layout_weight="1.625"
             android:onClick="up"
             app:srcCompat="@android:drawable/arrow_up_float" />
 
         <Space
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight=".5" />
+            android:layout_weight=".25" />
 
         <ImageButton
             android:id="@+id/imageButton2"
-            style="@android:style/Widget.DeviceDefault.ImageButton"
+            style="@style/Widget.AppCompat.ImageButton"
             android:layout_width="95dp"
             android:layout_height="0px"
             android:layout_gravity="center"
-            android:layout_weight="1.5"
-            android:background="@drawable/buttongratientvert2"
+            android:layout_weight="1.625"
             android:onClick="down"
             app:srcCompat="@android:drawable/arrow_down_float" />
 
@@ -85,7 +103,7 @@
             style="@android:style/Widget.Button"
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="1.5"
+            android:layout_weight="1"
             android:onClick="next"
             android:text="@string/next"
             android:textSize="24sp" />
