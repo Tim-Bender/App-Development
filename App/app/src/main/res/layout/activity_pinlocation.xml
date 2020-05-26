@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+    tools:context=".pinlocation">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,7 +26,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/direction"
+                android:id="@+id/pinlocationdirection"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -45,7 +44,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/connectorinformation"
+                    android:id="@+id/pinlocationconnectorinformation"
                     android:layout_width="wrap_content"
                     android:layout_height="0px"
                     android:layout_gravity="center"
@@ -66,7 +65,7 @@
                     android:textSize="18sp" />
 
                 <TextView
-                    android:id="@+id/voltage2"
+                    android:id="@+id/pinlocationvoltage"
                     android:layout_width="match_parent"
                     android:layout_height="0px"
                     android:layout_weight="1"
@@ -79,67 +78,39 @@
 
         </LinearLayout>
 
-        <Space
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/fragment"
+            android:name="com.example.main.First2Fragment"
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight=".5" />
+            android:layout_weight="6" >
 
-        <TextView
-            android:id="@+id/pinnumber"
+        </androidx.fragment.app.FragmentContainerView>
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/fragment3"
+            android:name="com.example.main.First3Fragment"
             android:layout_width="wrap_content"
-            android:layout_height="0px"
-            android:layout_gravity="center"
-            android:layout_weight=".9"
-            android:gravity="center"
-            android:text="Pin 5"
-            android:textColor="#000000"
-            android:textSize="24sp" />
+            android:layout_height="wrap_content"
+            android:visibility="gone">
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight=".375" />
+        </androidx.fragment.app.FragmentContainerView>
 
-        <TextView
-            android:id="@+id/pinname"
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight=".9"
-            android:gravity="center"
-            android:text="LH Digger Nose Pos."
-            android:textColor="#000000"
-            android:textSize="24sp" />
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/fragment4"
+            android:name="com.example.main.First3Fragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight=".375" />
+        </androidx.fragment.app.FragmentContainerView>
 
-        <TextView
-            android:id="@+id/voltage"
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight=".9"
-            android:gravity="center"
-            android:text="6.6 mA"
-            android:textColor="#000000"
-            android:textSize="26sp"
-            android:textStyle="bold" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight=".55" />
-
-        <Button
-            android:id="@+id/button"
-            style="@style/Widget.AppCompat.Button"
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight="1.5"
-            android:onClick="viewpinloc"
-            android:text="View Pin Location"
-            android:textSize="20sp" />
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/fragment5"
+            android:name="com.example.main.First5Fragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -165,6 +136,6 @@
                 android:onClick="nextPin"
                 android:text="Next Pin" />
         </LinearLayout>
-    </LinearLayout>
 
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

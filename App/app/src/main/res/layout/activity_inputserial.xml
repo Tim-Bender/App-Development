@@ -2,25 +2,27 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="fill_parent"
     android:layout_height="match_parent"
-    android:background="#C9706B6B"
     android:fitsSystemWindows="true"
     tools:context=".inputserial">
 
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_marginTop="50dp"
-        android:background="#BFE6E1E1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp">
+        tools:layout_editor_absoluteY="50dp">
+
+        <include
+            layout="@layout/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight=".75" />
 
         <TextView
             android:id="@+id/textView5"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0px"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:gravity="bottom|center"
@@ -31,16 +33,16 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0px"
             android:layout_weight="1"
             android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/dealeridtextview"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="30dp"
+                android:layout_marginStart="20dp"
                 android:autofillHints=""
                 android:backgroundTint="#FF0000"
                 android:ems="10"
@@ -60,13 +62,21 @@
                 android:onClick="go"
                 android:text="@string/next"
                 android:visibility="gone" />
+
+            <CheckBox
+                android:id="@+id/rememberdealeridcheckbox"
+                android:layout_width="160dp"
+                android:layout_height="fill_parent"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:text="Remember" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/textView"
             style="@android:style/Widget.DeviceDefault.Light.TextView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0px"
             android:layout_weight="1"
             android:gravity="center"
             android:text="@string/enter_implement_serial_number"
@@ -76,9 +86,8 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0px"
             android:layout_gravity="center"
-            android:layout_marginEnd="10dp"
             android:layout_weight="1"
             android:orientation="horizontal">
 
@@ -86,9 +95,8 @@
                 android:id="@+id/inputid"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="30dp"
-                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:layout_marginStart="20dp"
                 android:autofillHints=""
                 android:backgroundTint="#FF0000"
                 android:ems="10"
@@ -102,45 +110,63 @@
             <Button
                 android:id="@+id/gobutton"
                 style="@android:style/Widget.Button"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="20dp"
-                android:layout_weight="2"
+                android:layout_gravity="center"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="10dp"
                 android:background="@drawable/buttongradient"
                 android:onClick="go"
-                android:text="@string/next" />
+                android:text="@string/next"
+                android:textColor="#000000"
+                android:textSize="18sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/imageView2"
-            android:layout_width="match_parent"
-            android:layout_height="199dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="50dp"
+        <Switch
+            android:id="@+id/helptoggle"
+            android:layout_width="wrap_content"
+            android:layout_height="0px"
+            android:layout_marginStart="20dp"
             android:layout_weight="1"
+            android:checked="false"
+            android:text="Where's My Serial Number?"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/helpimage"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_gravity="center"
+            android:layout_weight="2.25"
             android:contentDescription="@string/spudnikplate"
             android:cropToPadding="false"
+            android:visibility="gone"
             app:srcCompat="@drawable/spudnikplate" />
 
         <EditText
-            android:id="@+id/editText2"
+            android:id="@+id/helptextview"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0px"
             android:layout_marginLeft="20dp"
-            android:layout_marginTop="15dp"
             android:layout_marginRight="20dp"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:ems="10"
             android:gravity="start|top"
             android:importantForAutofill="no"
             android:inputType="textMultiLine"
-            android:text="@string/the_implement_s_serial_number_can_be_found_on_the_front_of_the_machine_close_to_the_implement_s_drawbar_on_the_main_frame_the_serial_number_is_printed_on_an_aluminum_tag_that_looks_similar_to_the_image_above" />
+            android:text="The implement's serial number can be found on the front of the machine. It is printed on an aluminum tag similar to the one above."
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/spudnikelectrical"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_gravity="center"
+            android:layout_weight="4.25"
+            app:srcCompat="@drawable/circuittransparent" />
 
     </LinearLayout>
 
-    <include
-        layout="@layout/toolbar"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="3dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

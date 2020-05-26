@@ -4,63 +4,82 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#C9706B6B"
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="50dp"
-        android:background="#BFE6E1E1"
-        android:gravity="center|top"
         android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="ExtraText"
         tools:layout_editor_absoluteX="16dp">
 
 
+        <include
+            layout="@layout/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight=".75" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight=".1" />
+
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="328dp"
-            android:layout_height="126dp"
-            android:layout_gravity="center"
-            android:layout_weight="2"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="1.5"
             android:contentDescription="@string/spudniklogo"
             app:srcCompat="@drawable/spudniklogo" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="1.35" />
 
         <ImageView
             android:id="@+id/imageView3"
             android:layout_width="match_parent"
-            android:layout_height="39dp"
-            android:layout_gravity="bottom"
-            android:layout_marginTop="20dp"
-            android:layout_weight="1"
+            android:layout_height="0px"
+            android:layout_weight=".5"
             android:contentDescription="@string/s4logo"
             app:srcCompat="@drawable/s4redtransparent" />
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight=".1" />
+
         <TextView
             android:id="@+id/textView2"
-            android:layout_width="368dp"
-            android:layout_height="41dp"
+            android:layout_width="wrap_content"
+            android:layout_height="0px"
             android:layout_gravity="center"
-            android:layout_weight="1"
+            android:layout_weight=".5"
             android:gravity="center"
             android:text="@string/diagnostic_tool"
             android:textColor="#000000"
-            android:textSize="24sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight=".1" />
 
         <TextView
             android:id="@+id/textView3"
-            android:layout_width="match_parent"
-            android:layout_height="43dp"
+            android:layout_width="wrap_content"
+            android:layout_height="0px"
             android:layout_gravity="center"
-            android:layout_weight="1"
+            android:layout_weight=".5"
             android:gravity="center"
             android:text="@string/vdev1_0"
             android:textColor="#000000"
-            android:textSize="24sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
         <!--
         <pl.droidsonroids.gif.GifImageView
@@ -71,29 +90,33 @@
             android:src="@drawable/heartbeatgiftransparent" />
         -->
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight=".1" />
+
         <ImageView
             android:id="@+id/imageView6"
             android:layout_width="match_parent"
-            android:layout_height="275dp"
-            android:layout_weight="2"
+            android:layout_height="0px"
+            android:layout_weight="3"
             android:contentDescription="@string/heartratepicture"
             app:srcCompat="@drawable/heartratepicturetransparent" />
 
         <ImageView
             android:id="@+id/imageView5"
-            android:layout_width="189dp"
-            android:layout_height="49dp"
-            android:layout_gravity="center|top"
-            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_gravity="top"
+            android:layout_weight=".5"
             android:contentDescription="@string/todo"
-            android:paddingBottom="10dp"
             app:srcCompat="@drawable/redbluetoothtransparent" />
 
         <TextView
             android:id="@+id/loadingText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_height="0px"
+            android:layout_weight=".5"
             android:gravity="center"
             android:text="@string/loading_0"
             android:textColor="#FF0000"
@@ -104,14 +127,9 @@
             android:id="@+id/loadingbar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:layout_weight="1" />
+            android:layout_height="0px"
+            android:layout_weight=".5" />
 
     </LinearLayout>
 
-    <include
-        layout="@layout/toolbar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

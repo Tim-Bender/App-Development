@@ -77,6 +77,7 @@ public class connection implements Parcelable,Comparable<connection> {
                     case SORT_BY_DIRECTION:
                         return (Integer.compare(this.convertStringToInt(this.direction),this.convertStringToInt(o.direction)));
                     case SORT_BY_NAME:
+                        System.out.println("Sorting by name");
                         return (Integer.compare(this.convertStringToInt(this.name),this.convertStringToInt(o.name)));
                     case SORT_BY_TYPE:
                         return (Integer.compare(this.convertStringToInt(this.type),this.convertStringToInt(o.type)));
@@ -97,7 +98,19 @@ public class connection implements Parcelable,Comparable<connection> {
         return(Integer.parseInt(str1));
 
     }
-
+    protected String inout(){
+        try {
+            String temp = this.getDirection().toLowerCase();
+            if (temp.contains("in") || temp.contains("In")) {
+                return "Input";
+            } else {
+                return "Output";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "NULL";
+        }
+    }
 
     public static int getSortBy() {
         return SORT_BY;

@@ -4,36 +4,38 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#C9706B6B"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:layout_marginTop="50dp"
-        android:background="#BFE6E1E1"
         android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteX="0dp">
 
+        <include
+            layout="@layout/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight=".75" />
+
         <TextView
             android:id="@+id/textView6"
-            android:layout_width="312dp"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
             android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            android:layout_weight="1"
+            android:layout_weight="2.75"
+            android:gravity="center"
             android:text="@string/which_s4_input_or_output_connector_would_you_like_to_view_diagnostics_for"
             android:textColor="#000000"
-            android:textSize="30sp"
+            android:textSize="26sp"
             android:textStyle="bold" />
 
         <EditText
             android:id="@+id/connectorinput"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0px"
             android:layout_gravity="center"
-            android:layout_marginTop="20dp"
             android:layout_weight="1"
             android:backgroundTint="#FF0000"
             android:ems="10"
@@ -50,48 +52,44 @@
         <ImageButton
             android:id="@+id/imageButton"
             android:layout_width="95dp"
-            android:layout_height="99dp"
+            android:layout_height="0px"
             android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="20dp"
-            android:layout_weight="1"
+            android:layout_weight="1.5"
             android:background="@drawable/buttongradientvert"
             android:onClick="up"
             app:srcCompat="@android:drawable/arrow_up_float" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight=".5" />
 
         <ImageButton
             android:id="@+id/imageButton2"
             style="@android:style/Widget.DeviceDefault.ImageButton"
             android:layout_width="95dp"
-            android:layout_height="99dp"
+            android:layout_height="0px"
             android:layout_gravity="center"
-            android:layout_weight="1"
-            android:onClick="down"
+            android:layout_weight="1.5"
             android:background="@drawable/buttongratientvert2"
+            android:onClick="down"
             app:srcCompat="@android:drawable/arrow_down_float" />
 
-        <ProgressBar
-            android:id="@+id/loadingCircle"
-            style="?android:attr/progressBarStyle"
+        <Space
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:alpha="0" />
+            android:layout_height="0px"
+            android:layout_weight=".5" />
 
         <Button
             android:id="@+id/button8"
             style="@android:style/Widget.Button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_height="0px"
+            android:layout_weight="1.5"
             android:onClick="next"
-            android:text="@string/next" />
+            android:text="@string/next"
+            android:textSize="24sp" />
 
     </LinearLayout>
 
-    <include
-        layout="@layout/toolbar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

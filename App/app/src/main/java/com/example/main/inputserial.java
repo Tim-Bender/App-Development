@@ -2,19 +2,23 @@ package com.example.main;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
+import androidx.preference.PreferenceManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
+
 import java.io.InputStream;
-import java.util.Set;
 
 /**
  * Author: Timothy Bender
@@ -28,6 +32,9 @@ public class inputserial extends AppCompatActivity {
     boolean empty = true;
     private EditText edittext,dealerText;
     private Toolbar toolbar;
+    public ImageView imageView;
+    public TextView textView;
+    public Switch toggle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +43,10 @@ public class inputserial extends AppCompatActivity {
         setSupportActionBar(this.toolbar);
         setTitle("Input Serial Numer");
         this.toolbar.setTitleTextColor(Color.WHITE);
+        this.imageView = findViewById(R.id.helpimage);
+        this.imageView.setVisibility(View.GONE);
+        this.textView = findViewById(R.id.helptextview);
+        this.textView.setVisibility(View.GONE);
         try{
         this.edittext = findViewById(R.id.inputid);
         this.edittext.setOnKeyListener(new View.OnKeyListener() {
@@ -64,26 +75,28 @@ public class inputserial extends AppCompatActivity {
             Toast.makeText(this, "Unidentified Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
-        try {
-            BluetoothAdapter myAdapter = BluetoothAdapter.getDefaultAdapter();
-            if (myAdapter == null) {
-                System.out.println("Not supported");
-            }
-            if (!myAdapter.isEnabled()) {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, 1);
-            }
-            Set<BluetoothDevice> pairedDevices = myAdapter.getBondedDevices();
-            if (pairedDevices.size() > 0) {
-                for (BluetoothDevice device : pairedDevices) {
-                    String deviceName = device.getName();
-                    String hardWareAddress = device.getAddress();
+
+
+        toggle = findViewById(R.id.helptoggle);
+        final ImageView spudnikelectrical = findViewById(R.id.spudnikelectrical);
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    spudnikelectrical.setVisibility(View.GONE);
+                    imageView.setVisibility(View.VISIBLE);
+                    textView.setVisibility(View.VISIBLE);
+
+                }
+                else{
+                    imageView.setVisibility(View.GONE);
+                    textView.setVisibility(View.GONE);
+                    spudnikelectrical.setVisibility(View.VISIBLE);
+
                 }
             }
-        } catch (Exception e) {
-            Toast.makeText(this, "Bluetooth Failed", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
+        });
+
 
 
     }
