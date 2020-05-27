@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -30,6 +29,7 @@ public class connectorselect extends AppCompatActivity {
     EditText editText;
     Toolbar toolbar;
     Spinner mySpinner;
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
