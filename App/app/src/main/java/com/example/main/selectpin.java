@@ -30,7 +30,6 @@ public class selectpin extends AppCompatActivity {
     private final int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter myBluetoothAdapter;
     private Set<BluetoothDevice> connectedDevices;
-    private ConnectThread myBluetoothConnect;
     private BluetoothDevice myDevice;
     @SuppressLint("SetTextI18n")
     @Override
@@ -73,8 +72,6 @@ public class selectpin extends AppCompatActivity {
                     }
                 }
             });
-            bluetooth();
-
         } catch (Resources.NotFoundException e) {
             e.printStackTrace();
         }
@@ -147,34 +144,5 @@ public class selectpin extends AppCompatActivity {
 
     }
 
-    public void bluetooth(){
-        try{
-            myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if(myBluetoothAdapter == null){
-                Toast.makeText(this, "Bluetooth Not Supported", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if(!myBluetoothAdapter.isEnabled()){
-                Intent enableByIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableByIntent,REQUEST_ENABLE_BT);
-            }
-            this.connectedDevices = myBluetoothAdapter.getBondedDevices();
-            if(!connectedDevices.isEmpty()){
-                for(BluetoothDevice device : connectedDevices){
-                    Toast.makeText(this, device.getName(), Toast.LENGTH_SHORT).show();
-                }
-            }
-            //connect to a device
-            BluetoothDevice[] devices = (BluetoothDevice[]) this.connectedDevices.toArray();
-            this.myDevice = devices[0];
-            this.myBluetoothConnect = new ConnectThread(this.myDevice,this.myBluetoothAdapter);
-            this.myBluetoothConnect.run();
-
-
-
-        } catch (Exception e) {
-            Toast.makeText(this, "Bluetooth Error", Toast.LENGTH_SHORT).show();
-        }
-    }
 
 }
