@@ -45,7 +45,7 @@ public class connectorselect extends AppCompatActivity {
             this.myvehicle = getIntent().getParcelableExtra("myvehicle");
             this.myvehicle.setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
             this.myvehicle.setIs(is);
-          
+
             List<String> connections = this.myvehicle.getUniqueConnections();
             ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,connections);
             dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -71,7 +71,6 @@ public class connectorselect extends AppCompatActivity {
                     String s1 = temp.substring(0, 1).toUpperCase();
                     editText.setText(s1 + temp.substring(1));
                     myvehicle.setLoc(position);
-                    System.out.println("This is position" + position);
                 }
 
                 @Override

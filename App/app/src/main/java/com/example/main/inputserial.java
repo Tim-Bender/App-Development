@@ -16,6 +16,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.InputStream;
+
 /**
  * Author: Timothy Bender
  * timothy.bender@spudnik.com
@@ -35,8 +36,6 @@ public class inputserial extends AppCompatActivity {
     private InputStream d;
     private boolean built = false;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,24 +53,25 @@ public class inputserial extends AppCompatActivity {
         is = getResources().openRawResource(R.raw.parsedtest);
 
         try{
-
-        this.edittext = findViewById(R.id.inputid);
-        this.edittext.setOnKeyListener(new View.OnKeyListener() {
+            this.edittext = findViewById(R.id.inputid);
+            this.edittext.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)){
                     go(getCurrentFocus());
                     return true;
                 }
-                else{
-                    tryBuildDataBase();
+                else {
+                    if (!built) {
+                        tryBuildDataBase();
+                    }
                 }
 
                 return false;
-            }
+                    }
         });
-        this.dealerText = findViewById(R.id.dealeridtextview);
-        this.dealerText.setOnKeyListener(new View.OnKeyListener() {
+            this.dealerText = findViewById(R.id.dealeridtextview);
+            this.dealerText.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)){
@@ -163,6 +163,7 @@ public class inputserial extends AppCompatActivity {
             });
 
         }
+
 
 
 }

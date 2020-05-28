@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -151,22 +152,21 @@ public class selectpin extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_selectpin);
-        this.toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        toolbar.setTitleTextColor(Color.WHITE);
-        setTitle("Pin Selection");
-        this.toolbar.setTitleTextColor(Color.WHITE);
-
-        try {
+        try{
+            this.toolbar = findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+            toolbar.setTitleTextColor(Color.WHITE);
+            setTitle("Pin Selection");
+            this.toolbar.setTitleTextColor(Color.WHITE);
             messages = new StringBuilder();
             incomingMessage = findViewById(R.id.selectpinvoltage);
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver,new IntentFilter("incomingMessage"));
+            LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver2,new IntentFilter("incomingboolean"));
             IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
             registerReceiver(mBroadcastReceiver4,filter);
             InputStream is = getResources().openRawResource(R.raw.parsedtest);
             this.myvehicle = getIntent().getParcelableExtra("myvehicle");
-            assert this.myvehicle != null;
             this.myvehicle.setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
             this.myvehicle.setIs(is);
 
@@ -177,16 +177,14 @@ public class selectpin extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if(isChecked){
                         if(myvehicle.getLastSorted() == vehicle.SORT_BY_S4) {
-                            myvehicle.sortConnections(vehicle.SORT_BY_NAME);
+                            myvehicle.sortConnections(vehicle.SORT_BY_NAME,getApplicationContext());
                             myvehicle.setLastSorted(vehicle.SORT_BY_NAME);
-                            updatevalues();
                         }
                     }
                     else{
                         if(myvehicle.getLastSorted() == vehicle.SORT_BY_NAME){
-                            myvehicle.sortConnections(vehicle.SORT_BY_S4);
+                            myvehicle.sortConnections(vehicle.SORT_BY_S4,getApplicationContext());
                             myvehicle.setLastSorted(vehicle.SORT_BY_S4);
-                            updatevalues();
                         }
 
                     }
@@ -195,10 +193,6 @@ public class selectpin extends AppCompatActivity {
         } catch (Resources.NotFoundException e) {
             e.printStackTrace();
         }
-        try {
-        } catch (Exception e) {
-            Toast.makeText(this, "Bluetooth Error ", Toast.LENGTH_SHORT).show();
-        }
 
     }
 
@@ -206,9 +200,14 @@ public class selectpin extends AppCompatActivity {
     public void onStart(){
         super.onStart();
         try {
-            this.myvehicle.sortConnections(vehicle.SORT_BY_S4);
-            updatevalues();
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    myvehicle.sortConnections(vehicle.SORT_BY_S4,getApplicationContext());
+                }
+            });
             masterBTStart();
+
         } catch (Exception e) {
             Toast.makeText(this, "Bluetooth Error", Toast.LENGTH_SHORT).show();
         }
@@ -221,6 +220,15 @@ public class selectpin extends AppCompatActivity {
             Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
             incomingMessage.setText(messages);
             send("R,In4,4,V");
+        }
+    };
+    BroadcastReceiver mReceiver2 = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Boolean bool = intent.getBooleanExtra("boolean",false);
+            if(bool == true){
+                updatevalues();
+            }
         }
     };
 
@@ -293,7 +301,6 @@ public class selectpin extends AppCompatActivity {
 
     public void masterBTStart(){
         enableBluetooth();
-        enableDiscoverable();
         createBond();
         startConnection();
 
@@ -351,17 +358,19 @@ public class selectpin extends AppCompatActivity {
     }
 
     public void enableDiscoverable(){
-        Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,300);
-        startActivity(discoverableIntent);
-        IntentFilter intentFilter = new IntentFilter(mBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
-        registerReceiver(mBroadcastReceiver2,intentFilter);
+        if(!mBluetoothAdapter.isDiscovering()) {
+            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+            startActivity(discoverableIntent);
+            IntentFilter intentFilter = new IntentFilter(mBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
+            registerReceiver(mBroadcastReceiver2, intentFilter);
+        }
     }
 
     public void createBond(){
         mBluetoothAdapter.cancelDiscovery();
         for(BluetoothDevice device : this.mBTdevices){
-            if(device.getName() == "test_dev_1"){
+            if(device.getName().equals("test_dev_1")){
                 String deviceName = device.getName();
                 String deviceAddress = device.getAddress();
 

@@ -38,7 +38,6 @@
                 android:layout_weight=".4"
                 android:background="@drawable/back"
                 android:gravity="center"
-                android:text="In3"
                 android:textAllCaps="false"
                 android:textColor="#000000"
                 android:textSize="35sp"
@@ -57,7 +56,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="22p Analog Input Connector"
+                    android:text="p Analog Input Connector"
                     android:textColor="#000000"
                     android:textSize="18sp" />
 

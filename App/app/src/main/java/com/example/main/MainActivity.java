@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {

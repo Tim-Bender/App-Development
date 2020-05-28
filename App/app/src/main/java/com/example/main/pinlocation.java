@@ -34,7 +34,7 @@ public class pinlocation extends AppCompatActivity {
             this.myvehicle = getIntent().getParcelableExtra("myvehicle");
             assert this.myvehicle != null;
             this.myvehicle.setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
-            this.myvehicle.sortConnections(vehicle.SORT_BY_S4);
+            this.myvehicle.sortConnections(vehicle.SORT_BY_S4,this);
 
             this.myConnection = getIntent().getParcelableExtra("myconnection");
 
@@ -58,7 +58,6 @@ public class pinlocation extends AppCompatActivity {
         }
 
     }
-
 
     public void nextPin(View view){
         try {

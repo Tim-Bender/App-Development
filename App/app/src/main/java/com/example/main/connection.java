@@ -11,13 +11,15 @@ public class connection implements Parcelable,Comparable<connection> {
      * Please see README before updating anything
      */
 
-    /* This connection class will hold in memory the information for one pin connection.
-     * This class will be used by vehicle, in an array list implementation to store all the connections for one machine.
+    /**
+     * This connection object will hold data about an individual connection. vehicle.java contains an arraylist of these objects which represents all the connections on a machine
+     * Parcelable is implemented here to allow for transfer of an list of connections between activities.
+     * Comparable is also implemented here to allow for easy sorting via the vehicle sort method.
      */
     private String id,direction,name,units,plug,s4,type;
-    public static final int SORT_BY_DIRECTION = 0,SORT_BY_S4 = 1,SORT_BY_NAME = 2, SORT_BY_UNITS = 3, SORT_BY_TYPE = 4;
+    public static final int SORT_BY_NAME = 2;
     private static int SORT_BY = 0;
-    //construtor is overloaded. Either pass in no data, and add later using add/getter methods, or pass it all in at the same time.
+
     connection(String id,String dir, String s, String nm, String un, String type){
         this.id = id;
         this.direction = dir;
@@ -26,10 +28,11 @@ public class connection implements Parcelable,Comparable<connection> {
         this.s4 = s;
         this.type = type;
     }
-    //overloaded default constructor. If using this, you must add all the information using set methods
-    connection(){
-    }
 
+    /**
+     * Heres the parcelable implementation
+     * @param in
+     */
 
     protected connection(Parcel in) {
         id = in.readString();
@@ -68,46 +71,48 @@ public class connection implements Parcelable,Comparable<connection> {
         }
     };
 
-
+    /**
+     * Here is the most important compareTo method. If in compare by name mode, it will cast the names of both objects into chararrays and compare them alphabetically
+     * If it is in S4 mode then it converts the S4's of both connections into integers, then uses the default Integer.compare() method.
+     * @param o
+     * @return
+     */
     @Override
-    public int compareTo(connection o) {
-        try {
-            if (o != null) {
-                switch (this.SORT_BY) {
-                    case SORT_BY_DIRECTION:
-                        return (Integer.compare(this.convertStringToInt(this.direction),this.convertStringToInt(o.direction)));
+    public int compareTo(connection o){
+        int comparison = 0;
+        try{
+            if(o != null){
+                switch(this.SORT_BY){
                     case SORT_BY_NAME:
-                        System.out.println("Sorting by name");
-                        return (Integer.compare(this.convertStringToInt(this.name),this.convertStringToInt(o.name)));
-                    case SORT_BY_TYPE:
-                        return (Integer.compare(this.convertStringToInt(this.type),this.convertStringToInt(o.type)));
-                    case SORT_BY_UNITS:
-                        return (Integer.compare(this.convertStringToInt(this.units),this.convertStringToInt(o.units)));
+                        int counter = 0;
+                        char lArray[],oArray[];
+                        lArray = this.name.toCharArray();
+                        oArray = o.name.toCharArray();
+                        while(comparison == 0 && counter < lArray.length && counter < oArray.length){
+                            comparison = Character.compare(lArray[counter],oArray[counter]);
+                            counter++;
+                        }
+                        return comparison;
                     default:
-                        return (Integer.compare(this.convertStringToInt(this.s4),this.convertStringToInt(o.s4)));
+                        return Integer.compare(Integer.parseInt(this.s4),Integer.parseInt(o.s4));
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
-        return(this.getS4().compareTo(o.getS4()));
-    }
-
-    public int convertStringToInt(String str1){
-       str1 = str1.replaceAll("\\D+","");
-        return(Integer.parseInt(str1));
+        return comparison;
 
     }
+
     protected String inout(){
         try {
-            String temp = this.getDirection().toLowerCase();
+            String temp = this.direction;
             if (temp.contains("in") || temp.contains("In")) {
                 return "Input";
             } else {
                 return "Output";
             }
         } catch (Exception e) {
-            e.printStackTrace();
             return "NULL";
         }
     }

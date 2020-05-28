@@ -69,6 +69,8 @@
                 android:layout_height="fill_parent"
                 android:layout_gravity="center"
                 android:layout_weight="1"
+                android:buttonTint="#AF4C4C"
+                android:checked="false"
                 android:text="Remember" />
         </LinearLayout>
 
@@ -123,7 +125,7 @@
 
         <Switch
             android:id="@+id/helptoggle"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="0px"
             android:layout_marginStart="20dp"
             android:layout_weight="1"
