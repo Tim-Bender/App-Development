@@ -7,11 +7,14 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar;
@@ -19,6 +22,9 @@ public class MainActivity extends AppCompatActivity {
     private int progressStatus = 0;
     private Handler handler = new Handler();
     private Toolbar toolbar;
+    private vehicle myVehicle;
+    InputStream is;
+    InputStream d;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,6 +33,9 @@ public class MainActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         this.toolbar.setTitleTextColor(Color.WHITE);
+        myVehicle = new vehicle();
+        d = getResources().openRawResource(R.raw.dealerids);
+        is= getResources().openRawResource(R.raw.parsedtest);
         try {
             this.progressBar = findViewById(R.id.loadingbar);
             this.progressBar.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
@@ -51,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     Intent i = new Intent(getBaseContext(), home.class);
+                    i.putExtra("myvehicle",myVehicle);
                     startActivity(i);
                     finish();
                 }
@@ -59,5 +69,17 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Unidentified Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
+    }
+    @Override
+    protected void onStart() {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                myVehicle.buildDealers(d);
+                myVehicle.buildVehicleIds(is);
+            }
+        });
+
+        super.onStart();
     }
 }

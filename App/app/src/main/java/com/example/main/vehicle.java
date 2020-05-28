@@ -1,5 +1,6 @@
 package com.example.main;
 
+import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
 import java.io.BufferedReader;
@@ -22,7 +23,7 @@ import java.util.Map;
 /* This vehicle class will contain all necessary information about the vehicle the user needs. It will receive a vehicle id from android kernel,
  * Search through for it. Then store information about each connection.
  */
-public class vehicle  implements Parcelable {
+public class vehicle implements Parcelable {
 
     //vehicle id input by the user, passed through by the android kernel
     private String vehicleId;
@@ -32,6 +33,7 @@ public class vehicle  implements Parcelable {
     private ArrayList<String> uniqueConnections = new ArrayList<>();
     private ArrayList<String> uniquePins = new ArrayList<>();
     private ArrayList<String> dealers = new ArrayList<>();
+    private ArrayList<String> vehicleIds = new ArrayList<>();
     private int loc = 0,pinCount=0,lastSorted = this.SORT_BY_S4;
     private InputStream is;
     public static final int SORT_BY_DIRECTION = 0,SORT_BY_S4 = 1,SORT_BY_NAME = 2, SORT_BY_UNITS = 3, SORT_BY_TYPE = 4;
@@ -39,6 +41,9 @@ public class vehicle  implements Parcelable {
 
     vehicle(String id){
         this.vehicleId = id;
+
+    }
+    vehicle(){
 
     }
 
@@ -51,6 +56,7 @@ public class vehicle  implements Parcelable {
         dealers = in.createStringArrayList();
         uniquePins = in.createStringArrayList();
         lastSorted = in.readInt();
+        vehicleIds = in.createStringArrayList();
     }
     @Override
     public void writeToParcel(Parcel dest, int flags) {
@@ -61,6 +67,7 @@ public class vehicle  implements Parcelable {
         dest.writeStringList(dealers);
         dest.writeStringList(uniquePins);
         dest.writeInt(lastSorted);
+        dest.writeStringList(vehicleIds);
     }
 
     public static final Creator<vehicle> CREATOR = new Creator<vehicle>() {
@@ -85,40 +92,75 @@ public class vehicle  implements Parcelable {
      * Just don't touch it
      */
     protected void buildDataBase(){
-        try{
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-            String line;
-            while((line = reader.readLine()) != null) {
-                String[] tokens = line.split(",");
-                if (testConnection(vehicleId,tokens[0])) {
-                    //String id,String dir, String s, String nm, String un, String type
-                    this.addConnection(new connection(tokens[0].toLowerCase(), tokens[1].toLowerCase(), tokens[2].toLowerCase(),
-                            tokens[3].toLowerCase(), tokens[4].toLowerCase(), tokens[5].toLowerCase()));
-                    if(!this.getUniqueConnections().contains(tokens[1].toLowerCase())){
-                        this.addUniqueconnection(tokens[1]);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+                    String line;
+                    while((line = reader.readLine()) != null) {
+                        String[] tokens = line.split(",");
+                        if (testConnection(vehicleId,tokens[0])) {
+                            //String id,String dir, String s, String nm, String un, String type
+                            addConnection(new connection(tokens[0].toLowerCase(), tokens[1].toLowerCase(), tokens[2].toLowerCase(),
+                                    tokens[3].toLowerCase(), tokens[4].toLowerCase(), tokens[5].toLowerCase()));
+                            if(!getUniqueConnections().contains(tokens[1].toLowerCase())){
+                                addUniqueconnection(tokens[1]);
+                            }
+                        }
                     }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        });
+
     }
-    protected void buildDealers(InputStream i){
-        try{
-            BufferedReader reader = new BufferedReader(new InputStreamReader(i, Charset.forName("UTF-8")));
-            String line;
-            while((line = reader.readLine()) != null) {
-                line = line.toLowerCase().trim();
-                if (!this.dealers.contains(line)) {
-                    this.dealers.add(line);
+    protected void buildDealers(final InputStream i){
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(i, Charset.forName("UTF-8")));
+                    String line;
+                    while((line = reader.readLine()) != null) {
+                        line = line.toLowerCase().trim();
+                        if (!dealers.contains(line)) {
+                            dealers.add(line);
+                        }
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        });
     }
+    protected void buildVehicleIds(final InputStream i){
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(i, Charset.forName("UTF-8")));
+                    String line;
+                    String[] holder;
+                    while((line = reader.readLine()) != null) {
+                        line = line.toLowerCase().trim();
+                        holder = line.split(",");
+                        if (!vehicleIds.contains(holder[0])) {
+                            vehicleIds.add(holder[0]);
+                        }
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     protected boolean checkDealer(String dealerid){
         return this.dealers.contains(dealerid);
     }
@@ -276,5 +318,9 @@ public class vehicle  implements Parcelable {
 
     public void setLastSorted(int lastSorted) {
         this.lastSorted = lastSorted;
+    }
+
+    public ArrayList<String> getVehicleIds(){
+        return this.vehicleIds;
     }
 }

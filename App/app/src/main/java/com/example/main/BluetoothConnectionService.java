@@ -5,8 +5,11 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +22,7 @@ public class BluetoothConnectionService {
     private static final String appName = "SpudnikDiagnosticTool";
     private static final UUID uuid = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
     private final BluetoothAdapter mBluetoothAdapter;
-    Context mcontext;
+    private Context mcontext;
 
     private AcceptThread mInsecureAcceptThread;
     private ConnectThread mConnectThread;
@@ -30,6 +33,7 @@ public class BluetoothConnectionService {
     public BluetoothConnectionService(Context context){
         this.mcontext = context;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        start();
     }
 
     private class AcceptThread extends Thread{
@@ -164,6 +168,10 @@ public class BluetoothConnectionService {
                     bytes = mmInStream.read(buffer);
                     String incomingMessage = new String(buffer, 0 ,bytes);
                     Log.d(TAG,"Input Stream" + incomingMessage);
+
+                    Intent incomingMessageIntent = new Intent("incomingMessage");
+                    incomingMessageIntent.putExtra("themessage",incomingMessage);
+                    LocalBroadcastManager.getInstance(mcontext).sendBroadcast(incomingMessageIntent);
                 } catch (IOException e) {
                     Log.e(TAG,"write: Error writing to inputstream" + e.getMessage());
                     break;
@@ -194,7 +202,7 @@ public class BluetoothConnectionService {
         mConnectedThread.start();
     }
 
-    private void write(byte[] out){
+    public void write(byte[] out){
         ConnectedThread r;
         mConnectedThread.write(out);
     }

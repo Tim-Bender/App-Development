@@ -18,8 +18,9 @@ import android.widget.Toast;
  */
 
 public class home extends AppCompatActivity {
-    Toolbar myToolBar;
-    Context context;
+    private Toolbar myToolBar;
+    private Context context;
+    private vehicle myvehicle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,11 +30,14 @@ public class home extends AppCompatActivity {
         setSupportActionBar(myToolBar);
         setTitle("Home");
         this.myToolBar.setTitleTextColor(Color.WHITE);
+        this.myvehicle=getIntent().getParcelableExtra("myvehicle");
+
         Toast.makeText(this,"Welcome!",Toast.LENGTH_LONG).show();
     }
     public void diagTool(View view){
         try {
             Intent i = new Intent(getBaseContext(), inputserial.class);
+            i.putExtra("myvehicle",myvehicle);
             startActivity(i);
         } catch (Exception e) {
             e.printStackTrace();
@@ -44,6 +48,7 @@ public class home extends AppCompatActivity {
     public void update(View view){
         try {
             Intent i = new Intent(getBaseContext(), inputserial.class);
+            i.putExtra("myvehicle",myvehicle);
             startActivity(i);
         } catch (Exception e) {
             e.printStackTrace();
@@ -54,6 +59,7 @@ public class home extends AppCompatActivity {
     public void logData(View view){
         try {
             Intent i = new Intent(getBaseContext(), inputserial.class);
+            i.putExtra("myvehicle",myvehicle);
             startActivity(i);
         } catch (Exception e) {
             e.printStackTrace();

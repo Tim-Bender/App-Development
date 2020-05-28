@@ -43,12 +43,9 @@ public class connectorselect extends AppCompatActivity {
             InputStream is = getResources().openRawResource(R.raw.parsedtest);
             setTitle("Connector Selection");
             this.myvehicle = getIntent().getParcelableExtra("myvehicle");
-            if (this.myvehicle != null) {
-                this.myvehicle.setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
-            }
-            if (this.myvehicle != null) {
-                this.myvehicle.setIs(is);
-            }
+            this.myvehicle.setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
+            this.myvehicle.setIs(is);
+          
             List<String> connections = this.myvehicle.getUniqueConnections();
             ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,connections);
             dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
