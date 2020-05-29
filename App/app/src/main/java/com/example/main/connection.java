@@ -9,15 +9,13 @@ public class connection implements Parcelable,Comparable<connection> {
      * timothy.bender@spudnik.com
      * 530-414-6778
      * Please see README before updating anything
-     */
 
-    /**
      * This connection object will hold data about an individual connection. vehicle.java contains an arraylist of these objects which represents all the connections on a machine
      * Parcelable is implemented here to allow for transfer of an list of connections between activities.
      * Comparable is also implemented here to allow for easy sorting via the vehicle sort method.
      */
     private String id,direction,name,units,plug,s4,type;
-    public static final int SORT_BY_NAME = 2;
+    private static final int SORT_BY_NAME = 2;
     private static int SORT_BY = 0;
 
     connection(String id,String dir, String s, String nm, String un, String type){
@@ -31,10 +29,10 @@ public class connection implements Parcelable,Comparable<connection> {
 
     /**
      * Heres the parcelable implementation
-     * @param in
+     * @param in Parcel
      */
 
-    protected connection(Parcel in) {
+    private connection(Parcel in) {
         id = in.readString();
         direction = in.readString();
         name = in.readString();
@@ -74,37 +72,36 @@ public class connection implements Parcelable,Comparable<connection> {
     /**
      * Here is the most important compareTo method. If in compare by name mode, it will cast the names of both objects into chararrays and compare them alphabetically
      * If it is in S4 mode then it converts the S4's of both connections into integers, then uses the default Integer.compare() method.
-     * @param o
-     * @return
+     * @param o Connection
+     * @return int
      */
     @Override
     public int compareTo(connection o){
         int comparison = 0;
         try{
             if(o != null){
-                switch(this.SORT_BY){
-                    case SORT_BY_NAME:
-                        int counter = 0;
-                        char lArray[],oArray[];
-                        lArray = this.name.toCharArray();
-                        oArray = o.name.toCharArray();
-                        while(comparison == 0 && counter < lArray.length && counter < oArray.length){
-                            comparison = Character.compare(lArray[counter],oArray[counter]);
-                            counter++;
-                        }
-                        return comparison;
-                    default:
-                        return Integer.compare(Integer.parseInt(this.s4),Integer.parseInt(o.s4));
+                if (SORT_BY == SORT_BY_NAME) {
+                    int counter = 0;
+                    char[] lArray;
+                    char[] oArray;
+                    lArray = this.name.toCharArray();
+                    oArray = o.name.toCharArray();
+                    while (comparison == 0 && counter < lArray.length && counter < oArray.length) {
+                        comparison = Character.compare(lArray[counter], oArray[counter]);
+                        counter++;
+                    }
+                    return comparison;
                 }
+                return Integer.compare(Integer.parseInt(this.s4), Integer.parseInt(o.s4));
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
         return comparison;
 
     }
 
-    protected String inout(){
+    String inout(){
         try {
             String temp = this.direction;
             if (temp.contains("in") || temp.contains("In")) {
@@ -117,11 +114,7 @@ public class connection implements Parcelable,Comparable<connection> {
         }
     }
 
-    public static int getSortBy() {
-        return SORT_BY;
-    }
-
-    public static void setSortBy(int sortBy) {
+    static void setSortBy(int sortBy) {
         SORT_BY = sortBy;
     }
 
@@ -134,28 +127,9 @@ public class connection implements Parcelable,Comparable<connection> {
         this.id = id;
     }
 
-    public void setDirection(String direction) {
-        this.direction = direction;
-    }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void setPlug(String plug) {
-        this.plug = plug;
-    }
-
-    public void setS4(String s4) {
-        this.s4 = s4;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public void setUnits(String units) {
-        this.units = units;
     }
 
 
@@ -164,7 +138,7 @@ public class connection implements Parcelable,Comparable<connection> {
         return id;
     }
 
-    public String getDirection() {
+    String getDirection() {
         return direction;
     }
 
@@ -172,22 +146,8 @@ public class connection implements Parcelable,Comparable<connection> {
         return name;
     }
 
-    public String getPlug() {
-        return plug;
-    }
-
-    public String getS4() {
+    String getS4() {
         return s4;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public String getUnits() {
-        return this.units;
-    }
-
-
-    public connection getConnectionObject(){return this;}
 }

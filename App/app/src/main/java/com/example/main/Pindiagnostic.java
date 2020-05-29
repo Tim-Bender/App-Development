@@ -1,6 +1,7 @@
 package com.example.main;
 
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -12,13 +13,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Pindiagnostic extends AppCompatActivity {
 
     private vehicle myvehicle;
     private TextView direction,pinnumber,pinname,connectorinformation;
     private connection myConnection;
-    private Toolbar toolbar;
     private ArrayList<connection> uniqueConnections;
     private int loc;
     @Override
@@ -27,7 +28,7 @@ public class Pindiagnostic extends AppCompatActivity {
         setContentView(R.layout.content_pindiagnostic);
         try {
             this.myvehicle = getIntent().getParcelableExtra("myvehicle");
-            this.myvehicle.setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
+            Objects.requireNonNull(this.myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
             this.loc = getIntent().getIntExtra("loc", 0);
             this.uniqueConnections = getIntent().getParcelableArrayListExtra("uniqueconnections");
 
@@ -35,9 +36,9 @@ public class Pindiagnostic extends AppCompatActivity {
             InputStream is = getResources().openRawResource(R.raw.parsedtest);
             this.myvehicle.setIs(is);
             this.myConnection = uniqueConnections.get(this.loc);
-            this.toolbar = findViewById(R.id.toolbar);
+            Toolbar toolbar = findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
-            this.toolbar.setTitleTextColor(Color.WHITE);
+            toolbar.setTitleTextColor(Color.WHITE);
             this.direction = findViewById(R.id.direction);
             this.pinnumber = findViewById(R.id.pinnumber);
             this.pinname = findViewById(R.id.pinname);
@@ -51,6 +52,7 @@ public class Pindiagnostic extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     public void updateValues(){
         try {
             this.myConnection = uniqueConnections.get(loc);
