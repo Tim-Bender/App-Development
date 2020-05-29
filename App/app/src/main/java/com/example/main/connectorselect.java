@@ -16,6 +16,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Author: Timothy Bender
@@ -43,11 +44,11 @@ public class connectorselect extends AppCompatActivity {
             InputStream is = getResources().openRawResource(R.raw.parsedtest);
             setTitle("Connector Selection");
             this.myvehicle = getIntent().getParcelableExtra("myvehicle");
-            this.myvehicle.setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
+            Objects.requireNonNull(this.myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
             this.myvehicle.setIs(is);
 
             List<String> connections = this.myvehicle.getUniqueConnections();
-            ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,connections);
+            ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, connections);
             dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             this.mySpinner.setAdapter(dataAdapter);
             this.editText = findViewById(R.id.connectorinput);

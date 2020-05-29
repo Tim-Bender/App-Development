@@ -21,9 +21,7 @@ import java.util.Map;
  * timothy.bender@spudnik.com
  * 530-414-6778
  * Please see README before updating anything
- */
-
-/**
+ *
  * This is vehicle super class. It will serve as a Parcelable container of all information partaining to a machine.
  * It also contains numerous methods for database construction.
  * On app startup, ArrayLists containing the valid vehicleIDs and dealerID's are created on an Asyc Thread
@@ -40,9 +38,9 @@ public class vehicle implements Parcelable {
     private ArrayList<String> uniquePins = new ArrayList<>();
     private ArrayList<String> dealers = new ArrayList<>();
     private ArrayList<String> vehicleIds = new ArrayList<>();
-    private int loc = 0,pinCount=0,lastSorted = this.SORT_BY_S4;
+    private int loc = 0,pinCount=0,lastSorted = SORT_BY_S4;
     private InputStream is;
-    public static final int SORT_BY_S4 = 1,SORT_BY_NAME = 2;
+    static final int SORT_BY_S4 = 1,SORT_BY_NAME = 2;
     private  Map<String,Integer> pinnumbers = new HashMap<>();
 
     vehicle(String id){
@@ -59,11 +57,11 @@ public class vehicle implements Parcelable {
 
     /**
      * The following methods are all part of the Parcelable implementation.
-     * @param in
+     * @param in Parcel in
      */
 
     //parcelable constructor to rebuild object
-    protected vehicle(Parcel in) {
+    private vehicle(Parcel in) {
         vehicleId = in.readString();
         uniqueConnections = in.createStringArrayList();
         loc = in.readInt();
@@ -108,7 +106,7 @@ public class vehicle implements Parcelable {
      * Primary database builder. This will fill the instance field ArrayList connections with connection objects. This should only run once
      * It will run on an async thread in the background to avoid UI thread blocking
      */
-    protected void buildDataBase(){
+    void buildDataBase(){
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {

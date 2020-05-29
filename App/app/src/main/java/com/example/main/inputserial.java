@@ -28,28 +28,25 @@ public class inputserial extends AppCompatActivity {
     public vehicle myvehicle;
     boolean empty = true;
     private EditText edittext,dealerText;
-    private Toolbar toolbar;
     public ImageView imageView;
     public TextView textView;
     public Switch toggle;
     private InputStream is;
-    private InputStream d;
     private boolean built = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inputserial);
-        this.toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(this.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         setTitle("Input Serial Numer");
-        this.toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setTitleTextColor(Color.WHITE);
         this.imageView = findViewById(R.id.helpimage);
         this.imageView.setVisibility(View.GONE);
         this.textView = findViewById(R.id.helptextview);
         this.textView.setVisibility(View.GONE);
         this.myvehicle = getIntent().getParcelableExtra("myvehicle");
-        d = getResources().openRawResource(R.raw.dealerids);
         is = getResources().openRawResource(R.raw.parsedtest);
 
         try{
@@ -156,7 +153,7 @@ public class inputserial extends AppCompatActivity {
                             myvehicle.setVehicleId(vehicleId.toLowerCase().trim());
                             myvehicle.buildDataBase();
                         }
-                    } catch (Exception e) {
+                    } catch (Exception ignored) {
 
                     }
                 }

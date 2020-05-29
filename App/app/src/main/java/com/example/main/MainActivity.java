@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView textView;
     private int progressStatus = 0;
     private Handler handler = new Handler();
-    private Toolbar toolbar;
     private vehicle myVehicle;
     InputStream is;
     InputStream d;
@@ -29,9 +28,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setTitle("Loading");
-        toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        this.toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setTitleTextColor(Color.WHITE);
         myVehicle = new vehicle();
         d = getResources().openRawResource(R.raw.dealerids);
         is= getResources().openRawResource(R.raw.parsedtest);

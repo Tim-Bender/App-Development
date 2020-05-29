@@ -11,7 +11,6 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -28,14 +27,13 @@ import android.widget.Toast;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.UUID;
 
 public class selectpin extends AppCompatActivity {
     private vehicle myvehicle;
     private TextView  textView;
     private ArrayList<connection> connections = new ArrayList<>();
-    private Toolbar toolbar;
-    private Switch toggle;
     public BluetoothAdapter mBluetoothAdapter;
     public ArrayList<BluetoothDevice> mBTdevices = new ArrayList<>();
     BluetoothConnectionService mBluetoothConnection;
@@ -54,9 +52,9 @@ public class selectpin extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if(action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)){
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,BluetoothAdapter.ERROR);
-                switch(state){
+            if (action != null && action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+                switch (state) {
                     case BluetoothAdapter.STATE_OFF:
                         System.out.println("onReceive: STATE OFF");
                         break;
@@ -79,9 +77,9 @@ public class selectpin extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if(action.equals(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED)){
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE,BluetoothAdapter.ERROR);
-                switch(state){
+            if (action != null && action.equals(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
+                switch (state) {
                     case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
                         System.out.println("mBroadcastReceiver2: Discovery Enabled.");
                         break;
@@ -107,10 +105,12 @@ public class selectpin extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
 
-            if(action.equals(BluetoothDevice.ACTION_FOUND)){
+            if(action != null && action.equals(BluetoothDevice.ACTION_FOUND)){
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 mBTdevices.add(device);
-                System.out.println("onReceive: " + device.getName() + ": " + device.getAddress());
+                if (device != null) {
+                    System.out.println("onReceive: " + device.getName() + ": " + device.getAddress());
+                }
             }
         }
     };
@@ -119,17 +119,17 @@ public class selectpin extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if(action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)){
+            if (action != null && action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
                 BluetoothDevice mDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                if(mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
+                if (mDevice != null && mDevice.getBondState() == BluetoothDevice.BOND_BONDED) {
                     System.out.println("BroadcastReceiver4: Bond bonded");
                     mBTDevice = mDevice;
                 }
-                if(mDevice.getBondState() == BluetoothDevice.BOND_BONDING){
+                if (Objects.requireNonNull(mDevice).getBondState() == BluetoothDevice.BOND_BONDING) {
                     System.out.println("BroadcastReceiver4: Bond bonding");
                 }
-                if(mDevice.getBondState() == BluetoothDevice.BOND_NONE){
+                if (mDevice.getBondState() == BluetoothDevice.BOND_NONE) {
                     System.out.println("BroadcastReceiver4: Bond none");
                 }
             }
@@ -153,11 +153,11 @@ public class selectpin extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_selectpin);
         try{
-            this.toolbar = findViewById(R.id.toolbar);
+            Toolbar toolbar = findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
             toolbar.setTitleTextColor(Color.WHITE);
             setTitle("Pin Selection");
-            this.toolbar.setTitleTextColor(Color.WHITE);
+            toolbar.setTitleTextColor(Color.WHITE);
             messages = new StringBuilder();
             incomingMessage = findViewById(R.id.selectpinvoltage);
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -167,11 +167,11 @@ public class selectpin extends AppCompatActivity {
             registerReceiver(mBroadcastReceiver4,filter);
             InputStream is = getResources().openRawResource(R.raw.parsedtest);
             this.myvehicle = getIntent().getParcelableExtra("myvehicle");
-            this.myvehicle.setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
+            Objects.requireNonNull(this.myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
             this.myvehicle.setIs(is);
 
             this.textView = findViewById(R.id.connectorid);
-            this.toggle=findViewById(R.id.sortbytoggle);
+            Switch toggle = findViewById(R.id.sortbytoggle);
             toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -216,7 +216,7 @@ public class selectpin extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String text = intent.getStringExtra("theMessage");
-            messages.append(text + "\n");
+            messages.append(text).append("\n");
             Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
             incomingMessage.setText(messages);
             send("R,In4,4,V");
@@ -225,8 +225,8 @@ public class selectpin extends AppCompatActivity {
     BroadcastReceiver mReceiver2 = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Boolean bool = intent.getBooleanExtra("boolean",false);
-            if(bool == true){
+            boolean bool = intent.getBooleanExtra("boolean",false);
+            if(bool){
                 updatevalues();
             }
         }
@@ -234,6 +234,7 @@ public class selectpin extends AppCompatActivity {
 
 
 
+    @SuppressLint("SetTextI18n")
     public void updatevalues(){
             try{
             String temp = this.myvehicle.getUniqueConnections().get(this.myvehicle.getLoc());
@@ -307,14 +308,14 @@ public class selectpin extends AppCompatActivity {
     }
     public void startBTConnection(BluetoothDevice device, UUID uuid){
         Log.d(TAG,"startBtConnection: Initializing RFZOM bluetooth connection");
-        mBluetoothConnection.startclient(this.mBTDevice,this.uuid);
+        mBluetoothConnection.startclient(this.mBTDevice, selectpin.uuid);
     }
 
     public void startConnection(){
         startBTConnection(mBTDevice,uuid);
     }
 
-    public void deviceDiscover(){
+    /*public void deviceDiscover(){
         System.out.println("In discoverable method");
         if(mBluetoothAdapter.isDiscovering()){
             mBluetoothAdapter.cancelDiscovery();
@@ -329,18 +330,16 @@ public class selectpin extends AppCompatActivity {
             IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
             registerReceiver(mBroadcastReceiver3,discoverDevicesIntent);
         }
-    }
+    }*/
 
     private void checkBTPermissions(){
-        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP);{
-            int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
-            permissionCheck += this.checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
-            if(permissionCheck != 0){
-                this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},101);
-            }
-            else{
-                System.out.println("checkBtPermissions: No need to check permissions.");
-            }
+        int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
+        permissionCheck += this.checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
+        if(permissionCheck != 0){
+            this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},101);
+        }
+        else{
+            System.out.println("checkBtPermissions: No need to check permissions.");
         }
     }
 
@@ -357,7 +356,7 @@ public class selectpin extends AppCompatActivity {
         }
     }
 
-    public void enableDiscoverable(){
+   /* public void enableDiscoverable(){
         if(!mBluetoothAdapter.isDiscovering()) {
             Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
@@ -365,7 +364,7 @@ public class selectpin extends AppCompatActivity {
             IntentFilter intentFilter = new IntentFilter(mBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
             registerReceiver(mBroadcastReceiver2, intentFilter);
         }
-    }
+    }*/
 
     public void createBond(){
         mBluetoothAdapter.cancelDiscovery();
@@ -377,11 +376,9 @@ public class selectpin extends AppCompatActivity {
                 System.out.println("createBond: " + deviceName);
                 System.out.println("Createbond: " + deviceAddress);
 
-                if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2){
-                    device.createBond();
-                    mBTDevice = device;
-                    mBluetoothConnection = new BluetoothConnectionService(selectpin.this);
-                }
+                device.createBond();
+                mBTDevice = device;
+                mBluetoothConnection = new BluetoothConnectionService(selectpin.this);
                 break;
             }
         }

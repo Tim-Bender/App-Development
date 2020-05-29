@@ -1,6 +1,5 @@
 package com.example.main;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -18,18 +17,15 @@ import android.widget.Toast;
  */
 
 public class home extends AppCompatActivity {
-    private Toolbar myToolBar;
-    private Context context;
     private vehicle myvehicle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context = this;
         setContentView(R.layout.content_home);
-        this.myToolBar = findViewById(R.id.toolbar);
+        Toolbar myToolBar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolBar);
         setTitle("Home");
-        this.myToolBar.setTitleTextColor(Color.WHITE);
+        myToolBar.setTitleTextColor(Color.WHITE);
         this.myvehicle=getIntent().getParcelableExtra("myvehicle");
 
         Toast.makeText(this,"Welcome!",Toast.LENGTH_LONG).show();
