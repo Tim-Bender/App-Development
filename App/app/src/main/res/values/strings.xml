@@ -24,11 +24,11 @@
     <string name="view_tool_settings">View Tool Settings</string>
     <string name="_0">0%</string>
     <string name="loading_0">Loading 0%</string>
-    <string name="loading">loading...</string>
-    <string name="Loading">Loading...</string>
+    <string name="loading">loading…</string>
+    <string name="Loading">Loading…</string>
     <string name="title_activity_serialnumber">serialnumber</string>
     <string name="enter_implement_serial_number">Enter Implement Serial Number</string>
-    <string name="e_g_6640_55_150">(e.g. 6640-55-150)</string>
+    <string name="e_g_6640_55_150">(e.g. 6640–55–150)</string>
     <string name="spudnikplate">spudnikplate</string>
     <string name="the_implement_s_serial_number_can_be_found_on_the_front_of_the_machine_close_to_the_implement_s_drawbar_on_the_main_frame_the_serial_number_is_printed_on_an_aluminum_tag_that_looks_similar_to_the_image_above">The implement\'s serial number can be found on the front of the machine, close to the implement\'s drawbar on the main frame. The serial number is printed on an aluminum tag that looks similar to the image above.</string>
     <string name="back">Back</string>
@@ -52,4 +52,6 @@
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="title_activity_pindiagnostic">Pindiagnostic</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

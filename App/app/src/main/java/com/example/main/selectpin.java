@@ -175,7 +175,7 @@ public class selectpin extends AppCompatActivity {
             toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if(isChecked){
+                    /*if(isChecked){
                         if(myvehicle.getLastSorted() == vehicle.SORT_BY_S4) {
                             myvehicle.sortConnections(vehicle.SORT_BY_NAME,getApplicationContext());
                             myvehicle.setLastSorted(vehicle.SORT_BY_NAME);
@@ -187,7 +187,7 @@ public class selectpin extends AppCompatActivity {
                             myvehicle.setLastSorted(vehicle.SORT_BY_S4);
                         }
 
-                    }
+                    }*/
                 }
             });
         } catch (Resources.NotFoundException e) {
