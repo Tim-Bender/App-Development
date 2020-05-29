@@ -78,40 +78,6 @@
 
         </LinearLayout>
 
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/fragment"
-            android:name="com.example.main.First2Fragment"
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight="6" >
-
-        </androidx.fragment.app.FragmentContainerView>
-
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/fragment3"
-            android:name="com.example.main.First3Fragment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone">
-
-        </androidx.fragment.app.FragmentContainerView>
-
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/fragment4"
-            android:name="com.example.main.First3Fragment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone">
-
-        </androidx.fragment.app.FragmentContainerView>
-
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/fragment5"
-            android:name="com.example.main.First5Fragment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:visibility="gone" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0px"

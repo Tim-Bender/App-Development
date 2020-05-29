@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -111,7 +112,7 @@ public class vehicle implements Parcelable {
             @Override
             public void run() {
                 try{
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
                     String line;
                     while((line = reader.readLine()) != null) {
                         String[] tokens = line.split(",");
@@ -134,14 +135,14 @@ public class vehicle implements Parcelable {
 
     /**
      * Here is our database builder for the dealer id's. This is a small database but it is useful to keep it as a csv file to allow for updateability. It runs similarly to the one above
-     * @param i
+     * @param i InputStream
      */
-    protected void buildDealers(final InputStream i){
+    void buildDealers(final InputStream i){
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
                 try{
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(i, Charset.forName("UTF-8")));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(i, StandardCharsets.UTF_8));
                     String line;
                     while((line = reader.readLine()) != null) {
                         line = line.toLowerCase();
@@ -159,15 +160,15 @@ public class vehicle implements Parcelable {
 
     /**
      * This is the database builder of acceptable vehicle id numbers. Like the others above it is relegated to a background thread.
-     * @param i
+     * @param i Inputstream
      */
 
-    protected void buildVehicleIds(final InputStream i){
+     void buildVehicleIds(final InputStream i){
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
                 try{
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(i, Charset.forName("UTF-8")));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(i, StandardCharsets.UTF_8));
                     String line;
                     String[] holder;
                     while((line = reader.readLine()) != null) {
@@ -185,17 +186,17 @@ public class vehicle implements Parcelable {
         });
     }
 
-    protected boolean checkDealer(String dealerid){
+     boolean checkDealer(String dealerid){
         return this.dealers.contains(dealerid);
     }
 
     /**
      * Used to determine if an input'ed vehicle id is valid.
-     * @param vehicleid
-     * @param s
-     * @return
+     * @param vehicleid String
+     * @param s String
+     * @return boolean
      */
-    protected boolean testConnection(String vehicleid, String s){
+    private boolean testConnection(String vehicleid, String s){
         try {
             for (int i = 0; i < s.length(); i++) {
                 if (s.charAt(i) == 'X') {
@@ -219,9 +220,9 @@ public class vehicle implements Parcelable {
 
     /**
      * Will return a string depending on whether or not the connection is input or output
-     * @return
+     * @return String
      */
-    protected String inout(){
+    String inout(){
         try {
             String temp = this.uniqueConnections.get(this.loc);
             if (temp.contains("in") || temp.contains("In")) {
@@ -241,24 +242,21 @@ public class vehicle implements Parcelable {
      * This is implemented using a switch and final constants.
      * Finally, since sorting is relegated to an asyc thread, an Intent is passed to the parent Activity by a broadcast manager
      * This is caught by a broadcast manager in the parent activity, and allows for the UI to be updated.
-     * @param sort
-     * @param mcontext
+     * @param sort Sort-By
+     * @param mcontext Application Context
      */
-    protected void sortConnections(final int sort, final Context mcontext){
+     void sortConnections(final int sort, final Context mcontext){
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
                 try{
                     if(!connections.isEmpty()) {
-                        switch (sort) {
-                            case SORT_BY_NAME:
-                                connection.setSortBy(SORT_BY_NAME);
-                                Collections.sort(connections);
-                                break;
-                            default:
-                                connection.setSortBy(SORT_BY_S4);
-                                Collections.sort(connections);
-                                break;
+                        if (sort == SORT_BY_NAME) {
+                            connection.setSortBy(SORT_BY_NAME);
+                            Collections.sort(connections);
+                        } else {
+                            connection.setSortBy(SORT_BY_S4);
+                            Collections.sort(connections);
                         }
                         Intent incomingMessageIntent = new Intent("incomingboolean");
                         incomingMessageIntent.putExtra("boolean",true);
@@ -275,7 +273,7 @@ public class vehicle implements Parcelable {
     /**
      * Use these two methods below to wipe the contents of a vehicle object without deleting the object.
      */
-    protected void wipe(){
+    private void wipe(){
         this.lastSorted = SORT_BY_S4;
         this.loc = 0;
         this.pinnumbers.clear();
@@ -291,7 +289,7 @@ public class vehicle implements Parcelable {
      * Use fullwipe if you'd like the dealer and vehicleid ArrayLists wiped as well.
      * Please remember the only default building of these lists is in MainActivity during device startup.
      */
-    protected void fullwipe(){
+    private void fullwipe(){
         wipe();
         this.dealers.clear();
         this.vehicleIds.clear();
@@ -301,53 +299,53 @@ public class vehicle implements Parcelable {
      * The rest of the methods here are support methods
      * Primarily get set and add methods.
      */
-    public int getMap(String direction){
+    int getMap(String direction){
         return this.pinnumbers.get(direction.toLowerCase());
     }
 
-    protected void setVehicleId(String vehicleId) {
+    void setVehicleId(String vehicleId) {
         this.vehicleId = vehicleId;
     }
 
-    protected int getPinCount() {
+    int getPinCount() {
         return pinCount;
     }
 
-    protected void setPinCount(int pinCount) {
+    void setPinCount(int pinCount) {
         this.pinCount = pinCount;
     }
 
-    protected void addConnection(connection toAdd){
+    private void addConnection(connection toAdd){
         this.connections.add(toAdd);
     }
 
-    protected void addUniqueconnection(String s){
+    private void addUniqueconnection(String s){
         this.uniqueConnections.add(s.toLowerCase());
     }
 
-    protected ArrayList<String> getUniqueConnections(){
+    ArrayList<String> getUniqueConnections(){
         return this.uniqueConnections;
     }
 
-    protected ArrayList<connection> getConnections(){return this.connections;}
+    ArrayList<connection> getConnections(){return this.connections;}
 
-    protected void setConnections(ArrayList<connection> c){ this.connections = c;}
+    void setConnections(ArrayList<connection> c){ this.connections = c;}
 
-    protected void addUniquePin(String s){this.uniquePins.add(s.toLowerCase().trim());}
+    void addUniquePin(String s){this.uniquePins.add(s.toLowerCase().trim());}
 
-    protected int getLoc() {
+    int getLoc() {
         return loc;
     }
 
-    protected void setLoc(int loc) {
+    void setLoc(int loc) {
         this.loc = loc;
     }
 
-    protected void setIs(InputStream s){
+    void setIs(InputStream s){
         this.is = s;
     }
 
-    protected void setPinnumbers(){
+    private void setPinnumbers(){
         this.pinnumbers.put("in1",14);
         this.pinnumbers.put("in2",14);
         this.pinnumbers.put("in3",22);
@@ -370,19 +368,11 @@ public class vehicle implements Parcelable {
         return ("Id: "+ this.vehicleId + "\n Connections: " + this.connections.size() + "\n Unique Connections: " + this.uniqueConnections.size());
     }
 
-    protected ArrayList<String> getUniquePins() {
+    ArrayList<String> getUniquePins() {
         return uniquePins;
     }
 
-    public int getLastSorted() {
-        return lastSorted;
-    }
-
-    public void setLastSorted(int lastSorted) {
-        this.lastSorted = lastSorted;
-    }
-
-    public ArrayList<String> getVehicleIds(){
+    ArrayList<String> getVehicleIds(){
         return this.vehicleIds;
     }
 }
