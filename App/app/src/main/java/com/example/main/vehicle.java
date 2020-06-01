@@ -10,7 +10,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -250,6 +249,7 @@ public class vehicle implements Parcelable {
             @Override
             public void run() {
                 try{
+                    lastSorted = sort;
                     if(!connections.isEmpty()) {
                         if (sort == SORT_BY_NAME) {
                             connection.setSortBy(SORT_BY_NAME);
@@ -270,37 +270,13 @@ public class vehicle implements Parcelable {
         });
 
     }
-    /**
-     * Use these two methods below to wipe the contents of a vehicle object without deleting the object.
-     */
-    private void wipe(){
-        this.lastSorted = SORT_BY_S4;
-        this.loc = 0;
-        this.pinnumbers.clear();
-        this.uniquePins.clear();
-        this.uniqueConnections.clear();
-        this.connections.clear();
-        this.vehicleId = "";
-        this.pinCount = 0;
-        this.is = null;
-    }
-
-    /**
-     * Use fullwipe if you'd like the dealer and vehicleid ArrayLists wiped as well.
-     * Please remember the only default building of these lists is in MainActivity during device startup.
-     */
-    private void fullwipe(){
-        wipe();
-        this.dealers.clear();
-        this.vehicleIds.clear();
-    }
 
     /**
      * The rest of the methods here are support methods
      * Primarily get set and add methods.
      */
     int getMap(String direction){
-        return this.pinnumbers.get(direction.toLowerCase());
+        return this.pinnumbers.get(direction);
     }
 
     void setVehicleId(String vehicleId) {

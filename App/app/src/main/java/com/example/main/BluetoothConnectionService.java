@@ -7,10 +7,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.widget.Toast;
-
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,7 +28,7 @@ public class BluetoothConnectionService {
     private ConnectedThread mConnectedThread;
 
     public BluetoothConnectionService(Context context){
-        this.mcontext = context;
+        mcontext = context;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         start();
     }
@@ -99,6 +96,7 @@ public class BluetoothConnectionService {
                 mmSocket.connect();
                 Log.d(TAG,"run: Socket connected");
             } catch (IOException e) {
+               e.printStackTrace();
                 try{
                     mmSocket.close();
                     Log.d(TAG,"run: Closed Socket");
@@ -133,7 +131,7 @@ public class BluetoothConnectionService {
 
     public void startclient(BluetoothDevice device, UUID uuid){
         Log.d(TAG, "startclient: Started");
-        Toast.makeText(mcontext, "Connecting Bluetooth", Toast.LENGTH_SHORT).show();
+       Log.d(TAG,"Connecting Bluetooth");
         mConnectThread = new ConnectThread(device,uuid);
         mConnectThread.start();
     }
@@ -148,7 +146,7 @@ public class BluetoothConnectionService {
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
-            Toast.makeText(mcontext, "Bluetooth Connected", Toast.LENGTH_SHORT).show();
+            Log.d(TAG,"Bluetooth Connected");
             try {
                 tmpIn = mmSocket.getInputStream();
                 tmpOut = mmSocket.getOutputStream();
@@ -190,7 +188,7 @@ public class BluetoothConnectionService {
             try{
                 mmSocket.close();
             } catch (IOException e) {
-                Toast.makeText(mcontext, "Socket could not be closed", Toast.LENGTH_SHORT).show();
+                Log.e(TAG,"Socket should not be closed");
             }
         }
     }

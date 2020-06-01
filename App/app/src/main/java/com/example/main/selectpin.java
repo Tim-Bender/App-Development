@@ -38,7 +38,7 @@ public class selectpin extends AppCompatActivity {
     public ArrayList<BluetoothDevice> mBTdevices = new ArrayList<>();
     BluetoothConnectionService mBluetoothConnection;
     BluetoothDevice mBTDevice;
-    private final String TAG = "InputSerial";
+    private final String TAG = "SelectPin";
     private static final UUID uuid = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
     TextView incomingMessage;
     StringBuilder messages;
@@ -137,16 +137,19 @@ public class selectpin extends AppCompatActivity {
     };
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy(){
         super.onDestroy();
         try {
             unregisterReceiver(mBroadcastReceiver1);
             unregisterReceiver(mBroadcastReceiver2);
             unregisterReceiver(mBroadcastReceiver3);
             unregisterReceiver(mBroadcastReceiver4);
+            unregisterReceiver(mReceiver);
+            unregisterReceiver(mReceiver2);
         } catch (Exception e) {
-            Log.e(TAG,"Broadcast Receivers could not be killed, did not exist.");
+            Log.e(TAG, "onDestroy: Broadcast Receivers could not be killed, did not exist.");
         }
+
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -209,7 +212,7 @@ public class selectpin extends AppCompatActivity {
             masterBTStart();
 
         } catch (Exception e) {
-            Toast.makeText(this, "Bluetooth Error", Toast.LENGTH_SHORT).show();
+           e.printStackTrace();
         }
     }
     BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -219,7 +222,7 @@ public class selectpin extends AppCompatActivity {
             messages.append(text).append("\n");
             Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
             incomingMessage.setText(messages);
-            send("R,In4,4,V");
+            //send("R,In4,4,V");
         }
     };
     BroadcastReceiver mReceiver2 = new BroadcastReceiver() {
@@ -302,8 +305,10 @@ public class selectpin extends AppCompatActivity {
 
     public void masterBTStart(){
         enableBluetooth();
+        //enableDiscoverable();
+        deviceDiscover();
+        Log.d(TAG,"masterBTStart: Completed deviceDiscover");
         createBond();
-        startConnection();
 
     }
     public void startBTConnection(BluetoothDevice device, UUID uuid){
@@ -311,11 +316,8 @@ public class selectpin extends AppCompatActivity {
         mBluetoothConnection.startclient(this.mBTDevice, selectpin.uuid);
     }
 
-    public void startConnection(){
-        startBTConnection(mBTDevice,uuid);
-    }
 
-    /*public void deviceDiscover(){
+    public void deviceDiscover(){
         System.out.println("In discoverable method");
         if(mBluetoothAdapter.isDiscovering()){
             mBluetoothAdapter.cancelDiscovery();
@@ -330,7 +332,7 @@ public class selectpin extends AppCompatActivity {
             IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
             registerReceiver(mBroadcastReceiver3,discoverDevicesIntent);
         }
-    }*/
+    }
 
     private void checkBTPermissions(){
         int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
@@ -356,20 +358,22 @@ public class selectpin extends AppCompatActivity {
         }
     }
 
-   /* public void enableDiscoverable(){
+    public void enableDiscoverable(){
         if(!mBluetoothAdapter.isDiscovering()) {
             Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 60);
             startActivity(discoverableIntent);
             IntentFilter intentFilter = new IntentFilter(mBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
             registerReceiver(mBroadcastReceiver2, intentFilter);
         }
-    }*/
+    }
 
     public void createBond(){
         mBluetoothAdapter.cancelDiscovery();
         for(BluetoothDevice device : this.mBTdevices){
-            if(device.getName().equals("test_dev_1")){
+            Log.d(TAG,device.getName() + " " + device.getAddress());
+            Log.d(TAG,"I AM HERE");
+            if(device.getAddress().equals("8C:F1:12:5C:D3:CC")){
                 String deviceName = device.getName();
                 String deviceAddress = device.getAddress();
 
@@ -379,6 +383,7 @@ public class selectpin extends AppCompatActivity {
                 device.createBond();
                 mBTDevice = device;
                 mBluetoothConnection = new BluetoothConnectionService(selectpin.this);
+                startBTConnection(mBTDevice,uuid);
                 break;
             }
         }
