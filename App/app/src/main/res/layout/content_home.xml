@@ -55,9 +55,12 @@
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="2"
+            android:alpha=".5"
+            android:background="#737373"
             android:drawableLeft="@drawable/tinygreenarrowtransparent"
             android:onClick="update"
             android:text="@string/update_implement_software"
+            android:textColor="#434242"
             android:textSize="18sp" />
 
         <Button
@@ -66,9 +69,12 @@
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="2"
+            android:alpha=".5"
+            android:background="#737373"
             android:drawableLeft="@drawable/binarytexttransparent"
             android:onClick="logData"
             android:text="@string/log_implement_io_data"
+            android:textColor="#434242"
             android:textSize="18sp" />
 
         <Button

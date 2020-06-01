@@ -43,9 +43,10 @@ public class home extends AppCompatActivity {
 
     public void update(View view){
         try {
-            Intent i = new Intent(getBaseContext(), inputserial.class);
-            i.putExtra("myvehicle",myvehicle);
-            startActivity(i);
+            Toast.makeText(this, "Function Not Supported", Toast.LENGTH_SHORT).show();
+            //Intent i = new Intent(getBaseContext(), inputserial.class);
+            //i.putExtra("myvehicle",myvehicle);
+            //startActivity(i);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -54,9 +55,10 @@ public class home extends AppCompatActivity {
 
     public void logData(View view){
         try {
-            Intent i = new Intent(getBaseContext(), inputserial.class);
-            i.putExtra("myvehicle",myvehicle);
-            startActivity(i);
+            Toast.makeText(this, "Function Not Supported", Toast.LENGTH_SHORT).show();
+            //Intent i = new Intent(getBaseContext(), inputserial.class);
+            //i.putExtra("myvehicle",myvehicle);
+            //startActivity(i);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -64,12 +66,12 @@ public class home extends AppCompatActivity {
     }
 
     public void settings(View view){
-        /*try{
+        try{
             Intent i = new Intent(getBaseContext(), settings.class);
             startActivity(i);
         }catch(Exception e){
             e.printStackTrace();
-        }*/
+        }
 
     }
 

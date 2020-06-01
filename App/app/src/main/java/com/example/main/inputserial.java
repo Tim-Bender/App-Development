@@ -33,6 +33,8 @@ public class inputserial extends AppCompatActivity {
     public Switch toggle;
     private InputStream is;
     private boolean built = false;
+    public final int DIAGNOSTIC = 1, UPDATESOFTWARE = 2, LOGIODATA = 3;
+    private int POINTTO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +49,7 @@ public class inputserial extends AppCompatActivity {
         this.textView = findViewById(R.id.helptextview);
         this.textView.setVisibility(View.GONE);
         this.myvehicle = getIntent().getParcelableExtra("myvehicle");
+        this.POINTTO = getIntent().getIntExtra("pointto",0);
         is = getResources().openRawResource(R.raw.parsedtest);
 
         try{
@@ -120,6 +123,9 @@ public class inputserial extends AppCompatActivity {
                     this.myvehicle.buildDataBase();
                 }
                 if (!myvehicle.getConnections().isEmpty() && this.myvehicle.checkDealer(this.dealerText.getText().toString().toLowerCase().trim())) {
+                    switch(this.POINTTO){
+
+                    }
                     Intent i = new Intent(getBaseContext(), connectorselect.class);
                     i.putExtra("myvehicle", myvehicle);
                     i.putParcelableArrayListExtra("connections",this.myvehicle.getConnections());
