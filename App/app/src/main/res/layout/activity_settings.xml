@@ -117,6 +117,7 @@
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight=".4"
+                android:onClick="reportBug"
                 android:text="Report Bug " />
 
             <Space
@@ -147,6 +148,7 @@
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight=".4"
+                android:onClick="submitFeedback"
                 android:text="Report Feedback" />
 
             <Space

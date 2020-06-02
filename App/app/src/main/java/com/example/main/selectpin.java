@@ -8,19 +8,25 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.PreferenceManager;
+
+import android.text.Layout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,15 +40,15 @@ public class selectpin extends AppCompatActivity {
     private vehicle myvehicle;
     private TextView  textView;
     private ArrayList<connection> connections = new ArrayList<>();
-    public BluetoothAdapter mBluetoothAdapter;
-    public ArrayList<BluetoothDevice> mBTdevices = new ArrayList<>();
-    BluetoothConnectionService mBluetoothConnection;
-    BluetoothDevice mBTDevice;
+    private  BluetoothAdapter mBluetoothAdapter;
+    private ArrayList<BluetoothDevice> mBTdevices = new ArrayList<>();
+    private BluetoothConnectionService mBluetoothConnection;
+    private BluetoothDevice mBTDevice;
     private final String TAG = "SelectPin";
     private static final UUID uuid = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
-    TextView incomingMessage;
-    StringBuilder messages;
-
+    private TextView incomingMessage;
+    private StringBuilder messages;
+    private SharedPreferences preferences;
     @SuppressLint("SetTextI18n")
 
 
@@ -172,7 +178,7 @@ public class selectpin extends AppCompatActivity {
             this.myvehicle = getIntent().getParcelableExtra("myvehicle");
             Objects.requireNonNull(this.myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
             this.myvehicle.setIs(is);
-
+            preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             this.textView = findViewById(R.id.connectorid);
             Switch toggle = findViewById(R.id.sortbytoggle);
             toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -200,6 +206,10 @@ public class selectpin extends AppCompatActivity {
     }
 
     @Override
+    public void onResume(){
+        super.onResume();
+    }
+    @Override
     public void onStart(){
         super.onStart();
         try {
@@ -207,14 +217,30 @@ public class selectpin extends AppCompatActivity {
                 @Override
                 public void run() {
                     myvehicle.sortConnections(vehicle.SORT_BY_S4,getApplicationContext());
+                    if(preferences.getBoolean("nightmode",false)){
+                        nightMode();
+                    }
                 }
             });
-            masterBTStart();
+            //masterBTStart();
 
         } catch (Exception e) {
-           e.printStackTrace();
+            e.printStackTrace();
         }
     }
+
+    /*@Override
+    public void onResume(){
+        super.onResume();
+        if(preferences.getBoolean("nightmode",false)){
+            nightMode();
+            return;
+        }
+        if(!preferences.getBoolean("nightmode",false)){
+            dayMode();
+        }
+    }
+     */
     BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -230,6 +256,7 @@ public class selectpin extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             boolean bool = intent.getBooleanExtra("boolean",false);
             if(bool){
+                buildConnections();
                 updatevalues();
             }
         }
@@ -237,29 +264,57 @@ public class selectpin extends AppCompatActivity {
 
 
 
+    public void buildConnections(){
+        String temp= myvehicle.getUniqueConnections().get(myvehicle.getLoc());
+        if (!myvehicle.getConnections().isEmpty()) {
+            for (connection c : myvehicle.getConnections()) {
+                if (c.getDirection().contains(temp.toLowerCase())) {
+                    if (!myvehicle.getUniquePins().contains(c.getDirection().toLowerCase().trim())) {
+                        myvehicle.addUniquePin(c.getDirection().toLowerCase().trim());
+                        myvehicle.setPinCount(myvehicle.getPinCount() + 1);
+                    }
+                    connections.add(c);
+                }
+            }
+        }
+
+    }
     @SuppressLint("SetTextI18n")
     public void updatevalues(){
-            try{
-            String temp = this.myvehicle.getUniqueConnections().get(this.myvehicle.getLoc());
+        try{
+            String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc());
             String s1 = temp.substring(0, 1).toUpperCase();
-            this.textView.setText(s1 + temp.substring(1));
+            textView.setText(s1 + temp.substring(1));
 
             LinearLayout layout = findViewById(R.id.pins);
             layout.removeAllViews();
+            boolean nightMode = preferences.getBoolean("nightmode",false);
             int counter = 0;
-            if (!this.myvehicle.getConnections().isEmpty()) {
-                for (connection c : this.myvehicle.getConnections()) {
-                    if (c.getDirection().contains(temp.toLowerCase())) {
-                        if (!this.myvehicle.getUniquePins().contains(c.getDirection().toLowerCase().trim())) {
-                            this.myvehicle.addUniquePin(c.getDirection().toLowerCase().trim());
-                            this.myvehicle.setPinCount(this.myvehicle.getPinCount() + 1);
-                        }
-                        this.connections.add(c);
+            if (!myvehicle.getConnections().isEmpty()) {
+                for (connection c : connections){
                         final Button btn = new Button(this);
-                        btn.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-                        btn.setTextSize(18);
-                        btn.setTextColor(Color.BLACK);
-                        btn.setGravity(Gravity.BOTTOM);
+                        if(nightMode) {
+                            LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1.5f);
+                            textParams.setMarginStart(10);
+                            textParams.setMarginEnd(10);
+                            btn.setLayoutParams(textParams);
+                            btn.setTextSize(14);
+                        }
+                        else{
+                           btn.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.MATCH_PARENT));
+                           btn.setTextSize(18);
+
+                        }
+
+                        if(nightMode) {
+                            btn.setTextColor(Color.WHITE);
+                            btn.setBackgroundResource(R.drawable.toolbargradient);
+                        }
+                        else {
+                            btn.setTextColor(Color.BLACK);
+                            btn.setBackgroundResource(android.R.drawable.btn_default);
+                        }
+                        btn.setGravity(Gravity.CENTER);
                         btn.setTag(counter);
                         btn.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -268,26 +323,24 @@ public class selectpin extends AppCompatActivity {
                             }
                         });
                         btn.setText("Pin" + c.getS4() + " Signal:  " + c.getName());
-                        btn.setGravity(Gravity.START);
                         layout.addView(btn);
+                        if(nightMode) {
+                            final Space space = new Space(this);
+                            space.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, .1f));
+                            layout.addView(space);
+                        }
                         counter++;
 
                     }
                 }
-            } else {
-                Toast.makeText(this, "No Pins Available", Toast.LENGTH_SHORT).show();
-                TextView textView = new TextView(this);
-                textView.setText("No pin information available");
-                layout.addView(textView);
-            }
-            this.textView = findViewById(R.id.numberofpinstextfield);
-            this.textView.setText(this.myvehicle.getMap(this.myvehicle.getUniqueConnections().get(this.myvehicle.getLoc())) + "p " + this.myvehicle.inout() + " Connector");
+            textView = findViewById(R.id.numberofpinstextfield);
+            textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections().get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector");
 
 
         } catch (Resources.NotFoundException e) {
-            Toast.makeText(this, "File Not Found Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
+
 
     }
 
@@ -393,6 +446,68 @@ public class selectpin extends AppCompatActivity {
     public void send(String tosend){
         byte[] bytes = tosend.getBytes(Charset.defaultCharset());
         mBluetoothConnection.write(bytes);
+    }
+
+    public void nightMode(){
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            ConstraintLayout constraintLayout = findViewById(R.id.selectpinconstraintlayout);
+                            constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
+                            TextView textView = findViewById(R.id.connectorid);
+                            textView.setTextColor(Color.WHITE);
+                            textView = findViewById(R.id.numberofpinstextfield);
+                            textView.setTextColor(Color.WHITE);
+                            textView = findViewById(R.id.selectpintextview3);
+                            textView.setTextColor(Color.WHITE);
+                            textView = findViewById(R.id.selectpinvoltage);
+                            textView.setTextColor(Color.WHITE);
+                            textView = findViewById(R.id.selectpintextview5);
+                            textView.setTextColor(Color.WHITE);
+                            LinearLayout linearLayout = findViewById(R.id.selectpinhorizontallayout1);
+                            linearLayout.setBackgroundResource(R.drawable.nightmodeback);
+                            textView = findViewById(R.id.connectorid);
+                            textView.setBackgroundResource(R.drawable.nightmodeback);
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+                    }
+
+                });
+        //updatevalues();
+    }
+
+    public void dayMode(){
+        try {
+            ConstraintLayout constraintLayout = findViewById(R.id.selectpinconstraintlayout);
+            constraintLayout.setBackgroundColor(Color.WHITE);
+            TextView textView = findViewById(R.id.connectorid);
+            textView.setTextColor(Color.BLACK);
+            textView = findViewById(R.id.numberofpinstextfield);
+            textView.setTextColor(Color.BLACK);
+            textView = findViewById(R.id.selectpintextview3);
+            textView.setTextColor(Color.BLACK);
+            textView = findViewById(R.id.selectpinvoltage);
+            textView.setTextColor(Color.BLACK);
+            textView = findViewById(R.id.selectpintextview5);
+            textView.setTextColor(Color.BLACK);
+            LinearLayout linearLayout = findViewById(R.id.selectpinhorizontallayout1);
+            linearLayout.setBackgroundResource(R.drawable.back);
+            textView = findViewById(R.id.connectorid);
+            textView.setBackgroundResource(R.drawable.back);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //updatevalues();
+
     }
 
 

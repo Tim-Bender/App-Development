@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/selectpinconstraintlayout"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
     android:fitsSystemWindows="true"
@@ -24,10 +25,11 @@
             android:layout_weight=".75" />
 
         <LinearLayout
+            android:id="@+id/selectpinhorizontallayout1"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="1.75"
-            android:background="#FFFFFF"
+            android:background="@drawable/back"
             android:orientation="horizontal">
 
             <TextView
@@ -47,7 +49,6 @@
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight=".60"
-                android:background="@drawable/back"
                 android:orientation="vertical">
 
                 <TextView
@@ -61,7 +62,7 @@
                     android:textSize="18sp" />
 
                 <TextView
-                    android:id="@+id/textView9"
+                    android:id="@+id/selectpintextview3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -84,14 +85,19 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/textView8"
+            android:id="@+id/selectpintextview5"
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight=".75"
+            android:layout_weight=".85"
             android:gravity="center_horizontal|center_vertical"
             android:text="Select Pin to view diagnostics for:"
             android:textColor="#000000"
             android:textSize="18sp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight=".15" />
 
         <Switch
             android:id="@+id/sortbytoggle"
@@ -101,14 +107,15 @@
             android:layout_weight=".75"
             android:text="Sort By Name"
             android:textColor="#000000"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:visibility="gone" />
 
         <ScrollView
             android:id="@+id/pinscroll"
             style="@android:style/Widget.Holo.ScrollView"
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="6">
+            android:layout_weight="6.5">
 
             <LinearLayout
                 android:id="@+id/pins"

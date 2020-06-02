@@ -2,13 +2,18 @@ package com.example.main;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.preference.PreferenceManager;
 import android.content.Intent;
-import android.content.res.Resources;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -33,8 +38,10 @@ public class inputserial extends AppCompatActivity {
     public Switch toggle;
     private InputStream is;
     private boolean built = false;
-    public final int DIAGNOSTIC = 1, UPDATESOFTWARE = 2, LOGIODATA = 3;
     private int POINTTO;
+    private SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
+    private CheckBox checkBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,14 +51,16 @@ public class inputserial extends AppCompatActivity {
         setSupportActionBar(toolbar);
         setTitle("Input Serial Numer");
         toolbar.setTitleTextColor(Color.WHITE);
-        this.imageView = findViewById(R.id.helpimage);
-        this.imageView.setVisibility(View.GONE);
-        this.textView = findViewById(R.id.helptextview);
-        this.textView.setVisibility(View.GONE);
-        this.myvehicle = getIntent().getParcelableExtra("myvehicle");
-        this.POINTTO = getIntent().getIntExtra("pointto",0);
+        imageView = findViewById(R.id.helpimage);
+        imageView.setVisibility(View.GONE);
+        textView = findViewById(R.id.helptextview);
+        textView.setVisibility(View.GONE);
+        myvehicle = getIntent().getParcelableExtra("myvehicle");
+        POINTTO = getIntent().getIntExtra("pointto",0);
+        checkBox = findViewById(R.id.rememberdealeridcheckbox);
         is = getResources().openRawResource(R.raw.parsedtest);
-
+        preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        editor = preferences.edit();
         try{
             this.edittext = findViewById(R.id.inputid);
             this.edittext.setOnKeyListener(new View.OnKeyListener() {
@@ -81,12 +90,26 @@ public class inputserial extends AppCompatActivity {
                 return false;
             }
         });
+
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                 if(isChecked){
+                     editor.putString("dealerid",dealerText.getText().toString().trim());
+                     editor.commit();
+                 }
+                }
+            });
+            Log.d("inputserial",preferences.getString("dealerid",""));
+            if(!preferences.getString("dealerid", "").equals("")){
+                checkBox.setChecked(true);
+                dealerText.setText(preferences.getString("dealerid",""));
+            }
+
         } catch (Exception e) {
             Toast.makeText(this, "Unidentified Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
-
-
         toggle = findViewById(R.id.helptoggle);
         final ImageView spudnikelectrical = findViewById(R.id.spudnikelectrical);
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -108,6 +131,27 @@ public class inputserial extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onStart(){
+        super.onStart();
+        if(preferences.getBoolean("nightmode",false)){
+            nightMode();
+        }
+
+
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(preferences.getBoolean("nightmode",false)){
+            nightMode();
+            return;
+        }
+        if(!preferences.getBoolean("nightmode",false)){
+            dayMode();
+        }
+    }
+
 
     /*
      * This method will build the vehicle class, by pulling data from the database csv
@@ -117,18 +161,18 @@ public class inputserial extends AppCompatActivity {
             this.empty = true;
             String vehicleId = edittext.getText().toString();
             if (!(edittext.getText().length() < 2)) {
-                if(!this.built) {
+                if (!this.built) {
                     this.myvehicle = new vehicle(vehicleId);
                     this.myvehicle.setIs(is);
                     this.myvehicle.buildDataBase();
                 }
                 if (!myvehicle.getConnections().isEmpty() && this.myvehicle.checkDealer(this.dealerText.getText().toString().toLowerCase().trim())) {
-                    switch(this.POINTTO){
-
+                    if (checkBox.isChecked()) {
+                        editor.putString("dealerid", dealerText.getText().toString().trim());
                     }
                     Intent i = new Intent(getBaseContext(), connectorselect.class);
                     i.putExtra("myvehicle", myvehicle);
-                    i.putParcelableArrayListExtra("connections",this.myvehicle.getConnections());
+                    i.putParcelableArrayListExtra("connections", this.myvehicle.getConnections());
                     startActivity(i);
                 } else {
                     Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
@@ -136,36 +180,90 @@ public class inputserial extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
             }
-        } catch (Resources.NotFoundException e) {
+        } catch (Exception e) {
             Toast.makeText(this, "Resource Not Found", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
-        }catch(Exception e){
-            Toast.makeText(this, "Unidentified Error", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
         }
-
-        }
-
-        public void tryBuildDataBase(){
-            AsyncTask.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        final String vehicleId = edittext.getText().toString().toLowerCase().trim();
-                        if (myvehicle.getVehicleIds().contains(vehicleId) || myvehicle.getVehicleIds().contains(vehicleId + "xx")) {
-                            System.out.println("BUILDING DATABASE ON SERIAL!");
-                            built = true;
-                            myvehicle.setIs(is);
-                            myvehicle.setVehicleId(vehicleId.toLowerCase().trim());
-                            myvehicle.buildDataBase();
-                        }
-                    } catch (Exception ignored) {
-
+    }
+    public void tryBuildDataBase(){
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final String vehicleId = edittext.getText().toString().toLowerCase().trim();
+                    if (myvehicle.getVehicleIds().contains(vehicleId) || myvehicle.getVehicleIds().contains(vehicleId + "xx")) {
+                        System.out.println("BUILDING DATABASE ON SERIAL!");
+                        built = true;
+                        myvehicle.setIs(is);
+                        myvehicle.setVehicleId(vehicleId.toLowerCase().trim());
+                        myvehicle.buildDataBase();
                     }
-                }
-            });
+                } catch (Exception ignored) {
 
-        }
+                }
+            }
+        });
+
+    }
+
+    public void nightMode(){
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
+                constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
+                TextView view = findViewById(R.id.inputserialtextview1);
+                view.setTextColor(Color.WHITE);
+                view = findViewById(R.id.inputserialtextview2);
+                view.setTextColor(Color.WHITE);
+                view = findViewById(R.id.helptextview);
+                view.setTextColor(Color.WHITE);
+                EditText editText = findViewById(R.id.dealeridtextview);
+                editText.setTextColor(Color.WHITE);
+                editText = findViewById(R.id.inputid);
+                editText.setTextColor(Color.WHITE);
+                CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
+                checkBox.setTextColor(Color.WHITE);
+                Switch myswitch = findViewById(R.id.helptoggle);
+                myswitch.setTextColor(Color.WHITE);
+                Button button = findViewById(R.id.gobutton);
+                button.setBackgroundResource(R.drawable.toolbargradient);
+                button.setTextColor(Color.WHITE);
+            }
+        });
+
+
+    }
+
+    public void dayMode(){
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
+                constraintLayout.setBackgroundColor(Color.WHITE);
+                TextView view = findViewById(R.id.inputserialtextview1);
+                view.setTextColor(Color.BLACK);
+                view = findViewById(R.id.inputserialtextview2);
+                view.setTextColor(Color.BLACK);
+                view = findViewById(R.id.helptextview);
+                view.setTextColor(Color.BLACK);
+                EditText editText = findViewById(R.id.dealeridtextview);
+                editText.setTextColor(Color.BLACK);
+                editText = findViewById(R.id.inputid);
+                editText.setTextColor(Color.BLACK);
+                CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
+                checkBox.setTextColor(Color.BLACK);
+                Switch myswitch = findViewById(R.id.helptoggle);
+                myswitch.setTextColor(Color.BLACK);
+                Button button = findViewById(R.id.gobutton);
+                button.setBackgroundResource(android.R.drawable.btn_default);
+                button.setTextColor(Color.BLACK);
+            }
+        });
+
+
+    }
+
 
 
 

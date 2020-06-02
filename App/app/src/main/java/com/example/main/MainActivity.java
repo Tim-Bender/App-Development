@@ -2,9 +2,13 @@ package com.example.main;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.Constraints;
+import androidx.preference.PreferenceManager;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
@@ -13,6 +17,9 @@ import android.os.Handler;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
+
 import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
@@ -21,8 +28,9 @@ public class MainActivity extends AppCompatActivity {
     private int progressStatus = 0;
     private Handler handler = new Handler();
     private vehicle myVehicle;
-    InputStream is;
-    InputStream d;
+    private InputStream is;
+    private InputStream d;
+    private SharedPreferences preferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +78,10 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     protected void onStart() {
+        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        if(preferences.getBoolean("nightmode",false)){
+            nightMode();
+        }
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -79,5 +91,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         super.onStart();
+    }
+
+    public void nightMode(){
+        ConstraintLayout constraints = findViewById(R.id.mainactivityconstraintlayout);
+        constraints.setBackgroundColor(Color.parseColor("#333333"));
+        TextView textView = findViewById(R.id.textView2);
+        textView.setTextColor(Color.WHITE);
+        textView = findViewById(R.id.textView3);
+        textView.setTextColor(Color.WHITE);
     }
 }

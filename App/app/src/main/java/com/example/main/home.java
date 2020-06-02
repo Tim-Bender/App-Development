@@ -1,12 +1,17 @@
 package com.example.main;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.preference.PreferenceManager;
 
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -18,6 +23,7 @@ import android.widget.Toast;
 
 public class home extends AppCompatActivity {
     private vehicle myvehicle;
+    private SharedPreferences preferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,8 +33,26 @@ public class home extends AppCompatActivity {
         setTitle("Home");
         myToolBar.setTitleTextColor(Color.WHITE);
         this.myvehicle=getIntent().getParcelableExtra("myvehicle");
-
         Toast.makeText(this,"Welcome!",Toast.LENGTH_LONG).show();
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        if(preferences.getBoolean("nightmode",false)){
+            nightMode();
+        }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(preferences.getBoolean("nightmode",false)){
+            nightMode();
+            return;
+        }
+       if(!preferences.getBoolean("nightmode",false)){
+           dayMode();
+       }
     }
     public void diagTool(View view){
         try {
@@ -72,6 +96,49 @@ public class home extends AppCompatActivity {
         }catch(Exception e){
             e.printStackTrace();
         }
+
+    }
+
+    public void nightMode(){
+        try {
+            ConstraintLayout constraintLayout = findViewById(R.id.homeconstraintlayout);
+            constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
+            Button button = findViewById(R.id.rundiagtoolbutton);
+            button.setBackgroundResource(R.drawable.toolbargradient);
+            button.setTextColor(Color.WHITE);
+            button = findViewById(R.id.updatesoftwarebutton);
+            button.setBackgroundResource(R.drawable.toolbargradient);
+            button.setTextColor(Color.WHITE);
+            button = findViewById(R.id.logdatabutton);
+            button.setBackgroundResource(R.drawable.toolbargradient);
+            button.setTextColor(Color.WHITE);
+            button = findViewById(R.id.settingshomebutton);
+            button.setBackgroundResource(R.drawable.toolbargradient);
+            button.setTextColor(Color.WHITE);
+            TextView textView = findViewById(R.id.hometextview);
+            textView.setTextColor(Color.WHITE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void dayMode(){
+        ConstraintLayout constraintLayout = findViewById(R.id.homeconstraintlayout);
+        constraintLayout.setBackgroundColor(Color.WHITE);
+        Button button = findViewById(R.id.rundiagtoolbutton);
+        button.setBackgroundResource(android.R.drawable.btn_default);
+        button.setTextColor(Color.BLACK);
+        button = findViewById(R.id.updatesoftwarebutton);
+        button.setBackgroundResource(android.R.drawable.btn_default);
+        button.setTextColor(Color.BLACK);
+        button = findViewById(R.id.logdatabutton);
+        button.setBackgroundResource(android.R.drawable.btn_default);
+        button.setTextColor(Color.BLACK);
+        button = findViewById(R.id.settingshomebutton);
+        button.setBackgroundResource(android.R.drawable.btn_default);
+        button.setTextColor(Color.BLACK);
+        TextView textView = findViewById(R.id.hometextview);
+        textView.setTextColor(Color.BLACK);
 
     }
 

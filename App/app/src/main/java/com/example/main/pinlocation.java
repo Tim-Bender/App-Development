@@ -27,7 +27,7 @@ public class pinlocation extends AppCompatActivity {
         this.toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
-        setTitle("Pin Selection");
+        setTitle("Pin Location");
         this.toolbar.setTitleTextColor(Color.WHITE);
 
         try {

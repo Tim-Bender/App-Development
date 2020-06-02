@@ -3,11 +3,17 @@ package com.example.main;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.preference.PreferenceManager;
+
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.InputStream;
@@ -15,12 +21,13 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class Pindiagnostic extends AppCompatActivity {
-
     private vehicle myvehicle;
     private TextView direction,pinnumber,pinname,connectorinformation;
     private connection myConnection;
     private ArrayList<connection> uniqueConnections;
     private int loc;
+    private SharedPreferences preferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,12 +49,31 @@ public class Pindiagnostic extends AppCompatActivity {
             this.pinnumber = findViewById(R.id.pinnumber);
             this.pinname = findViewById(R.id.pinname);
             this.connectorinformation = findViewById(R.id.connectorinformation);
-            System.out.println("This is my connection: " + this.myConnection);
-            System.out.println("This is my location: " + this.loc);
+            preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             updateValues();
         }catch (Exception e){
             Toast.makeText(this, "ArrayList Parse Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
+        }
+    }
+    @Override
+    protected void onStart(){
+        super.onStart();
+        if(preferences.getBoolean("nightmode",false)){
+            nightMode();
+        }
+
+
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(preferences.getBoolean("nightmode",false)){
+            nightMode();
+            return;
+        }
+        if(!preferences.getBoolean("nightmode",false)){
+            dayMode();
         }
     }
 
@@ -102,6 +128,71 @@ public class Pindiagnostic extends AppCompatActivity {
         i.putParcelableArrayListExtra("connections",this.myvehicle.getConnections());
         i.putExtra("myConnection",this.myConnection);
         startActivity(i);
+    }
+
+    public void nightMode(){
+        ConstraintLayout constraintLayout = findViewById(R.id.pindiagnosticconstraintlayout);
+        constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
+        LinearLayout layout = findViewById(R.id.pindiagnosticlayout1);
+        layout.setBackgroundResource(R.drawable.nightmodeback);
+        layout = findViewById(R.id.pindiagnosticlayout2);
+        layout.setBackgroundResource(R.drawable.nightmodeback);
+        TextView textView = findViewById(R.id.direction);
+        textView.setTextColor(Color.WHITE);
+        textView = findViewById(R.id.connectorinformation);
+        textView.setTextColor(Color.WHITE);
+        textView = findViewById(R.id.pindiagnostictextview3);
+        textView.setTextColor(Color.WHITE);
+        textView = findViewById(R.id.pindiagnosticvoltage);
+        textView.setTextColor(Color.WHITE);
+        textView = findViewById(R.id.pinnumber);
+        textView.setTextColor(Color.WHITE);
+        textView = findViewById(R.id.pinname);
+        textView.setTextColor(Color.WHITE);
+        textView = findViewById(R.id.voltage);
+        textView.setTextColor(Color.WHITE);
+        Button button = findViewById(R.id.pindiagnosticbutton1);
+        button.setBackgroundResource(R.drawable.toolbargradient);
+        button.setTextColor(Color.WHITE);
+        button = findViewById(R.id.nextpin);
+        button.setBackgroundResource(R.drawable.toolbargradient);
+        button.setTextColor(Color.WHITE);
+        button = findViewById(R.id.prevpin);
+        button.setBackgroundResource(R.drawable.toolbargradient);
+        button.setTextColor(Color.WHITE);
+    }
+
+    public void dayMode(){
+        ConstraintLayout constraintLayout = findViewById(R.id.pindiagnosticconstraintlayout);
+        constraintLayout.setBackgroundColor(Color.WHITE);
+        LinearLayout layout = findViewById(R.id.pindiagnosticlayout1);
+        layout.setBackgroundResource(R.drawable.back);
+        layout = findViewById(R.id.pindiagnosticlayout2);
+        layout.setBackgroundResource(R.drawable.back);
+        TextView textView = findViewById(R.id.direction);
+        textView.setTextColor(Color.BLACK);
+        textView = findViewById(R.id.connectorinformation);
+        textView.setTextColor(Color.BLACK);
+        textView = findViewById(R.id.pindiagnostictextview3);
+        textView.setTextColor(Color.BLACK);
+        textView = findViewById(R.id.pindiagnosticvoltage);
+        textView.setTextColor(Color.BLACK);
+        textView = findViewById(R.id.pinnumber);
+        textView.setTextColor(Color.BLACK);
+        textView = findViewById(R.id.pinname);
+        textView.setTextColor(Color.BLACK);
+        textView = findViewById(R.id.voltage);
+        textView.setTextColor(Color.BLACK);
+        Button button = findViewById(R.id.pindiagnosticbutton1);
+        button.setBackgroundResource(android.R.drawable.btn_default);
+        button.setTextColor(Color.BLACK);
+        button = findViewById(R.id.nextpin);
+        button.setBackgroundResource(android.R.drawable.btn_default);
+        button.setTextColor(Color.BLACK);
+        button = findViewById(R.id.prevpin);
+        button.setBackgroundResource(android.R.drawable.btn_default);
+        button.setTextColor(Color.BLACK);
+
     }
 
 }
