@@ -1,4 +1,4 @@
-package com.example.main;
+package com.example.Spudnik;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -53,7 +53,6 @@ public class pinlocation extends AppCompatActivity {
             this.textView = findViewById(R.id.pinlocationconnectorinformation);
             this.textView.setText(this.myvehicle.getMap(this.myvehicle.getUniqueConnections().get(this.myvehicle.getLoc())) + "p " + this.myvehicle.inout() + " Connector");
         } catch (Exception e) {
-            Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
 

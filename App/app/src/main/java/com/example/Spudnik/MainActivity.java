@@ -1,9 +1,8 @@
-package com.example.main;
+package com.example.Spudnik;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.Constraints;
 import androidx.preference.PreferenceManager;
 
 import android.annotation.SuppressLint;
@@ -17,8 +16,6 @@ import android.os.Handler;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.w3c.dom.Text;
 
 import java.io.InputStream;
 

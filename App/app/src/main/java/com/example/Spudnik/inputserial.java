@@ -1,4 +1,4 @@
-package com.example.main;
+package com.example.Spudnik;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -47,21 +47,23 @@ public class inputserial extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inputserial);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        setTitle("Input Serial Numer");
-        toolbar.setTitleTextColor(Color.WHITE);
-        imageView = findViewById(R.id.helpimage);
-        imageView.setVisibility(View.GONE);
-        textView = findViewById(R.id.helptextview);
-        textView.setVisibility(View.GONE);
-        myvehicle = getIntent().getParcelableExtra("myvehicle");
-        POINTTO = getIntent().getIntExtra("pointto",0);
-        checkBox = findViewById(R.id.rememberdealeridcheckbox);
-        is = getResources().openRawResource(R.raw.parsedtest);
-        preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        editor = preferences.edit();
+
         try{
+            Toolbar toolbar = findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+            setTitle("Input Serial Numer");
+            toolbar.setTitleTextColor(Color.WHITE);
+            imageView = findViewById(R.id.helpimage);
+            imageView.setVisibility(View.GONE);
+            textView = findViewById(R.id.helptextview);
+            textView.setVisibility(View.GONE);
+            myvehicle = getIntent().getParcelableExtra("myvehicle");
+            POINTTO = getIntent().getIntExtra("pointto",0);
+            checkBox = findViewById(R.id.rememberdealeridcheckbox);
+            is = getResources().openRawResource(R.raw.parsedtest);
+            preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+            editor = preferences.edit();
+
             this.edittext = findViewById(R.id.inputid);
             this.edittext.setOnKeyListener(new View.OnKeyListener() {
             @Override
@@ -95,8 +97,9 @@ public class inputserial extends AppCompatActivity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                  if(isChecked){
-                     editor.putString("dealerid",dealerText.getText().toString().trim());
+                     editor.putString("dealerid", dealerText.getText().toString().trim());
                      editor.commit();
+
                  }
                 }
             });
@@ -105,51 +108,55 @@ public class inputserial extends AppCompatActivity {
                 checkBox.setChecked(true);
                 dealerText.setText(preferences.getString("dealerid",""));
             }
+            toggle = findViewById(R.id.helptoggle);
+            final ImageView spudnikelectrical = findViewById(R.id.spudnikelectrical);
+            toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if(isChecked){
+                        spudnikelectrical.setVisibility(View.GONE);
+                        imageView.setVisibility(View.VISIBLE);
+                        textView.setVisibility(View.VISIBLE);
+
+                    }
+                    else{
+                        imageView.setVisibility(View.GONE);
+                        textView.setVisibility(View.GONE);
+                        spudnikelectrical.setVisibility(View.VISIBLE);
+
+                    }
+                }
+            });
 
         } catch (Exception e) {
             Toast.makeText(this, "Unidentified Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
-        toggle = findViewById(R.id.helptoggle);
-        final ImageView spudnikelectrical = findViewById(R.id.spudnikelectrical);
-        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    spudnikelectrical.setVisibility(View.GONE);
-                    imageView.setVisibility(View.VISIBLE);
-                    textView.setVisibility(View.VISIBLE);
-
-                }
-                else{
-                    imageView.setVisibility(View.GONE);
-                    textView.setVisibility(View.GONE);
-                    spudnikelectrical.setVisibility(View.VISIBLE);
-
-                }
-            }
-        });
     }
 
     @Override
     protected void onStart(){
         super.onStart();
-        if(preferences.getBoolean("nightmode",false)){
-            nightMode();
-        }
+        try {
+            if (preferences.getBoolean("nightmode", false)) {
+                nightMode();
+            }
+        }catch(Exception Ignored){}
 
 
     }
     @Override
     protected void onResume() {
         super.onResume();
-        if(preferences.getBoolean("nightmode",false)){
-            nightMode();
-            return;
-        }
-        if(!preferences.getBoolean("nightmode",false)){
-            dayMode();
-        }
+        try {
+            if (preferences.getBoolean("nightmode", false)) {
+                nightMode();
+                return;
+            }
+            if (!preferences.getBoolean("nightmode", false)) {
+                dayMode();
+            }
+        }catch(Exception ignored){}
     }
 
 
@@ -198,9 +205,7 @@ public class inputserial extends AppCompatActivity {
                         myvehicle.setVehicleId(vehicleId.toLowerCase().trim());
                         myvehicle.buildDataBase();
                     }
-                } catch (Exception ignored) {
-
-                }
+                } catch (Exception ignored) {}
             }
         });
 
@@ -210,25 +215,27 @@ public class inputserial extends AppCompatActivity {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
-                constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
-                TextView view = findViewById(R.id.inputserialtextview1);
-                view.setTextColor(Color.WHITE);
-                view = findViewById(R.id.inputserialtextview2);
-                view.setTextColor(Color.WHITE);
-                view = findViewById(R.id.helptextview);
-                view.setTextColor(Color.WHITE);
-                EditText editText = findViewById(R.id.dealeridtextview);
-                editText.setTextColor(Color.WHITE);
-                editText = findViewById(R.id.inputid);
-                editText.setTextColor(Color.WHITE);
-                CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
-                checkBox.setTextColor(Color.WHITE);
-                Switch myswitch = findViewById(R.id.helptoggle);
-                myswitch.setTextColor(Color.WHITE);
-                Button button = findViewById(R.id.gobutton);
-                button.setBackgroundResource(R.drawable.toolbargradient);
-                button.setTextColor(Color.WHITE);
+                try {
+                    ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
+                    constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
+                    TextView view = findViewById(R.id.inputserialtextview1);
+                    view.setTextColor(Color.WHITE);
+                    view = findViewById(R.id.inputserialtextview2);
+                    view.setTextColor(Color.WHITE);
+                    view = findViewById(R.id.helptextview);
+                    view.setTextColor(Color.WHITE);
+                    EditText editText = findViewById(R.id.dealeridtextview);
+                    editText.setTextColor(Color.WHITE);
+                    editText = findViewById(R.id.inputid);
+                    editText.setTextColor(Color.WHITE);
+                    CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
+                    checkBox.setTextColor(Color.WHITE);
+                    Switch myswitch = findViewById(R.id.helptoggle);
+                    myswitch.setTextColor(Color.WHITE);
+                    Button button = findViewById(R.id.gobutton);
+                    button.setBackgroundResource(R.drawable.toolbargradient);
+                    button.setTextColor(Color.WHITE);
+                }catch(Exception ignored){}
             }
         });
 
@@ -239,25 +246,28 @@ public class inputserial extends AppCompatActivity {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
-                constraintLayout.setBackgroundColor(Color.WHITE);
-                TextView view = findViewById(R.id.inputserialtextview1);
-                view.setTextColor(Color.BLACK);
-                view = findViewById(R.id.inputserialtextview2);
-                view.setTextColor(Color.BLACK);
-                view = findViewById(R.id.helptextview);
-                view.setTextColor(Color.BLACK);
-                EditText editText = findViewById(R.id.dealeridtextview);
-                editText.setTextColor(Color.BLACK);
-                editText = findViewById(R.id.inputid);
-                editText.setTextColor(Color.BLACK);
-                CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
-                checkBox.setTextColor(Color.BLACK);
-                Switch myswitch = findViewById(R.id.helptoggle);
-                myswitch.setTextColor(Color.BLACK);
-                Button button = findViewById(R.id.gobutton);
-                button.setBackgroundResource(android.R.drawable.btn_default);
-                button.setTextColor(Color.BLACK);
+                try {
+                    ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
+                    constraintLayout.setBackgroundColor(Color.WHITE);
+                    TextView view = findViewById(R.id.inputserialtextview1);
+                    view.setTextColor(Color.BLACK);
+                    view = findViewById(R.id.inputserialtextview2);
+                    view.setTextColor(Color.BLACK);
+                    view = findViewById(R.id.helptextview);
+                    view.setTextColor(Color.BLACK);
+                    EditText editText = findViewById(R.id.dealeridtextview);
+                    editText.setTextColor(Color.BLACK);
+                    editText = findViewById(R.id.inputid);
+                    editText.setTextColor(Color.BLACK);
+                    CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
+                    checkBox.setTextColor(Color.BLACK);
+                    Switch myswitch = findViewById(R.id.helptoggle);
+                    myswitch.setTextColor(Color.BLACK);
+                    Button button = findViewById(R.id.gobutton);
+                    button.setBackgroundResource(android.R.drawable.btn_default);
+                    button.setTextColor(Color.BLACK);
+                }
+                catch(Exception Ignored){}
             }
         });
 

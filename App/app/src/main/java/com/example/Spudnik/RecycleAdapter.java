@@ -1,4 +1,4 @@
-package com.example.main;
+package com.example.Spudnik;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;

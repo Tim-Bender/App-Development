@@ -1,4 +1,4 @@
-package com.example.main;
+package com.example.Spudnik;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -186,9 +186,8 @@ public class connectorselect extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Empty", Toast.LENGTH_SHORT).show();
             }
-        } catch (Exception e) {
-            Toast.makeText(this, "Undefined Error", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
+        } catch (Exception Ignored) {
+
         }
 
     }
@@ -208,8 +207,7 @@ public class connectorselect extends AppCompatActivity {
             Button button = findViewById(R.id.connectorselectbutton3);
             button.setBackgroundResource(R.drawable.toolbargradient);
             button.setTextColor(Color.WHITE);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception Ignored) {
         }
 
     }
@@ -229,8 +227,7 @@ public class connectorselect extends AppCompatActivity {
             Button button = findViewById(R.id.connectorselectbutton3);
             button.setBackgroundResource(android.R.drawable.btn_default);
             button.setTextColor(Color.BLACK);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception Ignored) {
         }
     }
 

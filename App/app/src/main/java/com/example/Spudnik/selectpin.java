@@ -1,4 +1,4 @@
-package com.example.main;
+package com.example.Spudnik;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -19,7 +19,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 
-import android.text.Layout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -52,96 +51,6 @@ public class selectpin extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
 
 
-
-    //Create a broadcast receiver for action_found #1
-    private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action != null && action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-                switch (state) {
-                    case BluetoothAdapter.STATE_OFF:
-                        System.out.println("onReceive: STATE OFF");
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_OFF:
-                        System.out.println("onReceive: STATE TURNING OFF");
-                        break;
-                    case BluetoothAdapter.STATE_ON:
-                        System.out.println("onReceive: STATE ON");
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_ON:
-                        System.out.println("onReceive: STATE TURNING ON");
-                        break;
-                }
-
-            }
-        }
-    };
-    //Create a broadcast receiver for action_found #2
-    private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action != null && action.equals(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED)) {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
-                switch (state) {
-                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
-                        System.out.println("mBroadcastReceiver2: Discovery Enabled.");
-                        break;
-                    case BluetoothAdapter.SCAN_MODE_NONE:
-                        System.out.println("mBroadCastReceiver2: Discoverability Disabled. Not able to receive connections.");
-                        break;
-                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE:
-                        System.out.println("mBroadCastReceiver2: Discovery Enabled. Able to receive communication");
-                        break;
-                    case BluetoothAdapter.STATE_CONNECTING:
-                        System.out.println("mBroadCastReceiver2: Connecting...");
-                        break;
-                    case BluetoothAdapter.STATE_CONNECTED:
-                        System.out.println("mBroadCastReceiver2: Connected");
-                        break;
-                }
-            }
-        }
-    };
-
-    private BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-
-            if(action != null && action.equals(BluetoothDevice.ACTION_FOUND)){
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                mBTdevices.add(device);
-                if (device != null) {
-                    System.out.println("onReceive: " + device.getName() + ": " + device.getAddress());
-                }
-            }
-        }
-    };
-
-    private BroadcastReceiver mBroadcastReceiver4 = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (action != null && action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
-                BluetoothDevice mDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-                if (mDevice != null && mDevice.getBondState() == BluetoothDevice.BOND_BONDED) {
-                    System.out.println("BroadcastReceiver4: Bond bonded");
-                    mBTDevice = mDevice;
-                }
-                if (Objects.requireNonNull(mDevice).getBondState() == BluetoothDevice.BOND_BONDING) {
-                    System.out.println("BroadcastReceiver4: Bond bonding");
-                }
-                if (mDevice.getBondState() == BluetoothDevice.BOND_NONE) {
-                    System.out.println("BroadcastReceiver4: Bond none");
-                }
-            }
-        }
-    };
-
     @Override
     protected void onDestroy(){
         super.onDestroy();
@@ -152,9 +61,7 @@ public class selectpin extends AppCompatActivity {
             unregisterReceiver(mBroadcastReceiver4);
             unregisterReceiver(mReceiver);
             unregisterReceiver(mReceiver2);
-        } catch (Exception e) {
-            Log.e(TAG, "onDestroy: Broadcast Receivers could not be killed, did not exist.");
-        }
+        } catch (Exception ignored) {}
 
     }
     @Override
@@ -172,8 +79,6 @@ public class selectpin extends AppCompatActivity {
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver,new IntentFilter("incomingMessage"));
             LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver2,new IntentFilter("incomingboolean"));
-            IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-            registerReceiver(mBroadcastReceiver4,filter);
             InputStream is = getResources().openRawResource(R.raw.parsedtest);
             this.myvehicle = getIntent().getParcelableExtra("myvehicle");
             Objects.requireNonNull(this.myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
@@ -340,8 +245,6 @@ public class selectpin extends AppCompatActivity {
         } catch (Resources.NotFoundException e) {
             e.printStackTrace();
         }
-
-
     }
 
     public void pinSelected(int loc){
@@ -359,6 +262,8 @@ public class selectpin extends AppCompatActivity {
     public void masterBTStart(){
         enableBluetooth();
         //enableDiscoverable();
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        registerReceiver(mBroadcastReceiver4,filter);
         deviceDiscover();
         Log.d(TAG,"masterBTStart: Completed deviceDiscover");
         createBond();
@@ -479,10 +384,9 @@ public class selectpin extends AppCompatActivity {
 
                     }
                 });
-                    }
+            }
 
-                });
-        //updatevalues();
+        });
     }
 
     public void dayMode(){
@@ -509,6 +413,95 @@ public class selectpin extends AppCompatActivity {
         //updatevalues();
 
     }
+
+    //Create a broadcast receiver for action_found #1
+    private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action != null && action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+                switch (state) {
+                    case BluetoothAdapter.STATE_OFF:
+                        System.out.println("onReceive: STATE OFF");
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_OFF:
+                        System.out.println("onReceive: STATE TURNING OFF");
+                        break;
+                    case BluetoothAdapter.STATE_ON:
+                        System.out.println("onReceive: STATE ON");
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_ON:
+                        System.out.println("onReceive: STATE TURNING ON");
+                        break;
+                }
+
+            }
+        }
+    };
+    //Create a broadcast receiver for action_found #2
+    private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action != null && action.equals(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
+                switch (state) {
+                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
+                        System.out.println("mBroadcastReceiver2: Discovery Enabled.");
+                        break;
+                    case BluetoothAdapter.SCAN_MODE_NONE:
+                        System.out.println("mBroadCastReceiver2: Discoverability Disabled. Not able to receive connections.");
+                        break;
+                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE:
+                        System.out.println("mBroadCastReceiver2: Discovery Enabled. Able to receive communication");
+                        break;
+                    case BluetoothAdapter.STATE_CONNECTING:
+                        System.out.println("mBroadCastReceiver2: Connecting...");
+                        break;
+                    case BluetoothAdapter.STATE_CONNECTED:
+                        System.out.println("mBroadCastReceiver2: Connected");
+                        break;
+                }
+            }
+        }
+    };
+
+    private BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            if(action != null && action.equals(BluetoothDevice.ACTION_FOUND)){
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                mBTdevices.add(device);
+                if (device != null) {
+                    System.out.println("onReceive: " + device.getName() + ": " + device.getAddress());
+                }
+            }
+        }
+    };
+
+    private BroadcastReceiver mBroadcastReceiver4 = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (action != null && action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
+                BluetoothDevice mDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+                if (mDevice != null && mDevice.getBondState() == BluetoothDevice.BOND_BONDED) {
+                    System.out.println("BroadcastReceiver4: Bond bonded");
+                    mBTDevice = mDevice;
+                }
+                if (Objects.requireNonNull(mDevice).getBondState() == BluetoothDevice.BOND_BONDING) {
+                    System.out.println("BroadcastReceiver4: Bond bonding");
+                }
+                if (mDevice.getBondState() == BluetoothDevice.BOND_NONE) {
+                    System.out.println("BroadcastReceiver4: Bond none");
+                }
+            }
+        }
+    };
 
 
 }
