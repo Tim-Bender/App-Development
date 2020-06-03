@@ -174,8 +174,8 @@ public class selectpin extends AppCompatActivity {
         if (!myvehicle.getConnections().isEmpty()) {
             for (connection c : myvehicle.getConnections()) {
                 if (c.getDirection().contains(temp.toLowerCase())) {
-                    if (!myvehicle.getUniquePins().contains(c.getDirection().toLowerCase().trim())) {
-                        myvehicle.addUniquePin(c.getDirection().toLowerCase().trim());
+                    if (!myvehicle.getUniquePins().contains(c.getDirection())) {
+                        myvehicle.addUniquePin(c.getDirection().toLowerCase());
                         myvehicle.setPinCount(myvehicle.getPinCount() + 1);
                     }
                     connections.add(c);
@@ -197,47 +197,39 @@ public class selectpin extends AppCompatActivity {
             int counter = 0;
             if (!myvehicle.getConnections().isEmpty()) {
                 for (connection c : connections){
-                        final Button btn = new Button(this);
-                        if(nightMode) {
-                            LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1.5f);
-                            textParams.setMarginStart(10);
-                            textParams.setMarginEnd(10);
-                            btn.setLayoutParams(textParams);
-                            btn.setTextSize(14);
-                        }
-                        else{
-                           btn.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.MATCH_PARENT));
-                           btn.setTextSize(18);
+                    final Button btn = new Button(this);
+                    LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1.5f);
+                    textParams.setMarginStart(10);
+                    textParams.setMarginEnd(10);
+                    btn.setLayoutParams(textParams);
+                    btn.setTextSize(14);
 
-                        }
-
-                        if(nightMode) {
-                            btn.setTextColor(Color.WHITE);
-                            btn.setBackgroundResource(R.drawable.toolbargradient);
-                        }
-                        else {
-                            btn.setTextColor(Color.BLACK);
-                            btn.setBackgroundResource(android.R.drawable.btn_default);
-                        }
-                        btn.setGravity(Gravity.CENTER);
-                        btn.setTag(counter);
-                        btn.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                pinSelected((Integer) v.getTag());
-                            }
-                        });
-                        btn.setText("Pin" + c.getS4() + " Signal:  " + c.getName());
-                        layout.addView(btn);
-                        if(nightMode) {
-                            final Space space = new Space(this);
-                            space.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, .1f));
-                            layout.addView(space);
-                        }
-                        counter++;
-
+                    if(nightMode) {
+                        btn.setTextColor(Color.WHITE);
+                        btn.setBackgroundResource(R.drawable.nightmodebuttonselector);
                     }
+                    else {
+                        btn.setTextColor(Color.BLACK);
+                        btn.setBackgroundResource(R.drawable.daymodebuttonselector);
+                    }
+                    btn.setGravity(Gravity.CENTER);
+                    btn.setTag(counter);
+                    btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            pinSelected((Integer) v.getTag());
+                        }
+                    });
+                    btn.setText("Pin" + c.getS4() + " Signal:  " + c.getName());
+                    layout.addView(btn);
+                    final Space space = new Space(this);
+                    space.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, .1f));
+                    layout.addView(space);
+
+                    counter++;
+
                 }
+            }
             textView = findViewById(R.id.numberofpinstextfield);
             textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections().get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector");
 

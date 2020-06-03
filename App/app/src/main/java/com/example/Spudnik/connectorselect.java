@@ -201,11 +201,11 @@ public class connectorselect extends AppCompatActivity {
             EditText editText = findViewById(R.id.connectorinput);
             editText.setTextColor(Color.WHITE);
             ImageButton imageButton = findViewById(R.id.connectorselectbutton1);
-            imageButton.setBackgroundResource(R.drawable.toolbargradient);
+            imageButton.setBackgroundResource(R.drawable.nightmodebuttonselector);
             imageButton = findViewById(R.id.connectorselectbutton2);
-            imageButton.setBackgroundResource(R.drawable.toolbargradient);
+            imageButton.setBackgroundResource(R.drawable.nightmodebuttonselector);
             Button button = findViewById(R.id.connectorselectbutton3);
-            button.setBackgroundResource(R.drawable.toolbargradient);
+            button.setBackgroundResource(R.drawable.nightmodebuttonselector);
             button.setTextColor(Color.WHITE);
         } catch (Exception Ignored) {
         }
@@ -221,11 +221,11 @@ public class connectorselect extends AppCompatActivity {
             EditText editText = findViewById(R.id.connectorinput);
             editText.setTextColor(Color.BLACK);
             ImageButton imageButton = findViewById(R.id.connectorselectbutton1);
-            imageButton.setBackgroundResource(android.R.drawable.btn_default);
+            imageButton.setBackgroundResource(R.drawable.daymodebuttonselector);
             imageButton = findViewById(R.id.connectorselectbutton2);
-            imageButton.setBackgroundResource(android.R.drawable.btn_default);
+            imageButton.setBackgroundResource(R.drawable.daymodebuttonselector);
             Button button = findViewById(R.id.connectorselectbutton3);
-            button.setBackgroundResource(android.R.drawable.btn_default);
+            button.setBackgroundResource(R.drawable.daymodebuttonselector);
             button.setTextColor(Color.BLACK);
         } catch (Exception Ignored) {
         }

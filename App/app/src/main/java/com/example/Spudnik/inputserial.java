@@ -233,7 +233,7 @@ public class inputserial extends AppCompatActivity {
                     Switch myswitch = findViewById(R.id.helptoggle);
                     myswitch.setTextColor(Color.WHITE);
                     Button button = findViewById(R.id.gobutton);
-                    button.setBackgroundResource(R.drawable.toolbargradient);
+                    button.setBackgroundResource(R.drawable.nightmodebuttonselector);
                     button.setTextColor(Color.WHITE);
                 }catch(Exception ignored){}
             }
@@ -264,7 +264,7 @@ public class inputserial extends AppCompatActivity {
                     Switch myswitch = findViewById(R.id.helptoggle);
                     myswitch.setTextColor(Color.BLACK);
                     Button button = findViewById(R.id.gobutton);
-                    button.setBackgroundResource(android.R.drawable.btn_default);
+                    button.setBackgroundResource(R.drawable.daymodebuttonselector);
                     button.setTextColor(Color.BLACK);
                 }
                 catch(Exception Ignored){}

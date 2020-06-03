@@ -8,6 +8,7 @@ import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -63,7 +64,6 @@ public class settings extends AppCompatActivity {
      @Override
      public void onStart(){
         super.onStart();
-
      }
 
     public void reportBug(View view){
@@ -86,58 +86,64 @@ public class settings extends AppCompatActivity {
         }
     }
 
-    public void submitFeedback(View view){ try{
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int width = size.x;
-        int height = size.y;
+    public void submitFeedback(View view){
+        try{
+            Display display = getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            int width = size.x;
+            int height = size.y;
 
-        Intent emailIntent = new Intent(Intent.ACTION_SEND);
-        emailIntent.setType("message/rfc822");
-        //emailIntent.setData(Uri.parse("mailto:"));
-        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"timothy.bender@spudnik.com"});
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT,"Feedback Diagnostic Tool");
-        emailIntent.putExtra(Intent.EXTRA_TEXT, "Device: " + Build.DEVICE + " \nScreenSize:" + height +" x "+ width + "\nAndroid Version: " +
-                Build.VERSION.CODENAME + " " + Build.VERSION.RELEASE + "\n\nPlease describe the bug in detail:\n");
-        startActivity(Intent.createChooser(emailIntent,"Send mail..."));
-    } catch (Exception e) {
-        e.printStackTrace();
-    }}
+            Intent emailIntent = new Intent(Intent.ACTION_SEND);
+            emailIntent.setType("message/rfc822");
+            //emailIntent.setData(Uri.parse("mailto:"));
+            emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"timothy.bender@spudnik.com"});
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT,"Feedback Diagnostic Tool");
+            emailIntent.putExtra(Intent.EXTRA_TEXT, "Device: " + Build.DEVICE + " \nScreenSize:" + height +" x "+ width + "\nAndroid Version: " +
+                    Build.VERSION.CODENAME + " " + Build.VERSION.RELEASE + "\n\nPlease describe the bug in detail:\n");
+            startActivity(Intent.createChooser(emailIntent,"Send mail..."));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }}
 
     public void nightMode(){
-        LinearLayout layout = findViewById(R.id.settingsbackground);
-        layout.setBackgroundColor(Color.parseColor("#333333"));
-        TextView textView = findViewById(R.id.welcometosettingstextview);
-        textView.setTextColor(Color.WHITE);
-        Button button = findViewById(R.id.updatedatabasebutton);
-        button.setBackgroundResource(R.drawable.toolbargradient);
-        button.setTextColor(Color.WHITE);
-        button = findViewById(R.id.reportbugbutton);
-        button.setBackgroundResource(R.drawable.toolbargradient);
-        button.setTextColor(Color.WHITE);
-        button = findViewById(R.id.reportfeedback);
-        button.setBackgroundResource(R.drawable.toolbargradient);
-        button.setTextColor(Color.WHITE);
-        aSwitch.setTextColor(Color.WHITE);
+        try {
+            LinearLayout layout = findViewById(R.id.settingsbackground);
+            layout.setBackgroundColor(Color.parseColor("#333333"));
+            TextView textView = findViewById(R.id.welcometosettingstextview);
+            textView.setTextColor(Color.WHITE);
+            Button button = findViewById(R.id.updatedatabasebutton);
+            button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+            button.setTextColor(Color.WHITE);
+            button = findViewById(R.id.reportbugbutton);
+            button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+            button.setTextColor(Color.WHITE);
+            button = findViewById(R.id.reportfeedback);
+            button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+            button.setTextColor(Color.WHITE);
+            aSwitch.setTextColor(Color.WHITE);
+        } catch (Exception Ignored) {
+        }
 
     }
 
     public void dayMode(){
-        LinearLayout layout = findViewById(R.id.settingsbackground);
-        layout.setBackgroundColor(Color.WHITE);
-        TextView textView = findViewById(R.id.welcometosettingstextview);
-        textView.setTextColor(Color.BLACK);
-        Button button = findViewById(R.id.updatedatabasebutton);
-        button.setBackgroundResource(android.R.drawable.btn_default);
-        button.setTextColor(Color.BLACK);
-        button = findViewById(R.id.reportbugbutton);
-        button.setBackgroundResource(android.R.drawable.btn_default);
-        button.setTextColor(Color.BLACK);
-        button = findViewById(R.id.reportfeedback);
-        button.setBackgroundResource(android.R.drawable.btn_default);
-        button.setTextColor(Color.BLACK);
-        aSwitch.setTextColor(Color.BLACK);
+        try {
+            LinearLayout layout = findViewById(R.id.settingsbackground);
+            layout.setBackgroundColor(Color.WHITE);
+            TextView textView = findViewById(R.id.welcometosettingstextview);
+            textView.setTextColor(Color.BLACK);
+            Button button = findViewById(R.id.updatedatabasebutton);
+            button.setBackgroundResource(R.drawable.daymodebuttonselector);
+            button.setTextColor(Color.BLACK);
+            button = findViewById(R.id.reportbugbutton);
+            button.setBackgroundResource(R.drawable.daymodebuttonselector);
+            button.setTextColor(Color.BLACK);
+            button = findViewById(R.id.reportfeedback);
+            button.setBackgroundResource(R.drawable.daymodebuttonselector);
+            button.setTextColor(Color.BLACK);
+            aSwitch.setTextColor(Color.BLACK);
+        }catch(Exception Ignored){}
 
     }
 }
