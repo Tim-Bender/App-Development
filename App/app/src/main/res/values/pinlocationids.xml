@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <array name="pinlocationids">
+        <item type="id" name="pinlocationbutton1"/>
+        <item type="id" name="pinlocationbutton2"/>
+        <item type="id" name="pinlocationbutton3"/>
+        <item type="id" name="pinlocationbutton4"/>
+        <item type="id" name="pinlocationbutton5"/>
+        <item type="id" name="pinlocationbutton6"/>
+        <item type="id" name="pinlocationbutton7"/>
+        <item type="id" name="pinlocationbutton8"/>
+        <item type="id" name="pinlocationbutton9"/>
+        <item type="id" name="pinlocationbutton10"/>
+        <item type="id" name="pinlocationbutton11"/>
+        <item type="id" name="pinlocationbutton12"/>
+        <item type="id" name="pinlocationbutton13"/>
+        <item type="id" name="pinlocationbutton14"/>
+        <item type="id" name="pinlocationbutton15"/>
+        <item type="id" name="pinlocationbutton16"/>
+        <item type="id" name="pinlocationbutton17"/>
+        <item type="id" name="pinlocationbutton18"/>
+        <item type="id" name="pinlocationbutton19"/>
+        <item type="id" name="pinlocationbutton20"/>
+        <item type="id" name="pinlocationbutton21"/>
+        <item type="id" name="pinlocationbutton22"/>
+        <item type="id" name="pinlocationbutton23"/>
+        <item type="id" name="pinlocationbutton24"/>
+    </array>
+</resources>

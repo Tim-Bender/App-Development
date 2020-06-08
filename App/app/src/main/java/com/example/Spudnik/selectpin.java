@@ -149,6 +149,7 @@ public class selectpin extends AppCompatActivity {
                     if(preferences.getBoolean("nightmode",false)){
                         nightMode();
                     }
+                    buildConnections();
                 }
             });
             //masterBTStart();
@@ -172,7 +173,6 @@ public class selectpin extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             boolean bool = intent.getBooleanExtra("boolean",false);
             if(bool){
-                buildConnections();
                 updatevalues();
             }
         }
@@ -181,25 +181,26 @@ public class selectpin extends AppCompatActivity {
 
 
     public void buildConnections(){
-        String temp= myvehicle.getUniqueConnections().get(myvehicle.getLoc());
-        int counter = 0;
-        if (!myvehicle.getConnections().isEmpty()) {
-            for (connection c : myvehicle.getConnections()) {
-                if (c.getDirection().contains(temp.toLowerCase())) {
-                    if (!myvehicle.getUniquePins().contains(c.getDirection())) {
-                        myvehicle.addUniquePin(c.getDirection());
-                        myvehicle.setPinCount(myvehicle.getPinCount() + 1);
+        try {
+            String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc());
+            int counter = 0;
+            if (!myvehicle.getConnections().isEmpty() && connections.isEmpty()) {
+                for (connection c : myvehicle.getConnections()) {
+                    if (c.getDirection().contains(temp.toLowerCase())) {
+                        if (!myvehicle.getUniquePins().contains(c.getDirection())) {
+                            myvehicle.addUniquePin(c.getDirection());
+                            myvehicle.setPinCount(myvehicle.getPinCount() + 1);
+                        }
+                        if (counter > 0 && c.getS4().equals(connections.get(counter - 1).getS4())) {
+                            connections.get(counter - 1).setName(connections.get(counter - 1).getName() + " / " + c.getName());
+                        } else {
+                            connections.add(c);
+                            counter++;
+                        }
                     }
-                   if(counter > 0 && connections.get(counter).getS4().equals(connections.get(counter-1).getS4())){
-                      connections.get(counter-1).s
-                   }
-                   else{
-                       connections.add(c);
-                       counter ++;
-                   }
                 }
             }
-        }
+        }catch (Exception ignored){}
 
     }
     @SuppressLint("SetTextI18n")
@@ -213,7 +214,7 @@ public class selectpin extends AppCompatActivity {
             layout.removeAllViews();
             boolean nightMode = preferences.getBoolean("nightmode",false);
             int counter = 0;
-            if (!myvehicle.getConnections().isEmpty()) {
+            if (!connections.isEmpty()) {
                 for (connection c : connections){
                     final Button btn = new Button(this);
                     LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1.5f);
@@ -230,7 +231,9 @@ public class selectpin extends AppCompatActivity {
                         btn.setTextColor(Color.BLACK);
                         btn.setBackgroundResource(R.drawable.daymodebuttonselector);
                     }
-                    btn.setGravity(Gravity.CENTER);
+                    btn.setGravity(Gravity.START);
+                    btn.setGravity(Gravity.CENTER_VERTICAL);
+                    btn.setPadding(20,0,0,0);
                     btn.setTag(counter);
                     btn.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -238,12 +241,11 @@ public class selectpin extends AppCompatActivity {
                             pinSelected((Integer) v.getTag());
                         }
                     });
-                    btn.setText("Pin" + c.getS4() + " Signal:  " + c.getName());
+                    btn.setText("Pin" + c.getS4() +" " +  c.getName());
                     layout.addView(btn);
                     final Space space = new Space(this);
                     space.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, .1f));
                     layout.addView(space);
-
                     counter++;
 
                 }
@@ -382,8 +384,7 @@ public class selectpin extends AppCompatActivity {
             textView = findViewById(R.id.connectorid);
             textView.setBackgroundResource(R.drawable.nightmodeback);
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
     }
 
@@ -405,8 +406,7 @@ public class selectpin extends AppCompatActivity {
             linearLayout.setBackgroundResource(R.drawable.back);
             textView = findViewById(R.id.connectorid);
             textView.setBackgroundResource(R.drawable.back);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
         //updatevalues();
 

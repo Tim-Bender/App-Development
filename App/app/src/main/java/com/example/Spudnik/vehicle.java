@@ -178,8 +178,7 @@ public class vehicle implements Parcelable {
                         }
                     }
 
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException ignored) {
                 }
             }
         });
@@ -211,8 +210,7 @@ public class vehicle implements Parcelable {
                 }
             }
             return true;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
             return false;
         }
     }
@@ -229,8 +227,7 @@ public class vehicle implements Parcelable {
             } else {
                 return "Output";
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
             return "NULL";
         }
     }
@@ -262,8 +259,7 @@ public class vehicle implements Parcelable {
                         incomingMessageIntent.putExtra("boolean",true);
                         LocalBroadcastManager.getInstance(mcontext).sendBroadcast(incomingMessageIntent);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (Exception ignored) {
                 }
 
             }

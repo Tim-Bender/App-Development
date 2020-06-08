@@ -150,4 +150,6 @@ public class connection implements Parcelable,Comparable<connection> {
         return s4;
     }
 
+    public void setS4(String s){s4 = s;}
+
 }
