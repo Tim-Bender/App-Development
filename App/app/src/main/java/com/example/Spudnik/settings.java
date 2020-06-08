@@ -8,7 +8,9 @@ import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Display;
-import android.view.MotionEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -16,41 +18,38 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
 public class settings extends AppCompatActivity {
-    private Toolbar myToolBar;
     private Switch aSwitch;
     boolean nightmode = false;
-    private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        this.myToolBar = findViewById(R.id.toolbar);
+        Toolbar myToolBar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolBar);
         setTitle("Settings");
         myToolBar.setTitleTextColor(Color.WHITE);
         aSwitch = findViewById(R.id.settingsToggle);
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = sharedPreferences.edit();
         aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked && nightmode == false){
+                if(isChecked && !nightmode){
                     nightmode = true;
                     nightMode();
                     editor.putBoolean("nightmode",true);
-                    editor.commit();
-                    return;
+                    editor.apply();
                 }
-                if(!isChecked && nightmode == true){
+                if(!isChecked && nightmode){
                     nightmode = false;
                     dayMode();
                     editor.putBoolean("nightmode",false);
                     editor.commit();
-                    return;
                 }
             }
         });
@@ -106,6 +105,8 @@ public class settings extends AppCompatActivity {
             e.printStackTrace();
         }}
 
+
+
     public void nightMode(){
         try {
             LinearLayout layout = findViewById(R.id.settingsbackground);
@@ -121,9 +122,11 @@ public class settings extends AppCompatActivity {
             button = findViewById(R.id.reportfeedback);
             button.setBackgroundResource(R.drawable.nightmodebuttonselector);
             button.setTextColor(Color.WHITE);
+            button = findViewById(R.id.settingsbluetoothtestbutton);
+            button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+            button.setTextColor(Color.WHITE);
             aSwitch.setTextColor(Color.WHITE);
-        } catch (Exception Ignored) {
-        }
+        } catch (Exception ignored) {}
 
     }
 
@@ -142,8 +145,18 @@ public class settings extends AppCompatActivity {
             button = findViewById(R.id.reportfeedback);
             button.setBackgroundResource(R.drawable.daymodebuttonselector);
             button.setTextColor(Color.BLACK);
+            button = findViewById(R.id.settingsbluetoothtestbutton);
+            button.setBackgroundResource(R.drawable.daymodebuttonselector);
+            button.setTextColor(Color.BLACK);
             aSwitch.setTextColor(Color.BLACK);
-        }catch(Exception Ignored){}
+        }catch(Exception ignored){}
 
+    }
+
+    public void testBluetooth(View view){
+        try{
+            Intent i = new Intent(getBaseContext(), BluetoothTestActivity.class);
+            startActivity(i);
+        }catch(Exception ignored){}
     }
 }

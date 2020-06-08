@@ -11,6 +11,9 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -94,6 +97,21 @@ public class Pindiagnostic extends AppCompatActivity {
             Toast.makeText(this, "ArrayList Parse Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        if(item.getItemId() == R.id.action_settings){
+            Intent i = new Intent(getBaseContext(),settings.class);
+            startActivity(i);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.toolbarbuttons,menu);
+        return true;
     }
 
     public void nextPin(View view){

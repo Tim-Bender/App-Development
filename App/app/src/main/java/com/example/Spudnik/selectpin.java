@@ -19,8 +19,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 
-import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -29,8 +31,8 @@ import android.widget.Space;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
@@ -41,7 +43,6 @@ public class selectpin extends AppCompatActivity {
     private ArrayList<connection> connections = new ArrayList<>();
     private  BluetoothAdapter mBluetoothAdapter;
     private ArrayList<BluetoothDevice> mBTdevices = new ArrayList<>();
-    private BluetoothConnectionService mBluetoothConnection;
     private BluetoothDevice mBTDevice;
     private final String TAG = "SelectPin";
     private static final UUID uuid = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
@@ -64,6 +65,7 @@ public class selectpin extends AppCompatActivity {
         } catch (Exception ignored) {}
 
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,8 +113,30 @@ public class selectpin extends AppCompatActivity {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        if(item.getItemId() == R.id.action_settings){
+            Intent i = new Intent(getBaseContext(),settings.class);
+            startActivity(i);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.toolbarbuttons,menu);
+        return true;
+    }
+
+    @Override
     public void onResume(){
         super.onResume();
+        if(preferences.getBoolean("nightmode",false)){
+            nightMode();
+        }
+        else{
+            dayMode();
+        }
     }
     @Override
     public void onStart(){
@@ -129,23 +153,10 @@ public class selectpin extends AppCompatActivity {
             });
             //masterBTStart();
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
     }
 
-    /*@Override
-    public void onResume(){
-        super.onResume();
-        if(preferences.getBoolean("nightmode",false)){
-            nightMode();
-            return;
-        }
-        if(!preferences.getBoolean("nightmode",false)){
-            dayMode();
-        }
-    }
-     */
     BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -171,14 +182,21 @@ public class selectpin extends AppCompatActivity {
 
     public void buildConnections(){
         String temp= myvehicle.getUniqueConnections().get(myvehicle.getLoc());
+        int counter = 0;
         if (!myvehicle.getConnections().isEmpty()) {
             for (connection c : myvehicle.getConnections()) {
                 if (c.getDirection().contains(temp.toLowerCase())) {
                     if (!myvehicle.getUniquePins().contains(c.getDirection())) {
-                        myvehicle.addUniquePin(c.getDirection().toLowerCase());
+                        myvehicle.addUniquePin(c.getDirection());
                         myvehicle.setPinCount(myvehicle.getPinCount() + 1);
                     }
-                    connections.add(c);
+                   if(counter > 0 && connections.get(counter).getS4().equals(connections.get(counter-1).getS4())){
+                      connections.get(counter-1).s
+                   }
+                   else{
+                       connections.add(c);
+                       counter ++;
+                   }
                 }
             }
         }
@@ -251,7 +269,7 @@ public class selectpin extends AppCompatActivity {
 
     }
 
-    public void masterBTStart(){
+    /*public void masterBTStart(){
         enableBluetooth();
         //enableDiscoverable();
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
@@ -261,10 +279,10 @@ public class selectpin extends AppCompatActivity {
         createBond();
 
     }
-    public void startBTConnection(BluetoothDevice device, UUID uuid){
+    /*public void startBTConnection(BluetoothDevice device, UUID uuid){
         Log.d(TAG,"startBtConnection: Initializing RFZOM bluetooth connection");
         mBluetoothConnection.startclient(this.mBTDevice, selectpin.uuid);
-    }
+    }*/
 
 
     public void deviceDiscover(){
@@ -318,7 +336,7 @@ public class selectpin extends AppCompatActivity {
         }
     }
 
-    public void createBond(){
+    /*public void createBond(){
         mBluetoothAdapter.cancelDiscovery();
         for(BluetoothDevice device : this.mBTdevices){
             Log.d(TAG,device.getName() + " " + device.getAddress());
@@ -338,47 +356,35 @@ public class selectpin extends AppCompatActivity {
             }
         }
 
-    }
-
+    }*/
+    /*
     public void send(String tosend){
         byte[] bytes = tosend.getBytes(Charset.defaultCharset());
         mBluetoothConnection.write(bytes);
-    }
+    }*/
 
     public void nightMode(){
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ConstraintLayout constraintLayout = findViewById(R.id.selectpinconstraintlayout);
-                            constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
-                            TextView textView = findViewById(R.id.connectorid);
-                            textView.setTextColor(Color.WHITE);
-                            textView = findViewById(R.id.numberofpinstextfield);
-                            textView.setTextColor(Color.WHITE);
-                            textView = findViewById(R.id.selectpintextview3);
-                            textView.setTextColor(Color.WHITE);
-                            textView = findViewById(R.id.selectpinvoltage);
-                            textView.setTextColor(Color.WHITE);
-                            textView = findViewById(R.id.selectpintextview5);
-                            textView.setTextColor(Color.WHITE);
-                            LinearLayout linearLayout = findViewById(R.id.selectpinhorizontallayout1);
-                            linearLayout.setBackgroundResource(R.drawable.nightmodeback);
-                            textView = findViewById(R.id.connectorid);
-                            textView.setBackgroundResource(R.drawable.nightmodeback);
+        try {
+            ConstraintLayout constraintLayout = findViewById(R.id.selectpinconstraintlayout);
+            constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
+            TextView textView = findViewById(R.id.connectorid);
+            textView.setTextColor(Color.WHITE);
+            textView = findViewById(R.id.numberofpinstextfield);
+            textView.setTextColor(Color.WHITE);
+            textView = findViewById(R.id.selectpintextview3);
+            textView.setTextColor(Color.WHITE);
+            textView = findViewById(R.id.selectpinvoltage);
+            textView.setTextColor(Color.WHITE);
+            textView = findViewById(R.id.selectpintextview5);
+            textView.setTextColor(Color.WHITE);
+            LinearLayout linearLayout = findViewById(R.id.selectpinhorizontallayout1);
+            linearLayout.setBackgroundResource(R.drawable.nightmodeback);
+            textView = findViewById(R.id.connectorid);
+            textView.setBackgroundResource(R.drawable.nightmodeback);
 
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                });
-            }
-
-        });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void dayMode(){

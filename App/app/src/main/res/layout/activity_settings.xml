@@ -75,7 +75,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="1.5"
+            android:layout_weight="1.125"
             android:orientation="horizontal">
 
             <Space
@@ -99,12 +99,12 @@
         <Space
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight=".33" />
+            android:layout_weight=".22" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="1.5"
+            android:layout_weight="1.125"
             android:orientation="horizontal">
 
             <Space
@@ -130,12 +130,12 @@
         <Space
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight=".33" />
+            android:layout_weight=".22" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="1.5"
+            android:layout_weight="1.125"
             android:orientation="horizontal">
 
             <Space
@@ -150,6 +150,37 @@
                 android:layout_weight=".4"
                 android:onClick="submitFeedback"
                 android:text="Report Feedback" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5" />
+
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight=".22" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="1.125"
+            android:orientation="horizontal">
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".05" />
+
+            <Button
+                android:id="@+id/settingsbluetoothtestbutton"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight=".4"
+                android:onClick="testBluetooth"
+                android:text="Bluetooth Test" />
 
             <Space
                 android:layout_width="0dp"

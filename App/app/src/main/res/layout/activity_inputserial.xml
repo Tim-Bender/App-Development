@@ -70,7 +70,7 @@
                 android:layout_height="fill_parent"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-                android:buttonTint="#AF4C4C"
+                android:buttonTint="#FF0000"
                 android:checked="false"
                 android:text="Remember" />
         </LinearLayout>
@@ -130,6 +130,7 @@
             android:layout_height="0px"
             android:layout_marginStart="20dp"
             android:layout_weight="1"
+            android:buttonTint="#FF0000"
             android:checked="false"
             android:text="Where's My Serial Number?"
             android:textSize="16sp" />

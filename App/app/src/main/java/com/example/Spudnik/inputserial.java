@@ -11,6 +11,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -210,71 +213,70 @@ public class inputserial extends AppCompatActivity {
         });
 
     }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        if(item.getItemId() == R.id.action_settings){
+            Intent i = new Intent(getBaseContext(),settings.class);
+            startActivity(i);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.toolbarbuttons,menu);
+        return true;
+    }
 
     public void nightMode(){
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
-                    constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
-                    TextView view = findViewById(R.id.inputserialtextview1);
-                    view.setTextColor(Color.WHITE);
-                    view = findViewById(R.id.inputserialtextview2);
-                    view.setTextColor(Color.WHITE);
-                    view = findViewById(R.id.helptextview);
-                    view.setTextColor(Color.WHITE);
-                    EditText editText = findViewById(R.id.dealeridtextview);
-                    editText.setTextColor(Color.WHITE);
-                    editText = findViewById(R.id.inputid);
-                    editText.setTextColor(Color.WHITE);
-                    CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
-                    checkBox.setTextColor(Color.WHITE);
-                    Switch myswitch = findViewById(R.id.helptoggle);
-                    myswitch.setTextColor(Color.WHITE);
-                    Button button = findViewById(R.id.gobutton);
-                    button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                    button.setTextColor(Color.WHITE);
-                }catch(Exception ignored){}
-            }
-        });
-
-
+        try {
+            ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
+            constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
+            TextView view = findViewById(R.id.inputserialtextview1);
+            view.setTextColor(Color.WHITE);
+            view = findViewById(R.id.inputserialtextview2);
+            view.setTextColor(Color.WHITE);
+            view = findViewById(R.id.helptextview);
+            view.setTextColor(Color.WHITE);
+            EditText editText = findViewById(R.id.dealeridtextview);
+            editText.setTextColor(Color.WHITE);
+            editText = findViewById(R.id.inputid);
+            editText.setTextColor(Color.WHITE);
+            CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
+            checkBox.setTextColor(Color.WHITE);
+            Switch myswitch = findViewById(R.id.helptoggle);
+            myswitch.setTextColor(Color.WHITE);
+            Button button = findViewById(R.id.gobutton);
+            button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+            button.setTextColor(Color.WHITE);
+        }catch(Exception ignored){}
     }
+
 
     public void dayMode(){
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
-                    constraintLayout.setBackgroundColor(Color.WHITE);
-                    TextView view = findViewById(R.id.inputserialtextview1);
-                    view.setTextColor(Color.BLACK);
-                    view = findViewById(R.id.inputserialtextview2);
-                    view.setTextColor(Color.BLACK);
-                    view = findViewById(R.id.helptextview);
-                    view.setTextColor(Color.BLACK);
-                    EditText editText = findViewById(R.id.dealeridtextview);
-                    editText.setTextColor(Color.BLACK);
-                    editText = findViewById(R.id.inputid);
-                    editText.setTextColor(Color.BLACK);
-                    CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
-                    checkBox.setTextColor(Color.BLACK);
-                    Switch myswitch = findViewById(R.id.helptoggle);
-                    myswitch.setTextColor(Color.BLACK);
-                    Button button = findViewById(R.id.gobutton);
-                    button.setBackgroundResource(R.drawable.daymodebuttonselector);
-                    button.setTextColor(Color.BLACK);
-                }
-                catch(Exception Ignored){}
-            }
-        });
-
-
+        try {
+            ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
+            constraintLayout.setBackgroundColor(Color.WHITE);
+            TextView view = findViewById(R.id.inputserialtextview1);
+            view.setTextColor(Color.BLACK);
+            view = findViewById(R.id.inputserialtextview2);
+            view.setTextColor(Color.BLACK);
+            view = findViewById(R.id.helptextview);
+            view.setTextColor(Color.BLACK);
+            EditText editText = findViewById(R.id.dealeridtextview);
+            editText.setTextColor(Color.BLACK);
+            editText = findViewById(R.id.inputid);
+            editText.setTextColor(Color.BLACK);
+            CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
+            checkBox.setTextColor(Color.BLACK);
+            Switch myswitch = findViewById(R.id.helptoggle);
+            myswitch.setTextColor(Color.BLACK);
+            Button button = findViewById(R.id.gobutton);
+            button.setBackgroundResource(R.drawable.daymodebuttonselector);
+            button.setTextColor(Color.BLACK);
+        }
+        catch(Exception Ignored){}
     }
-
-
-
 
 }

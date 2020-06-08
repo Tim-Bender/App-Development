@@ -12,9 +12,16 @@ import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+
 import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
@@ -41,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
             this.progressBar = findViewById(R.id.loadingbar);
             this.progressBar.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
             this.textView = findViewById(R.id.loadingText);
+            ImageView image = findViewById(R.id.gifloadingscreen);
+            Glide.with(this).load(R.drawable.heartbeatgiftransparent).into(image);
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -71,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
     @Override
     protected void onStart() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
