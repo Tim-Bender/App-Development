@@ -18,7 +18,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
-
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,6 +33,7 @@ import android.widget.Toast;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -49,6 +49,7 @@ public class selectpin extends AppCompatActivity {
     private TextView incomingMessage;
     private StringBuilder messages;
     private SharedPreferences preferences;
+    private int lastsorted = vehicle.SORT_BY_S4;
     @SuppressLint("SetTextI18n")
 
 
@@ -88,24 +89,24 @@ public class selectpin extends AppCompatActivity {
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             this.textView = findViewById(R.id.connectorid);
             Switch toggle = findViewById(R.id.sortbytoggle);
-            toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            /*toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    /*if(isChecked){
-                        if(myvehicle.getLastSorted() == vehicle.SORT_BY_S4) {
-                            myvehicle.sortConnections(vehicle.SORT_BY_NAME,getApplicationContext());
-                            myvehicle.setLastSorted(vehicle.SORT_BY_NAME);
+                    if(isChecked){
+                    if(lastsorted == vehicle.SORT_BY_NAME) {
+                            sortConnections(vehicle.SORT_BY_NAME);
+                            lastsorted = vehicle.SORT_BY_NAME;
                         }
                     }
                     else{
-                        if(myvehicle.getLastSorted() == vehicle.SORT_BY_NAME){
-                            myvehicle.sortConnections(vehicle.SORT_BY_S4,getApplicationContext());
-                            myvehicle.setLastSorted(vehicle.SORT_BY_S4);
+                        if(lastsorted == vehicle.SORT_BY_S4){
+                            sortConnections(vehicle.SORT_BY_S4);
+                            lastsorted = vehicle.SORT_BY_NAME;
                         }
 
-                    }*/
+                    }
                 }
-            });
+            });*/
         } catch (Resources.NotFoundException e) {
             e.printStackTrace();
         }
@@ -201,8 +202,10 @@ public class selectpin extends AppCompatActivity {
                 }
             }
         }catch (Exception ignored){}
-
     }
+
+
+
     @SuppressLint("SetTextI18n")
     public void updatevalues(){
         try{

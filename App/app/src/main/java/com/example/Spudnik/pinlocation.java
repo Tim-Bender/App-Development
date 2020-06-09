@@ -21,6 +21,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class pinlocation extends AppCompatActivity {
 
@@ -48,10 +49,10 @@ public class pinlocation extends AppCompatActivity {
 
         try {
             myvehicle = getIntent().getParcelableExtra("myvehicle");
-            myvehicle.setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
+            Objects.requireNonNull(myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
             myvehicle.sortConnections(vehicle.SORT_BY_S4,this);
             myConnection = getIntent().getParcelableExtra("myConnection");
-            loc = Integer.parseInt(myConnection.getS4());
+            loc = Integer.parseInt(Objects.requireNonNull(myConnection).getS4());
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             tableLayout = findViewById(R.id.pinlocationtablelayout);
         } catch (Exception e) {
@@ -191,6 +192,11 @@ public class pinlocation extends AppCompatActivity {
         TextView textView;
         Space newspace;
         int[] ids = getResources().getIntArray(R.array.pinlocationids);
+        int pincount = myvehicle.getMap(myConnection.getDirection());
+        boolean orientation = orientations.get(myConnection.getDirection());
+        boolean nightmode = preferences.getBoolean("nightmode",false);
+        //if vertically orientated
+
 
     }
 

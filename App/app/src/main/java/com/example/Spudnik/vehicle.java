@@ -150,8 +150,7 @@ public class vehicle implements Parcelable {
                         }
                     }
 
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (Exception ignored) {
                 }
             }
         });
@@ -171,7 +170,7 @@ public class vehicle implements Parcelable {
                     String line;
                     String[] holder;
                     while((line = reader.readLine()) != null) {
-                        line = line.toLowerCase().trim();
+                        line = line.toLowerCase();
                         holder = line.split(",");
                         if (!vehicleIds.contains(holder[0])) {
                             vehicleIds.add(holder[0]);

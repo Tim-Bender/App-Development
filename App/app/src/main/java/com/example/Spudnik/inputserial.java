@@ -95,14 +95,20 @@ public class inputserial extends AppCompatActivity {
                 return false;
             }
         });
-
+            if(!preferences.getString("dealerid", "").equals("")){
+                dealerText.setText(preferences.getString("dealerid",""));
+                checkBox.setChecked(true);
+            }
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                  if(isChecked){
                      editor.putString("dealerid", dealerText.getText().toString().trim());
-                     editor.commit();
-
+                     editor.apply();
+                 }
+                 else{
+                     editor.putString("dealerid","");
+                     editor.apply();
                  }
                 }
             });
@@ -132,7 +138,6 @@ public class inputserial extends AppCompatActivity {
             });
 
         } catch (Exception e) {
-            Toast.makeText(this, "Unidentified Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }
@@ -178,7 +183,7 @@ public class inputserial extends AppCompatActivity {
                 }
                 if (!myvehicle.getConnections().isEmpty() && this.myvehicle.checkDealer(this.dealerText.getText().toString().toLowerCase().trim())) {
                     if (checkBox.isChecked()) {
-                        editor.putString("dealerid", dealerText.getText().toString().trim());
+                        editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());
                     }
                     Intent i = new Intent(getBaseContext(), connectorselect.class);
                     i.putExtra("myvehicle", myvehicle);
@@ -191,7 +196,6 @@ public class inputserial extends AppCompatActivity {
                 Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
-            Toast.makeText(this, "Resource Not Found", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }

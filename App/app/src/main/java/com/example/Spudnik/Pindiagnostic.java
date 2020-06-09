@@ -170,13 +170,13 @@ public class Pindiagnostic extends AppCompatActivity {
         textView = findViewById(R.id.voltage);
         textView.setTextColor(Color.WHITE);
         Button button = findViewById(R.id.pindiagnosticbutton1);
-        button.setBackgroundResource(R.drawable.toolbargradient);
+        button.setBackgroundResource(R.drawable.nightmodebuttonselector);
         button.setTextColor(Color.WHITE);
         button = findViewById(R.id.nextpin);
-        button.setBackgroundResource(R.drawable.toolbargradient);
+        button.setBackgroundResource(R.drawable.nightmodebuttonselector);
         button.setTextColor(Color.WHITE);
         button = findViewById(R.id.prevpin);
-        button.setBackgroundResource(R.drawable.toolbargradient);
+        button.setBackgroundResource(R.drawable.nightmodebuttonselector);
         button.setTextColor(Color.WHITE);
     }
 
