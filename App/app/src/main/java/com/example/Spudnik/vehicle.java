@@ -41,17 +41,15 @@ public class vehicle implements Parcelable {
     private int loc = 0,pinCount=0,lastSorted = SORT_BY_S4;
     private InputStream is;
     static final int SORT_BY_S4 = 1,SORT_BY_NAME = 2;
-    private  Map<String,Integer> pinnumbers = new HashMap<>();
+    private Map<String,Integer> pinnumbers = new HashMap<>();
 
     vehicle(String id){
         this.vehicleId = id;
         setPinnumbers();
-
     }
 
     vehicle(){
         setPinnumbers();
-
     }
 
 
@@ -227,7 +225,7 @@ public class vehicle implements Parcelable {
                 return "Output";
             }
         } catch (Exception ignored) {
-            return "NULL";
+            return null;
         }
     }
 
@@ -270,8 +268,9 @@ public class vehicle implements Parcelable {
      * The rest of the methods here are support methods
      * Primarily get set and add methods.
      */
-    int getMap(String direction){
-        return this.pinnumbers.get(direction);
+    int getMap(String direction)throws NullPointerException{
+        return pinnumbers.get(direction);
+
     }
 
     void setVehicleId(String vehicleId) {

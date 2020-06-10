@@ -4,20 +4,28 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
+
+import android.accessibilityservice.AccessibilityService;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,9 +40,9 @@ public class pinlocation extends AppCompatActivity {
     private TextView textView;
     private Toolbar toolbar;
     private SharedPreferences preferences;
-    private Map<String,Boolean> orientations = new HashMap<>();
-    private TableLayout tableLayout;
-
+    private Map<String,Integer> orientations = new HashMap<>();
+    private static final int VERTICAL = 1, HORIZONTAL = 2;
+    private final String TAG = this.getClass().getSimpleName();
 
 
     @Override
@@ -54,7 +62,8 @@ public class pinlocation extends AppCompatActivity {
             myConnection = getIntent().getParcelableExtra("myConnection");
             loc = Integer.parseInt(Objects.requireNonNull(myConnection).getS4());
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            tableLayout = findViewById(R.id.pinlocationtablelayout);
+
+            buildLayout();
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -68,6 +77,7 @@ public class pinlocation extends AppCompatActivity {
         if(preferences.getBoolean("nightmode",false)){
             nightMode();
         }
+        buildLayout();
         updateValues();
 
     }
@@ -91,9 +101,89 @@ public class pinlocation extends AppCompatActivity {
             this.textView.setText(s1 + temp.substring(1));
             this.textView = findViewById(R.id.pinlocationconnectorinformation);
             this.textView.setText(this.myvehicle.getMap(this.myvehicle.getUniqueConnections().get(this.myvehicle.getLoc())) + "p " + this.myvehicle.inout() + " Connector");
-            buildTableLayout();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+    }
+
+    private void buildLayout(){
+        int pinnumber = myvehicle.getMap(myConnection.getDirection());
+        int orientation = orientations.get(myConnection.getDirection());
+
+        Space topspace = findViewById(R.id.topspacepinlocation);
+        Space bottomspace = findViewById(R.id.bottomspacepinlocation);
+        Space leftspace = findViewById(R.id.leftspacepinlocation);
+        Space rightspace = findViewById(R.id.rightspacepinlocation);
+
+        LinearLayout outsidelayout = findViewById(R.id.outsidelayoutpinlocation);
+        LinearLayout innerlayout1 = findViewById(R.id.innerlayout1);
+        LinearLayout innerlayout2 = findViewById(R.id.innerlayout2);
+
+        TextView textView;
+        Log.d(TAG,"Orientation:" + orientation);
+        if(orientation == VERTICAL){
+            topspace.setVisibility(View.GONE);
+            topspace.setLayoutParams(new LinearLayout.LayoutParams(0,0));
+            bottomspace.setVisibility(View.GONE);
+            bottomspace.setLayoutParams(new LinearLayout.LayoutParams(0,0));
+            rightspace.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,4));
+            leftspace.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,4));
+            outsidelayout.setOrientation(LinearLayout.HORIZONTAL);
+            innerlayout1.setOrientation(LinearLayout.VERTICAL);
+            innerlayout1.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,1));
+
+            innerlayout2.setOrientation(LinearLayout.VERTICAL);
+            innerlayout2.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,1));
+
+            outsidelayout.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,2));
+            if(pinnumber == 1){
+                for(int i = 1; i < 3; i ++){
+                    innerlayout2.setVisibility(View.GONE);
+                    textView = new TextView(this);
+                    textView.setBackgroundResource(R.drawable.back);
+                    textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0,1));
+                    textView.setTextSize(14);
+                    if(i == 1) {
+                        textView.setText(Integer.toString(i));
+                    }
+                    else{
+                        textView.setText("p");
+                    }
+                    textView.setGravity(Gravity.CENTER);
+                    if(i == loc){
+                        textView.setBackgroundResource(R.drawable.nightmodebuttonpressed);
+                    }
+                }
+            }
+            else{
+               for(int i = 1; i <= pinnumber/2; i++){
+                   textView = new TextView(this);
+                   textView.setBackgroundResource(R.drawable.back);
+                   textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0,1));
+                   textView.setTextSize(14);
+                   textView.setText(Integer.toString(i));
+                   textView.setGravity(Gravity.CENTER);
+                   if(i == loc){
+                       textView.setBackgroundResource(R.drawable.nightmodebuttonpressed);
+                   }
+                   innerlayout2.addView(textView);
+               }
+                for(int i = pinnumber/2+1; i <= pinnumber; i++){
+                    textView = new TextView(this);
+                    textView.setBackgroundResource(R.drawable.back);
+                    textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0,1));
+                    textView.setTextSize(14);
+                    textView.setText(Integer.toString(i));
+                    textView.setGravity(Gravity.CENTER);
+                    if(i == loc){
+                        textView.setBackgroundResource(R.drawable.nightmodebuttonpressed);
+                    }
+                    innerlayout1.addView(textView);
+                }
+            }
+
+
         }
 
     }
@@ -187,39 +277,27 @@ public class pinlocation extends AppCompatActivity {
 
     }
 
-    public void buildTableLayout(){
-        TableRow row;
-        TextView textView;
-        Space newspace;
-        int[] ids = getResources().getIntArray(R.array.pinlocationids);
-        int pincount = myvehicle.getMap(myConnection.getDirection());
-        boolean orientation = orientations.get(myConnection.getDirection());
-        boolean nightmode = preferences.getBoolean("nightmode",false);
-        //if vertically orientated
-
-
-    }
 
     public void fillHashMap(){
         //vertical orientation = true
         //horizontal orientation = false
-        orientations.put("out1",true);
-        orientations.put("out2",true);
-        orientations.put("out3",true);
-        orientations.put("out4",true);
-        orientations.put("out5",true);
-        orientations.put("out6",true);
-        orientations.put("out7",true);
-        orientations.put("out8",true);
-        orientations.put("out9",true);
+        orientations.put("out1",1);
+        orientations.put("out2",1);
+        orientations.put("out3",1);
+        orientations.put("out4",1);
+        orientations.put("out5",1);
+        orientations.put("out6",1);
+        orientations.put("out7",1);
+        orientations.put("out8",1);
+        orientations.put("out9",1);
 
-        orientations.put("in1",true);
-        orientations.put("in2",true);
+        orientations.put("in1",1);
+        orientations.put("in2",1);
 
-        orientations.put("in3",false);
-        orientations.put("in4",false);
+        orientations.put("in3",2);
+        orientations.put("in4",2);
 
-        orientations.put("exp11out",true);
-        orientations.put("exp11in",false);
+        orientations.put("exp11out",1);
+        orientations.put("exp11in",2);
     }
 }

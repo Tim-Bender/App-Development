@@ -1,6 +1,5 @@
 package com.example.Spudnik;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -41,15 +40,15 @@ public class selectpin extends AppCompatActivity {
     private vehicle myvehicle;
     private TextView  textView;
     private ArrayList<connection> connections = new ArrayList<>();
-    private  BluetoothAdapter mBluetoothAdapter;
-    private ArrayList<BluetoothDevice> mBTdevices = new ArrayList<>();
-    private BluetoothDevice mBTDevice;
-    private final String TAG = "SelectPin";
-    private static final UUID uuid = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
+    //private  BluetoothAdapter mBluetoothAdapter;
+    //private ArrayList<BluetoothDevice> mBTdevices = new ArrayList<>();
+    //private BluetoothDevice mBTDevice;
+    //private final String TAG = "SelectPin";
+    //private static final UUID uuid = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
     private TextView incomingMessage;
     private StringBuilder messages;
     private SharedPreferences preferences;
-    private int lastsorted = vehicle.SORT_BY_S4;
+    //private int lastsorted = vehicle.SORT_BY_S4;
     @SuppressLint("SetTextI18n")
 
 
@@ -59,8 +58,8 @@ public class selectpin extends AppCompatActivity {
         try {
             unregisterReceiver(mBroadcastReceiver1);
             unregisterReceiver(mBroadcastReceiver2);
-            unregisterReceiver(mBroadcastReceiver3);
-            unregisterReceiver(mBroadcastReceiver4);
+            //unregisterReceiver(mBroadcastReceiver3);
+            //unregisterReceiver(mBroadcastReceiver4);
             unregisterReceiver(mReceiver);
             unregisterReceiver(mReceiver2);
         } catch (Exception ignored) {}
@@ -79,7 +78,7 @@ public class selectpin extends AppCompatActivity {
             toolbar.setTitleTextColor(Color.WHITE);
             messages = new StringBuilder();
             incomingMessage = findViewById(R.id.selectpinvoltage);
-            mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            //mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver,new IntentFilter("incomingMessage"));
             LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver2,new IntentFilter("incomingboolean"));
             InputStream is = getResources().openRawResource(R.raw.parsedtest);
@@ -88,7 +87,7 @@ public class selectpin extends AppCompatActivity {
             this.myvehicle.setIs(is);
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             this.textView = findViewById(R.id.connectorid);
-            Switch toggle = findViewById(R.id.sortbytoggle);
+            //Switch toggle = findViewById(R.id.sortbytoggle);
             /*toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -150,7 +149,9 @@ public class selectpin extends AppCompatActivity {
                     if(preferences.getBoolean("nightmode",false)){
                         nightMode();
                     }
-                    buildConnections();
+                    if(connections.isEmpty()) {
+                        buildConnections();
+                    }
                 }
             });
             //masterBTStart();
@@ -183,20 +184,22 @@ public class selectpin extends AppCompatActivity {
 
     public void buildConnections(){
         try {
-            String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc());
-            int counter = 0;
-            if (!myvehicle.getConnections().isEmpty() && connections.isEmpty()) {
-                for (connection c : myvehicle.getConnections()) {
-                    if (c.getDirection().contains(temp.toLowerCase())) {
-                        if (!myvehicle.getUniquePins().contains(c.getDirection())) {
-                            myvehicle.addUniquePin(c.getDirection());
-                            myvehicle.setPinCount(myvehicle.getPinCount() + 1);
-                        }
-                        if (counter > 0 && c.getS4().equals(connections.get(counter - 1).getS4())) {
-                            connections.get(counter - 1).setName(connections.get(counter - 1).getName() + " / " + c.getName());
-                        } else {
-                            connections.add(c);
-                            counter++;
+            if(connections.isEmpty()) {
+                String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc());
+                int counter = 0;
+                if (!myvehicle.getConnections().isEmpty() && connections.isEmpty()) {
+                    for (connection c : myvehicle.getConnections()) {
+                        if (c.getDirection().contains(temp.toLowerCase())) {
+                            if (!myvehicle.getUniquePins().contains(c.getDirection())) {
+                                myvehicle.addUniquePin(c.getDirection());
+                                myvehicle.setPinCount(myvehicle.getPinCount() + 1);
+                            }
+                            if (counter > 0 && c.getS4().equals(connections.get(counter - 1).getS4())) {
+                                connections.get(counter - 1).setName(connections.get(counter - 1).getName() + " / " + c.getName());
+                            } else {
+                                connections.add(c);
+                                counter++;
+                            }
                         }
                     }
                 }
@@ -287,7 +290,7 @@ public class selectpin extends AppCompatActivity {
     /*public void startBTConnection(BluetoothDevice device, UUID uuid){
         Log.d(TAG,"startBtConnection: Initializing RFZOM bluetooth connection");
         mBluetoothConnection.startclient(this.mBTDevice, selectpin.uuid);
-    }*/
+    }
 
 
     public void deviceDiscover(){
@@ -336,12 +339,12 @@ public class selectpin extends AppCompatActivity {
             Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 60);
             startActivity(discoverableIntent);
-            IntentFilter intentFilter = new IntentFilter(mBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
+            IntentFilter intentFilter = new IntentFilter(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
             registerReceiver(mBroadcastReceiver2, intentFilter);
         }
     }
 
-    /*public void createBond(){
+    public void createBond(){
         mBluetoothAdapter.cancelDiscovery();
         for(BluetoothDevice device : this.mBTdevices){
             Log.d(TAG,device.getName() + " " + device.getAddress());
@@ -361,8 +364,8 @@ public class selectpin extends AppCompatActivity {
             }
         }
 
-    }*/
-    /*
+    }
+
     public void send(String tosend){
         byte[] bytes = tosend.getBytes(Charset.defaultCharset());
         mBluetoothConnection.write(bytes);
@@ -468,7 +471,7 @@ public class selectpin extends AppCompatActivity {
         }
     };
 
-    private BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
+    /*private BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
@@ -503,6 +506,6 @@ public class selectpin extends AppCompatActivity {
             }
         }
     };
-
+     */
 
 }

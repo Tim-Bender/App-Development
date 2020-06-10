@@ -95,8 +95,10 @@ public class BluetoothTestActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        unbindService(mServiceConnection);
-        mBluetoothService = null;
+        try {
+            unbindService(mServiceConnection);
+            mBluetoothService = null;
+        }catch(Exception ignored){}
     }
 
 

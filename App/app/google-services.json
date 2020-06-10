@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "533753689095",
+    "firebase_url": "https://spudnikdiagnostics.firebaseio.com",
+    "project_id": "spudnikdiagnostics",
+    "storage_bucket": "spudnikdiagnostics.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:533753689095:android:8b54f36fe7d080ffb7a6a2",
+        "android_client_info": {
+          "package_name": "com.example.Spudnik"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "533753689095-9qa9bf3l1q3is3f5uh2in7uf75c0rqqk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzgN-yC3H1PVJvr558jvCNQ9uE52O1pPo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "533753689095-9qa9bf3l1q3is3f5uh2in7uf75c0rqqk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
