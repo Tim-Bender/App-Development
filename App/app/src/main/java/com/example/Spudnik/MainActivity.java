@@ -1,5 +1,6 @@
 package com.example.Spudnik;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -12,19 +13,26 @@ import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = MainActivity.class.getSimpleName();
     private ProgressBar progressBar;
     private TextView textView;
     private int progressStatus = 0;
@@ -32,22 +40,80 @@ public class MainActivity extends AppCompatActivity {
     private vehicle myVehicle;
     private InputStream is;
     private InputStream d;
+    private FirebaseDatabase firebaseDatabase;
+    private FirebaseStorage firebaseStorage;
+    private SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setTitle("Loading");
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        toolbar.setTitleTextColor(Color.WHITE);
-        myVehicle = new vehicle();
-        d = getResources().openRawResource(R.raw.dealerids);
-        is= getResources().openRawResource(R.raw.parsedtest);
         try {
-            this.progressBar = findViewById(R.id.loadingbar);
-            this.progressBar.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
-            this.textView = findViewById(R.id.loadingText);
+            Toolbar toolbar = findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+            toolbar.setTitleTextColor(Color.WHITE);
+            myVehicle = new vehicle();
+            d = getResources().openRawResource(R.raw.dealerids);
+            is= getResources().openRawResource(R.raw.parsedtest);
+
+            preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            editor = preferences.edit();
+
+            firebaseDatabase = FirebaseDatabase.getInstance();
+            firebaseStorage = FirebaseStorage.getInstance();
+            DatabaseReference addressReference = firebaseDatabase.getReference("address");
+            addressReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    String newAddress = dataSnapshot.getValue(String.class);
+                    Log.i(TAG,"New Address: " + newAddress);
+                    editor.putString("ftpaddress",newAddress);
+                    editor.commit();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+            DatabaseReference passwordReference = firebaseDatabase.getReference("password");
+            passwordReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    String newPassword = dataSnapshot.getValue(String.class);
+                    Log.i(TAG,"New Password: " + newPassword);
+                    editor.putString("ftppassword",newPassword);
+                    editor.commit();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+            DatabaseReference passwordReference3 = firebaseDatabase.getReference("username");
+            passwordReference3.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    String newUsername = dataSnapshot.getValue(String.class);
+                    Log.i(TAG,"New Username: " + newUsername);
+                    editor.putString("ftpusername",newUsername);
+                    editor.commit();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            StorageReference storageReference = firebaseStorage.getReference();
+
+            progressBar = findViewById(R.id.loadingbar);
+            progressBar.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
+            textView = findViewById(R.id.loadingText);
             ImageView image = findViewById(R.id.gifloadingscreen);
             Glide.with(this).load(R.drawable.heartbeatgiftransparent).into(image);
             new Thread(new Runnable() {
@@ -76,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }).start();
         } catch (Exception e) {
-            Toast.makeText(this, "Unidentified Error", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Boot Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }

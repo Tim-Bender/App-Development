@@ -5,7 +5,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
-import android.accessibilityservice.AccessibilityService;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -20,11 +20,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Space;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,8 +37,9 @@ public class pinlocation extends AppCompatActivity {
     private Toolbar toolbar;
     private SharedPreferences preferences;
     private Map<String,Integer> orientations = new HashMap<>();
-    private static final int VERTICAL = 1, HORIZONTAL = 2;
+    private static final int VERTICAL = 1;
     private final String TAG = this.getClass().getSimpleName();
+    private boolean built = false;
 
 
     @Override
@@ -63,7 +60,6 @@ public class pinlocation extends AppCompatActivity {
             loc = Integer.parseInt(Objects.requireNonNull(myConnection).getS4());
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-            buildLayout();
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -77,7 +73,9 @@ public class pinlocation extends AppCompatActivity {
         if(preferences.getBoolean("nightmode",false)){
             nightMode();
         }
-        buildLayout();
+        if(!built) {
+            buildLayout();
+        }
         updateValues();
 
     }
@@ -107,6 +105,7 @@ public class pinlocation extends AppCompatActivity {
 
     }
 
+    @SuppressLint("SetTextI18n")
     private void buildLayout(){
         int pinnumber = myvehicle.getMap(myConnection.getDirection());
         int orientation = orientations.get(myConnection.getDirection());
@@ -122,6 +121,9 @@ public class pinlocation extends AppCompatActivity {
 
         TextView textView;
         Log.d(TAG,"Orientation:" + orientation);
+        Log.d(TAG,"Pinnumber: " + pinnumber);
+        boolean nightmode = preferences.getBoolean("nightmode",false);
+
         if(orientation == VERTICAL){
             topspace.setVisibility(View.GONE);
             topspace.setLayoutParams(new LinearLayout.LayoutParams(0,0));
@@ -137,23 +139,30 @@ public class pinlocation extends AppCompatActivity {
             innerlayout2.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,1));
 
             outsidelayout.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,2));
-            if(pinnumber == 1){
+            if(pinnumber == 2){
+                rightspace.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,4.5f));
+                leftspace.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,4.5f));
+                innerlayout2.setVisibility(View.GONE);
+                innerlayout2.setLayoutParams(new LinearLayout.LayoutParams(0,0));
+                innerlayout1.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                LinearLayout superlayout = findViewById(R.id.superlinearlayoutpinlocation);
+                superlayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0,2));
+                topspace.setVisibility(View.VISIBLE);
+                topspace.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0,2.25f));
+                bottomspace.setVisibility(View.VISIBLE);
+                bottomspace.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0,2.25f));
                 for(int i = 1; i < 3; i ++){
-                    innerlayout2.setVisibility(View.GONE);
                     textView = new TextView(this);
                     textView.setBackgroundResource(R.drawable.back);
                     textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0,1));
                     textView.setTextSize(14);
-                    if(i == 1) {
-                        textView.setText(Integer.toString(i));
-                    }
-                    else{
-                        textView.setText("p");
-                    }
+                    textView.setTextColor(Color.BLACK);
+                    textView.setText(Integer.toString(i));
                     textView.setGravity(Gravity.CENTER);
                     if(i == loc){
-                        textView.setBackgroundResource(R.drawable.nightmodebuttonpressed);
+                        textView.setBackgroundResource(R.drawable.pinlocationcurrentbuttonbackground);
                     }
+                    innerlayout1.addView(textView);
                 }
             }
             else{
@@ -164,8 +173,9 @@ public class pinlocation extends AppCompatActivity {
                    textView.setTextSize(14);
                    textView.setText(Integer.toString(i));
                    textView.setGravity(Gravity.CENTER);
+                   textView.setTextColor(Color.BLACK);
                    if(i == loc){
-                       textView.setBackgroundResource(R.drawable.nightmodebuttonpressed);
+                       textView.setBackgroundResource(R.drawable.pinlocationcurrentbuttonbackground);
                    }
                    innerlayout2.addView(textView);
                }
@@ -176,13 +186,64 @@ public class pinlocation extends AppCompatActivity {
                     textView.setTextSize(14);
                     textView.setText(Integer.toString(i));
                     textView.setGravity(Gravity.CENTER);
+                    textView.setTextColor(Color.BLACK);
                     if(i == loc){
-                        textView.setBackgroundResource(R.drawable.nightmodebuttonpressed);
+                        textView.setBackgroundResource(R.drawable.pinlocationcurrentbuttonbackground);
                     }
                     innerlayout1.addView(textView);
                 }
             }
+            built = true;
+            return;
+        }
+        else{
+            leftspace.setVisibility(View.GONE);
+            leftspace.setLayoutParams(new LinearLayout.LayoutParams(0,0));
+            rightspace.setVisibility(View.GONE);
+            rightspace.setLayoutParams(new LinearLayout.LayoutParams(0,0));
 
+            topspace.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0,2.25f));
+            bottomspace.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0,2.25f));
+
+            outsidelayout.setOrientation(LinearLayout.VERTICAL);
+            outsidelayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+            innerlayout1.setOrientation(LinearLayout.HORIZONTAL);
+            innerlayout1.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0,1));
+
+            innerlayout2.setOrientation(LinearLayout.HORIZONTAL);
+            innerlayout2.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0,1));
+
+            LinearLayout superlayout = findViewById(R.id.superlinearlayoutpinlocation);
+            superlayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0,2));
+            for(int i = pinnumber; i > pinnumber/2; i--){
+                textView = new TextView(this);
+                textView.setBackgroundResource(R.drawable.back);
+                textView.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,1));
+                textView.setTextSize(14);
+                textView.setText(Integer.toString(i));
+                textView.setGravity(Gravity.CENTER);
+                textView.setTextColor(Color.BLACK);
+                if(i == loc){
+                    textView.setBackgroundResource(R.drawable.pinlocationcurrentbuttonbackground);
+                }
+                innerlayout1.addView(textView);
+            }
+            for(int i = pinnumber/2; i >=1; i--){
+                textView = new TextView(this);
+                textView.setBackgroundResource(R.drawable.back);
+                textView.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,1));
+                textView.setTextSize(14);
+                textView.setText(Integer.toString(i));
+                textView.setGravity(Gravity.CENTER);
+                textView.setTextColor(Color.BLACK);
+                if(i == loc){
+                    textView.setBackgroundResource(R.drawable.pinlocationcurrentbuttonbackground);
+                }
+                innerlayout2.addView(textView);
+            }
+
+            built = true;
 
         }
 
@@ -206,6 +267,7 @@ public class pinlocation extends AppCompatActivity {
 
     public void nextPin(View view){
         try {
+            int previousLocation = loc;
             this.loc++;
             if (this.loc == this.uniqueConnections.size()) {
                 this.loc = 0;
@@ -217,6 +279,7 @@ public class pinlocation extends AppCompatActivity {
 
     public void prevPin(View view){
         try {
+            int previousLocation = loc;
             this.loc--;
             if (this.loc < 0) {
                 this.loc = this.uniqueConnections.size() - 1;
