@@ -18,7 +18,13 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.InputStream;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Author: Timothy Bender
@@ -30,8 +36,10 @@ import java.io.InputStream;
 public class home extends AppCompatActivity {
     private vehicle myvehicle;
     private SharedPreferences preferences;
-    private InputStream is;
-    private InputStream d;
+    private InputStreamReader is;
+    private InputStreamReader d;
+    private FirebaseUser user;
+    private FirebaseAuth auth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,9 +49,11 @@ public class home extends AppCompatActivity {
         setTitle("Home");
         myToolBar.setTitleTextColor(Color.WHITE);
         this.myvehicle = new vehicle();
-        Toast.makeText(this,"Welcome!",Toast.LENGTH_LONG).show();
-        d = getResources().openRawResource(R.raw.dealerids);
-        is= getResources().openRawResource(R.raw.parsedtest);
+        auth = FirebaseAuth.getInstance();
+        user = auth.getCurrentUser();
+
+        Toast.makeText(this, "Welcome!", Toast.LENGTH_SHORT).show();
+
 
     }
     @Override
@@ -53,13 +63,35 @@ public class home extends AppCompatActivity {
         if(preferences.getBoolean("nightmode",false)){
             nightMode();
         }
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                myvehicle.buildDealers(d);
-                myvehicle.buildVehicleIds(is);
-            }
-        });
+        if(user != null) {
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+
+                        boolean updated = preferences.getBoolean("databaseupdated", false);
+                        d = new InputStreamReader(getResources().openRawResource(R.raw.dealerids));
+
+                        System.out.println("Updated : " + updated);
+                        FileInputStream fis2;
+                        if (updated) {
+                            //String filename = getFilesDir().getPath() + File.separator + "database" + File.separator +"parsedtest.csv";
+                            final File rootpath = new File(getFilesDir(),"database");
+                            File localFile = new File(rootpath,"machine83xx.csv");
+                            fis2 = new FileInputStream(localFile);
+                            is = new InputStreamReader(fis2, StandardCharsets.UTF_8);
+                        } else {
+                            is = new InputStreamReader(getResources().openRawResource(R.raw.machine83xx));
+                        }
+
+                        myvehicle.buildDealers(d);
+                        myvehicle.buildVehicleIds(is);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
     }
     @Override
     protected void onResume() {

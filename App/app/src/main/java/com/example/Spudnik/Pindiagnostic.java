@@ -41,9 +41,6 @@ public class Pindiagnostic extends AppCompatActivity {
             this.loc = getIntent().getIntExtra("loc", 0);
             this.uniqueConnections = getIntent().getParcelableArrayListExtra("uniqueconnections");
 
-
-            InputStream is = getResources().openRawResource(R.raw.parsedtest);
-            this.myvehicle.setIs(is);
             this.myConnection = uniqueConnections.get(this.loc);
             Toolbar toolbar = findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);

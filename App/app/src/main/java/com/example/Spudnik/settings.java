@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -23,10 +24,11 @@ import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
@@ -38,6 +40,7 @@ public class settings extends AppCompatActivity {
     private Switch aSwitch;
     boolean nightmode = false;
     private SharedPreferences.Editor editor;
+    private SharedPreferences preferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,9 +50,9 @@ public class settings extends AppCompatActivity {
         setTitle("Settings");
         myToolBar.setTitleTextColor(Color.WHITE);
         aSwitch = findViewById(R.id.settingsToggle);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+       preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         firebaseStorage = FirebaseStorage.getInstance();
-        editor = sharedPreferences.edit();
+        editor = preferences.edit();
         aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -67,7 +70,7 @@ public class settings extends AppCompatActivity {
                 }
             }
         });
-        if(sharedPreferences.getBoolean("nightmode",false)){
+        if(preferences.getBoolean("nightmode",false)){
             nightMode();
             aSwitch.setChecked(true);
         }
@@ -176,34 +179,36 @@ public class settings extends AppCompatActivity {
     }
 
     public void updateDataBase(View view){
-
         StorageReference reference = firebaseStorage.getReference().getRoot();
+
+        final File rootpath = new File(getFilesDir(),"database");
+        if(!rootpath.exists()){
+            rootpath.mkdirs();
+        }
         reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
             @Override
             public void onSuccess(ListResult listResult) {
                 for(StorageReference item : listResult.getItems()){
-                    try {
-                        File dir = getFilesDir();
-                        File file = new File(dir,item.getName());
-                        boolean deleted = file.delete();
-                        File localFile = File.createTempFile(item.getName(),"csv");
-                        item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    final File localFile = new File(rootpath,item.getName());
+                    localFile.delete();
+                    Log.i(TAG,"Item Name: " + item.getName());
+                    item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            Toast.makeText(settings.this, "Downloaded: " + localFile, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(settings.this, "FileDownloaded", Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
 
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-
-                            }
-                        });
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                        }
+                    });
 
 
                 }
+                editor.putBoolean("databaseupdated",true);
+                editor.commit();
                 Toast.makeText(settings.this, "Update Complete", Toast.LENGTH_SHORT).show();
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -213,4 +218,9 @@ public class settings extends AppCompatActivity {
                     }
                 });
     }
+    public void login(View view){
+        Intent i = new Intent(getBaseContext(),LoginActivity.class);
+        startActivity(i);
+    }
+
 }

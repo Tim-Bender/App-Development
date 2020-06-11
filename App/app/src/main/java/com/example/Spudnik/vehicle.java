@@ -39,7 +39,7 @@ public class vehicle implements Parcelable {
     private ArrayList<String> dealers = new ArrayList<>();
     private ArrayList<String> vehicleIds = new ArrayList<>();
     private int loc = 0,pinCount=0,lastSorted = SORT_BY_S4;
-    private InputStream is;
+    private InputStreamReader isr;
     static final int SORT_BY_S4 = 1,SORT_BY_NAME = 2;
     private Map<String,Integer> pinnumbers = new HashMap<>();
 
@@ -109,7 +109,7 @@ public class vehicle implements Parcelable {
             @Override
             public void run() {
                 try{
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+                    BufferedReader reader = new BufferedReader(isr);
                     String line;
                     while((line = reader.readLine()) != null) {
                         String[] tokens = line.split(",");
@@ -134,12 +134,12 @@ public class vehicle implements Parcelable {
      * Here is our database builder for the dealer id's. This is a small database but it is useful to keep it as a csv file to allow for updateability. It runs similarly to the one above
      * @param i InputStream
      */
-    void buildDealers(final InputStream i){
+    void buildDealers(final InputStreamReader i){
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
                 try{
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(i, StandardCharsets.UTF_8));
+                    BufferedReader reader = new BufferedReader(i);
                     String line;
                     while((line = reader.readLine()) != null) {
                         line = line.toLowerCase();
@@ -159,12 +159,12 @@ public class vehicle implements Parcelable {
      * @param i Inputstream
      */
 
-     void buildVehicleIds(final InputStream i){
+     void buildVehicleIds(final InputStreamReader i){
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
                 try{
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(i, StandardCharsets.UTF_8));
+                    BufferedReader reader = new BufferedReader(i);
                     String line;
                     String[] holder;
                     while((line = reader.readLine()) != null) {
@@ -175,7 +175,8 @@ public class vehicle implements Parcelable {
                         }
                     }
 
-                } catch (IOException ignored) {
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -311,8 +312,8 @@ public class vehicle implements Parcelable {
         this.loc = loc;
     }
 
-    void setIs(InputStream s){
-        this.is = s;
+    void setIs(InputStreamReader s){
+        this.isr = s;
     }
 
     private void setPinnumbers(){

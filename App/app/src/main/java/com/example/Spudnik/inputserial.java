@@ -23,7 +23,11 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.io.InputStream;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Author: Timothy Bender
@@ -39,19 +43,21 @@ public class inputserial extends AppCompatActivity {
     public ImageView imageView;
     public TextView textView;
     public Switch toggle;
-    private InputStream is;
+    private InputStreamReader is;
     private boolean built = false;
     private int POINTTO;
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
     private CheckBox checkBox;
+    private InputStreamReader d;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inputserial);
+        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        try{
+        try {
             Toolbar toolbar = findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
             setTitle("Input Serial Numer");
@@ -61,40 +67,62 @@ public class inputserial extends AppCompatActivity {
             textView = findViewById(R.id.helptextview);
             textView.setVisibility(View.GONE);
             myvehicle = getIntent().getParcelableExtra("myvehicle");
-            POINTTO = getIntent().getIntExtra("pointto",0);
+            POINTTO = getIntent().getIntExtra("pointto", 0);
             checkBox = findViewById(R.id.rememberdealeridcheckbox);
-            is = getResources().openRawResource(R.raw.parsedtest);
+        }catch(Exception ignored){}
+    }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        try {
+            boolean updated = preferences.getBoolean("databaseupdated", false);
+            d = new InputStreamReader(getResources().openRawResource(R.raw.dealerids));
+
+            System.out.println("Updated : " + updated);
+            FileInputStream fis2;
+            if (updated) {
+                //String filename = getFilesDir().getPath() + File.separator + "database" + File.separator +"parsedtest.csv";
+                final File rootpath = new File(getFilesDir(),"database");
+                File localFile = new File(rootpath,"machine83xx.csv");
+                fis2 = new FileInputStream(localFile);
+                is = new InputStreamReader(fis2, StandardCharsets.UTF_8);
+            } else {
+                is = new InputStreamReader(getResources().openRawResource(R.raw.machine83xx));
+            }
+
+
             preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
             editor = preferences.edit();
 
             this.edittext = findViewById(R.id.inputid);
             this.edittext.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)){
-                    go(getCurrentFocus());
-                    return true;
-                }
-                else {
-                    if (!built) {
-                        tryBuildDataBase();
-                    }
-                }
-
-                return false;
-                    }
-        });
-            this.dealerText = findViewById(R.id.dealeridtextview);
-            this.dealerText.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)){
-                    Toast.makeText(inputserial.this, "Enter A Serial Number", Toast.LENGTH_SHORT).show();
+                @Override
+                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                    if((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)){
+                        go(getCurrentFocus());
                         return true;
                     }
-                return false;
-            }
-        });
+                    else {
+                        if (!built) {
+                            tryBuildDataBase();
+                        }
+                    }
+
+                    return false;
+                }
+            });
+            this.dealerText = findViewById(R.id.dealeridtextview);
+            this.dealerText.setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                    if((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)){
+                        Toast.makeText(inputserial.this, "Enter A Serial Number", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                    return false;
+                }
+            });
             if(!preferences.getString("dealerid", "").equals("")){
                 dealerText.setText(preferences.getString("dealerid",""));
                 checkBox.setChecked(true);
@@ -102,14 +130,14 @@ public class inputserial extends AppCompatActivity {
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                 if(isChecked){
-                     editor.putString("dealerid", dealerText.getText().toString().trim());
-                     editor.apply();
-                 }
-                 else{
-                     editor.putString("dealerid","");
-                     editor.apply();
-                 }
+                    if(isChecked){
+                        editor.putString("dealerid", dealerText.getText().toString().trim());
+                        editor.apply();
+                    }
+                    else{
+                        editor.putString("dealerid","");
+                        editor.apply();
+                    }
                 }
             });
             Log.d("inputserial",preferences.getString("dealerid",""));
@@ -136,16 +164,6 @@ public class inputserial extends AppCompatActivity {
                     }
                 }
             });
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    protected void onStart(){
-        super.onStart();
-        try {
             if (preferences.getBoolean("nightmode", false)) {
                 nightMode();
             }

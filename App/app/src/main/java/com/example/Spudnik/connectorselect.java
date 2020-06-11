@@ -52,11 +52,9 @@ public class connectorselect extends AppCompatActivity {
         this.mySpinner = findViewById(R.id.myconnectorspinner);
         try {
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            InputStream is = getResources().openRawResource(R.raw.parsedtest);
             setTitle("Connector Selection");
             this.myvehicle = getIntent().getParcelableExtra("myvehicle");
             Objects.requireNonNull(this.myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
-            this.myvehicle.setIs(is);
 
             List<String> connections = this.myvehicle.getUniqueConnections();
 

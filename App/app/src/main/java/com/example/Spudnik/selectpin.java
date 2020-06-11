@@ -82,10 +82,8 @@ public class selectpin extends AppCompatActivity {
             //mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver,new IntentFilter("incomingMessage"));
             LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver2,new IntentFilter("incomingboolean"));
-            InputStream is = getResources().openRawResource(R.raw.parsedtest);
             this.myvehicle = getIntent().getParcelableExtra("myvehicle");
             Objects.requireNonNull(this.myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
-            this.myvehicle.setIs(is);
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             this.textView = findViewById(R.id.connectorid);
             //Switch toggle = findViewById(R.id.sortbytoggle);

@@ -19,22 +19,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.auth.api.signin.internal.Storage;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.ListResult;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,10 +39,14 @@ public class MainActivity extends AppCompatActivity {
     private int progressStatus = 0;
     private Handler handler = new Handler();
     private vehicle myVehicle;
-    private FirebaseDatabase firebaseDatabase;
-    private FirebaseStorage firebaseStorage;
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
+    private FirebaseUser user;
+    private FirebaseAuth auth;
+    /*
+    private FirebaseDatabase firebaseDatabase;
+    private FirebaseStorage firebaseStorage;
+    */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +62,11 @@ public class MainActivity extends AppCompatActivity {
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             editor = preferences.edit();
 
-            firebaseDatabase = FirebaseDatabase.getInstance();
+            auth = FirebaseAuth.getInstance();
+            user = auth.getCurrentUser();
+
+
+            /*firebaseDatabase = FirebaseDatabase.getInstance();
             firebaseStorage = FirebaseStorage.getInstance();
             DatabaseReference addressReference = firebaseDatabase.getReference("address");
             addressReference.addValueEventListener(new ValueEventListener() {
@@ -109,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onCancelled(@NonNull DatabaseError databaseError) {
 
                 }
-            });
+            });*/
 
             progressBar = findViewById(R.id.loadingbar);
             progressBar.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
@@ -135,11 +138,24 @@ public class MainActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     }
-                    Intent i = new Intent(getBaseContext(), home.class);
+                    Intent i;
+                    if(user != null) {
+
+                        i = new Intent(getBaseContext(), home.class);
+                    }
+                    else{
+                        i = new Intent(getBaseContext(),LoginActivity.class);
+                    }
                     i.putExtra("myvehicle",myVehicle);
                     startActivity(i);
                     finish();
                 }
+               /* StorageReference reference = firebaseStorage.getReference().getRoot();
+
+                final File rootpath = new File(getFilesDir(),"database");
+        if(!rootpath.exists()){
+                    rootpath.mkdirs();
+                }*/
             }).start();
         } catch (Exception e) {
             Toast.makeText(this, "Boot Error", Toast.LENGTH_SHORT).show();
