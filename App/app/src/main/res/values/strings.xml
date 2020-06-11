@@ -4,55 +4,30 @@
     <string name="s4logo">s4logo</string>
     <string name="diagnostic_tool">Diagnostic Tool</string>
     <string name="vdev1_0">vDev1.0</string>
-    <string name="bluetoothlogo">bluetoothlogo</string>
     <string name="todo">TODO</string>
-    <string name="heartratepicture">heartratepicture</string>
     <string name="title_activity_home">home</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
-    <string name="previous">Previous</string>
 
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-    <string name="textview">TextView</string>
     <string name="what_do_you_want_to_do">What do you want to do?</string>
     <string name="run_diagnostic_tool">Run Diagnostic Tool</string>
     <string name="update_implement_software">Update Implement Software</string>
     <string name="log_implement_io_data">Log Implement Io Data</string>
     <string name="view_tool_settings">View Tool Settings</string>
-    <string name="_0">0%</string>
     <string name="loading_0">Loading 0%</string>
-    <string name="loading">loading…</string>
-    <string name="Loading">Loading…</string>
-    <string name="title_activity_serialnumber">serialnumber</string>
     <string name="enter_implement_serial_number">Enter Implement Serial Number</string>
     <string name="e_g_6640_55_150">(e.g. 6640–55–150)</string>
     <string name="spudnikplate">spudnikplate</string>
-    <string name="the_implement_s_serial_number_can_be_found_on_the_front_of_the_machine_close_to_the_implement_s_drawbar_on_the_main_frame_the_serial_number_is_printed_on_an_aluminum_tag_that_looks_similar_to_the_image_above">The implement\'s serial number can be found on the front of the machine, close to the implement\'s drawbar on the main frame. The serial number is printed on an aluminum tag that looks similar to the image above.</string>
-    <string name="back">Back</string>
     <string name="title_activity_connectorselect">connectorselect</string>
     <string name="which_s4_input_or_output_connector_would_you_like_to_view_diagnostics_for">Which S4 Input or Output connector would you like to view diagnostics for?</string>
     <string name="title_activity_selectpin">selectpin</string>
-    <string name="title_activity_settings">Settings</string>
 
     <!-- Preference Titles -->
-    <string name="messages_header">Messages</string>
-    <string name="sync_header">Sync</string>
 
     <!-- Messages Preferences -->
-    <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
 
     <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
-    </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="title_activity_pindiagnostic">Pindiagnostic</string>
 
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="settings">Settings</string>
 </resources>

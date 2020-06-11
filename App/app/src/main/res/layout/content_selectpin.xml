@@ -100,7 +100,6 @@
             android:layout_weight=".15" />
 
         <Switch
-            android:id="@+id/sortbytoggle"
             android:layout_width="wrap_content"
             android:layout_height="0px"
             android:layout_marginStart="10dp"
@@ -111,7 +110,6 @@
             android:visibility="gone" />
 
         <ScrollView
-            android:id="@+id/pinscroll"
             style="@android:style/Widget.Holo.ScrollView"
             android:layout_width="match_parent"
             android:layout_height="0px"

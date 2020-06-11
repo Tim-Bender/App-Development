@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -20,15 +19,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.auth.api.signin.internal.Storage;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,8 +44,6 @@ public class MainActivity extends AppCompatActivity {
     private int progressStatus = 0;
     private Handler handler = new Handler();
     private vehicle myVehicle;
-    private InputStream is;
-    private InputStream d;
     private FirebaseDatabase firebaseDatabase;
     private FirebaseStorage firebaseStorage;
     private SharedPreferences preferences;
@@ -55,8 +59,6 @@ public class MainActivity extends AppCompatActivity {
             setSupportActionBar(toolbar);
             toolbar.setTitleTextColor(Color.WHITE);
             myVehicle = new vehicle();
-            d = getResources().openRawResource(R.raw.dealerids);
-            is= getResources().openRawResource(R.raw.parsedtest);
 
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             editor = preferences.edit();
@@ -109,8 +111,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            StorageReference storageReference = firebaseStorage.getReference();
-
             progressBar = findViewById(R.id.loadingbar);
             progressBar.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
             textView = findViewById(R.id.loadingText);
@@ -153,13 +153,6 @@ public class MainActivity extends AppCompatActivity {
         if(preferences.getBoolean("nightmode",false)){
             nightMode();
         }
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                myVehicle.buildDealers(d);
-                myVehicle.buildVehicleIds(is);
-            }
-        });
 
         super.onStart();
     }

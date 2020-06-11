@@ -1,5 +1,6 @@
 package com.example.Spudnik;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -7,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.widget.Button;
@@ -14,10 +16,25 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
+import java.io.IOException;
+
 public class settings extends AppCompatActivity {
+    private static final String TAG = settings.class.getSimpleName();
+    private FirebaseStorage firebaseStorage;
     private Switch aSwitch;
     boolean nightmode = false;
     private SharedPreferences.Editor editor;
@@ -31,6 +48,7 @@ public class settings extends AppCompatActivity {
         myToolBar.setTitleTextColor(Color.WHITE);
         aSwitch = findViewById(R.id.settingsToggle);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        firebaseStorage = FirebaseStorage.getInstance();
         editor = sharedPreferences.edit();
         aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -155,5 +173,44 @@ public class settings extends AppCompatActivity {
             Intent i = new Intent(getBaseContext(), BluetoothTestActivity.class);
             startActivity(i);
         }catch(Exception ignored){}
+    }
+
+    public void updateDataBase(View view){
+
+        StorageReference reference = firebaseStorage.getReference().getRoot();
+        reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
+            @Override
+            public void onSuccess(ListResult listResult) {
+                for(StorageReference item : listResult.getItems()){
+                    try {
+                        File dir = getFilesDir();
+                        File file = new File(dir,item.getName());
+                        boolean deleted = file.delete();
+                        File localFile = File.createTempFile(item.getName(),"csv");
+                        item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+
+                            }
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+                Toast.makeText(settings.this, "Update Complete", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG,"Firebase Update Error");
+                    }
+                });
     }
 }

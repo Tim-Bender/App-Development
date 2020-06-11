@@ -31,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.InputStream;
+import java.nio.channels.AsynchronousByteChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
@@ -175,6 +176,7 @@ public class selectpin extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             boolean bool = intent.getBooleanExtra("boolean",false);
             if(bool){
+                sortConnections();
                 updatevalues();
             }
         }
@@ -263,6 +265,17 @@ public class selectpin extends AppCompatActivity {
         } catch (Resources.NotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public void sortConnections(){
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                   Collections.sort(connections);
+                }catch(Exception ignored){}
+            }
+        });
     }
 
     public void pinSelected(int loc){

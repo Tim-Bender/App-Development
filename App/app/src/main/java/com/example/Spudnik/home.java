@@ -3,6 +3,7 @@ package com.example.Spudnik;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -17,6 +18,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.InputStream;
+
 /**
  * Author: Timothy Bender
  * timothy.bender@spudnik.com
@@ -27,6 +30,8 @@ import android.widget.Toast;
 public class home extends AppCompatActivity {
     private vehicle myvehicle;
     private SharedPreferences preferences;
+    private InputStream is;
+    private InputStream d;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,8 +40,11 @@ public class home extends AppCompatActivity {
         setSupportActionBar(myToolBar);
         setTitle("Home");
         myToolBar.setTitleTextColor(Color.WHITE);
-        this.myvehicle=getIntent().getParcelableExtra("myvehicle");
+        this.myvehicle = new vehicle();
         Toast.makeText(this,"Welcome!",Toast.LENGTH_LONG).show();
+        d = getResources().openRawResource(R.raw.dealerids);
+        is= getResources().openRawResource(R.raw.parsedtest);
+
     }
     @Override
     protected void onStart() {
@@ -45,6 +53,13 @@ public class home extends AppCompatActivity {
         if(preferences.getBoolean("nightmode",false)){
             nightMode();
         }
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                myvehicle.buildDealers(d);
+                myvehicle.buildVehicleIds(is);
+            }
+        });
     }
     @Override
     protected void onResume() {

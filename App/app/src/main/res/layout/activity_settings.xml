@@ -88,6 +88,7 @@
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight=".4"
+                android:onClick="updateDataBase"
                 android:text="Update DataBase" />
 
             <Space
