@@ -20,28 +20,26 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".LoginActivity"></activity>
-        <activity android:name=".BluetoothTestActivity" />
+        <activity android:name=".LoginActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".BluetoothTestActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <service android:name=".BluetoothLeService" />
 
-        <activity android:name=".settings" />
-        <activity android:name=".pinlocation" />
-        <activity
-            android:name=".Pindiagnostic"
-            android:label="@string/title_activity_pindiagnostic" />
-        <activity
-            android:name=".selectpin"
-            android:label="@string/title_activity_selectpin" />
-        <activity
-            android:name=".connectorselect"
-            android:label="@string/title_activity_connectorselect" />
-        <activity
-            android:name=".inputserial"
-            android:label="inputserial" />
-        <activity
-            android:name=".home"
-            android:label="@string/title_activity_home"
+        <activity android:name=".settings"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".pinlocation"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Pindiagnostic"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".selectpin"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".connectorselect"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".inputserial"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".home"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -50,6 +48,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <meta-data android:name="firebase_performance_collection_deactivated"
+                   android:value="true"/>
     </application>
 
 </manifest>

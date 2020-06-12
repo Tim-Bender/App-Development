@@ -5,7 +5,6 @@
     <string name="diagnostic_tool">Diagnostic Tool</string>
     <string name="vdev1_0">vDev1.0</string>
     <string name="todo">TODO</string>
-    <string name="title_activity_home">home</string>
     <!-- Strings used for fragments for navigation -->
     <string name="next">Next</string>
 
@@ -18,16 +17,13 @@
     <string name="enter_implement_serial_number">Enter Implement Serial Number</string>
     <string name="e_g_6640_55_150">(e.g. 6640–55–150)</string>
     <string name="spudnikplate">spudnikplate</string>
-    <string name="title_activity_connectorselect">connectorselect</string>
     <string name="which_s4_input_or_output_connector_would_you_like_to_view_diagnostics_for">Which S4 Input or Output connector would you like to view diagnostics for?</string>
-    <string name="title_activity_selectpin">selectpin</string>
 
     <!-- Preference Titles -->
 
     <!-- Messages Preferences -->
 
     <!-- Sync Preferences -->
-    <string name="title_activity_pindiagnostic">Pindiagnostic</string>
 
     <string name="settings">Settings</string>
 </resources>

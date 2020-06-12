@@ -45,7 +45,7 @@ public class inputserial extends AppCompatActivity {
     public Switch toggle;
     private InputStreamReader is;
     private boolean built = false;
-    private int POINTTO;
+    //private int POINTTO;
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
     private CheckBox checkBox;
@@ -67,7 +67,7 @@ public class inputserial extends AppCompatActivity {
             textView = findViewById(R.id.helptextview);
             textView.setVisibility(View.GONE);
             myvehicle = getIntent().getParcelableExtra("myvehicle");
-            POINTTO = getIntent().getIntExtra("pointto", 0);
+            //POINTTO = getIntent().getIntExtra("pointto", 0);
             checkBox = findViewById(R.id.rememberdealeridcheckbox);
         }catch(Exception ignored){}
     }

@@ -206,6 +206,7 @@
                 android:layout_weight=".05" />
 
             <Button
+                android:id="@+id/settingsloginbutton"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight=".4"

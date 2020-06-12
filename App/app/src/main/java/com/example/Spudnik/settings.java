@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -24,15 +23,12 @@ import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
-import java.io.IOException;
 
 public class settings extends AppCompatActivity {
     private static final String TAG = settings.class.getSimpleName();
@@ -143,6 +139,9 @@ public class settings extends AppCompatActivity {
             button = findViewById(R.id.settingsbluetoothtestbutton);
             button.setBackgroundResource(R.drawable.nightmodebuttonselector);
             button.setTextColor(Color.WHITE);
+            button = findViewById(R.id.settingsloginbutton);
+            button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+            button.setTextColor(Color.WHITE);
             aSwitch.setTextColor(Color.WHITE);
         } catch (Exception ignored) {}
 
@@ -164,6 +163,9 @@ public class settings extends AppCompatActivity {
             button.setBackgroundResource(R.drawable.daymodebuttonselector);
             button.setTextColor(Color.BLACK);
             button = findViewById(R.id.settingsbluetoothtestbutton);
+            button.setBackgroundResource(R.drawable.daymodebuttonselector);
+            button.setTextColor(Color.BLACK);
+            button = findViewById(R.id.settingsloginbutton);
             button.setBackgroundResource(R.drawable.daymodebuttonselector);
             button.setTextColor(Color.BLACK);
             aSwitch.setTextColor(Color.BLACK);
@@ -196,7 +198,6 @@ public class settings extends AppCompatActivity {
                         @Override
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                             Toast.makeText(settings.this, "Downloaded: " + localFile, Toast.LENGTH_SHORT).show();
-                            Toast.makeText(settings.this, "FileDownloaded", Toast.LENGTH_SHORT).show();
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
