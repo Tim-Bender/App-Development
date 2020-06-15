@@ -84,7 +84,7 @@ public class BluetoothLeService extends Service {
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic,int status){
-            if(status == bluetoothGatt.GATT_SUCCESS){
+            if(status == BluetoothGatt.GATT_SUCCESS){
                 broadcastUpdate(ACTION_DATA_AVAILABLE,characteristic);
             }
         }
