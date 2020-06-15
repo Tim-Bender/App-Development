@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 /**
  * Author: Timothy Bender
@@ -39,17 +40,18 @@ public class home extends AppCompatActivity {
     private InputStreamReader is;
     private InputStreamReader d;
     private FirebaseUser user;
-    private FirebaseAuth auth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_home);
         Toolbar myToolBar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolBar);
+        Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
         setTitle("Home");
         myToolBar.setTitleTextColor(Color.WHITE);
         this.myvehicle = new vehicle();
-        auth = FirebaseAuth.getInstance();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
 
         Toast.makeText(this, "Welcome!", Toast.LENGTH_SHORT).show();

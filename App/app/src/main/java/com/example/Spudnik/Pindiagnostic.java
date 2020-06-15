@@ -19,7 +19,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -36,19 +35,20 @@ public class Pindiagnostic extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_pindiagnostic);
         try {
-            this.myvehicle = getIntent().getParcelableExtra("myvehicle");
+            myvehicle = getIntent().getParcelableExtra("myvehicle");
             Objects.requireNonNull(this.myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
-            this.loc = getIntent().getIntExtra("loc", 0);
-            this.uniqueConnections = getIntent().getParcelableArrayListExtra("uniqueconnections");
+            loc = getIntent().getIntExtra("loc", 0);
+            uniqueConnections = getIntent().getParcelableArrayListExtra("uniqueconnections");
 
-            this.myConnection = uniqueConnections.get(this.loc);
+            myConnection = uniqueConnections.get(this.loc);
             Toolbar toolbar = findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
             toolbar.setTitleTextColor(Color.WHITE);
-            this.direction = findViewById(R.id.direction);
-            this.pinnumber = findViewById(R.id.pinnumber);
-            this.pinname = findViewById(R.id.pinname);
-            this.connectorinformation = findViewById(R.id.connectorinformation);
+            getSupportActionBar().setIcon(R.mipmap.ic_launcher);
+            direction = findViewById(R.id.direction);
+            pinnumber = findViewById(R.id.pinnumber);
+            pinname = findViewById(R.id.pinname);
+            connectorinformation = findViewById(R.id.connectorinformation);
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             updateValues();
         }catch (Exception e){

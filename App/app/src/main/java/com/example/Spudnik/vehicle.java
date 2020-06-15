@@ -7,10 +7,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,7 +37,7 @@ public class vehicle implements Parcelable {
     private ArrayList<String> vehicleIds = new ArrayList<>();
     private int loc = 0,pinCount=0,lastSorted = SORT_BY_S4;
     private InputStreamReader isr;
-    static final int SORT_BY_S4 = 1,SORT_BY_NAME = 2;
+    private static final int SORT_BY_S4 = 1;
     private Map<String,Integer> pinnumbers = new HashMap<>();
 
     vehicle(String id){
@@ -236,23 +233,17 @@ public class vehicle implements Parcelable {
      * This is implemented using a switch and final constants.
      * Finally, since sorting is relegated to an asyc thread, an Intent is passed to the parent Activity by a broadcast manager
      * This is caught by a broadcast manager in the parent activity, and allows for the UI to be updated.
-     * @param sort Sort-By
      * @param mcontext Application Context
      */
-     void sortConnections(final int sort, final Context mcontext){
+     void sortConnections(final Context mcontext){
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
                 try{
-                    lastSorted = sort;
+                    lastSorted = vehicle.SORT_BY_S4;
                     if(!connections.isEmpty()) {
-                        if (sort == SORT_BY_NAME) {
-                            connection.setSortBy(SORT_BY_NAME);
-                            Collections.sort(connections);
-                        } else {
-                            connection.setSortBy(SORT_BY_S4);
-                            Collections.sort(connections);
-                        }
+                        connection.setSortBy(SORT_BY_S4);
+                        Collections.sort(connections);
                         Intent incomingMessageIntent = new Intent("incomingboolean");
                         incomingMessageIntent.putExtra("boolean",true);
                         LocalBroadcastManager.getInstance(mcontext).sendBroadcast(incomingMessageIntent);
@@ -269,7 +260,7 @@ public class vehicle implements Parcelable {
      * The rest of the methods here are support methods
      * Primarily get set and add methods.
      */
-    int getMap(String direction)throws NullPointerException{
+    int getMap(String direction) throws NullPointerException{
         return pinnumbers.get(direction);
 
     }

@@ -36,17 +36,18 @@ public class settings extends AppCompatActivity {
     private Switch aSwitch;
     boolean nightmode = false;
     private SharedPreferences.Editor editor;
-    private SharedPreferences preferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         Toolbar myToolBar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolBar);
+        getSupportActionBar().setIcon(R.mipmap.ic_launcher);
         setTitle("Settings");
         myToolBar.setTitleTextColor(Color.WHITE);
         aSwitch = findViewById(R.id.settingsToggle);
-       preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         firebaseStorage = FirebaseStorage.getInstance();
         editor = preferences.edit();
         aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -185,14 +186,14 @@ public class settings extends AppCompatActivity {
 
         final File rootpath = new File(getFilesDir(),"database");
         if(!rootpath.exists()){
-            rootpath.mkdirs();
+            Log.i(TAG,"Folder Created: " + rootpath.mkdirs());
         }
         reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
             @Override
             public void onSuccess(ListResult listResult) {
                 for(StorageReference item : listResult.getItems()){
                     final File localFile = new File(rootpath,item.getName());
-                    localFile.delete();
+                    Log.i(TAG,"File deleted " + localFile.delete());
                     Log.i(TAG,"Item Name: " + item.getName());
                     item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override

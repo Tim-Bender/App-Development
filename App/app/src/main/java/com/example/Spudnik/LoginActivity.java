@@ -6,10 +6,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -32,6 +32,7 @@ import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = LoginActivity.class.getSimpleName();
@@ -41,12 +42,10 @@ public class LoginActivity extends AppCompatActivity {
     private EditText emailEditText;
     private EditText passwordEditText;
     private vehicle myVehicle;
-    private Toolbar toolbar;
-    private SharedPreferences preferences;
-    private boolean nightmode;
     private SharedPreferences.Editor editor;
     private FirebaseStorage firebaseStorage;
 
+    @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,9 +60,10 @@ public class LoginActivity extends AppCompatActivity {
             finish();
         }
         myVehicle = getIntent().getParcelableExtra("myvehicle");
-        toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("Login");
+        Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
         toolbar.setTitleTextColor(Color.WHITE);
         emailEditText = findViewById(R.id.loginemailedittext);
         passwordEditText = findViewById(R.id.loginpasswordedittext);
@@ -72,8 +72,8 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onStart(){
         super.onStart();
-        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        nightmode = preferences.getBoolean("nightmode",false);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        boolean nightmode = preferences.getBoolean("nightmode", false);
         if(nightmode){
             nightMode();
         }
@@ -106,14 +106,14 @@ public class LoginActivity extends AppCompatActivity {
 
         final File rootpath = new File(getFilesDir(),"database");
         if(!rootpath.exists()){
-            rootpath.mkdirs();
+           Log.i(TAG,"Folder created: " + rootpath.mkdirs());
         }
         reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
             @Override
             public void onSuccess(ListResult listResult) {
                 for(StorageReference item : listResult.getItems()){
                     final File localFile = new File(rootpath,item.getName());
-                    localFile.delete();
+                    Log.i(TAG,localFile.delete() + " file removed");
                     Log.i(TAG,"Item Name: " + item.getName());
                     item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override

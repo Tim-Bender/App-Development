@@ -49,7 +49,6 @@ public class inputserial extends AppCompatActivity {
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
     private CheckBox checkBox;
-    private InputStreamReader d;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +59,9 @@ public class inputserial extends AppCompatActivity {
         try {
             Toolbar toolbar = findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
+            getSupportActionBar().setIcon(R.mipmap.ic_launcher);
             setTitle("Input Serial Numer");
+            getSupportActionBar().setIcon(R.mipmap.ic_launcher);
             toolbar.setTitleTextColor(Color.WHITE);
             imageView = findViewById(R.id.helpimage);
             imageView.setVisibility(View.GONE);
@@ -77,7 +78,6 @@ public class inputserial extends AppCompatActivity {
         super.onStart();
         try {
             boolean updated = preferences.getBoolean("databaseupdated", false);
-            d = new InputStreamReader(getResources().openRawResource(R.raw.dealerids));
 
             System.out.println("Updated : " + updated);
             FileInputStream fis2;
@@ -167,7 +167,7 @@ public class inputserial extends AppCompatActivity {
             if (preferences.getBoolean("nightmode", false)) {
                 nightMode();
             }
-        }catch(Exception Ignored){}
+        }catch(Exception ignored){}
 
 
     }
@@ -298,7 +298,7 @@ public class inputserial extends AppCompatActivity {
             button.setBackgroundResource(R.drawable.daymodebuttonselector);
             button.setTextColor(Color.BLACK);
         }
-        catch(Exception Ignored){}
+        catch(Exception ignored){}
     }
 
 }

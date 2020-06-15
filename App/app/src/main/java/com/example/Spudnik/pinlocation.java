@@ -33,8 +33,6 @@ public class pinlocation extends AppCompatActivity {
     private ArrayList<connection> uniqueConnections;
     private connection myConnection;
     private vehicle myvehicle;
-    private TextView textView;
-    private Toolbar toolbar;
     private SharedPreferences preferences;
     private Map<String,Integer> orientations = new HashMap<>();
     private static final int VERTICAL = 1;
@@ -46,16 +44,17 @@ public class pinlocation extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pinlocation);
-        this.toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
         setTitle("Pin Location");
-        this.toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setTitleTextColor(Color.WHITE);
+        getSupportActionBar().setIcon(R.mipmap.ic_launcher);
 
         try {
             myvehicle = getIntent().getParcelableExtra("myvehicle");
             Objects.requireNonNull(myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
-            myvehicle.sortConnections(vehicle.SORT_BY_S4,this);
+            myvehicle.sortConnections(this);
             myConnection = getIntent().getParcelableExtra("myConnection");
             loc = Integer.parseInt(Objects.requireNonNull(myConnection).getS4());
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -91,14 +90,15 @@ public class pinlocation extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private void updateValues(){
         try {
-            this.textView = findViewById(R.id.pinlocationdirection);
+            TextView textView = findViewById(R.id.pinlocationdirection);
             String temp = this.myConnection.getDirection();
             String s1 = temp.substring(0, 1).toUpperCase();
-            this.textView.setText(s1 + temp.substring(1));
-            this.textView = findViewById(R.id.pinlocationconnectorinformation);
-            this.textView.setText(this.myvehicle.getMap(this.myvehicle.getUniqueConnections().get(this.myvehicle.getLoc())) + "p " + this.myvehicle.inout() + " Connector");
+            textView.setText(s1 + temp.substring(1));
+            textView = findViewById(R.id.pinlocationconnectorinformation);
+            textView.setText(this.myvehicle.getMap(this.myvehicle.getUniqueConnections().get(this.myvehicle.getLoc())) + "p " + this.myvehicle.inout() + " Connector");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -122,7 +122,6 @@ public class pinlocation extends AppCompatActivity {
         TextView textView;
         Log.d(TAG,"Orientation:" + orientation);
         Log.d(TAG,"Pinnumber: " + pinnumber);
-        boolean nightmode = preferences.getBoolean("nightmode",false);
 
         if(orientation == VERTICAL){
             topspace.setVisibility(View.GONE);
@@ -194,7 +193,6 @@ public class pinlocation extends AppCompatActivity {
                 }
             }
             built = true;
-            return;
         }
         else{
             leftspace.setVisibility(View.GONE);
@@ -267,7 +265,6 @@ public class pinlocation extends AppCompatActivity {
 
     public void nextPin(View view){
         try {
-            int previousLocation = loc;
             this.loc++;
             if (this.loc == this.uniqueConnections.size()) {
                 this.loc = 0;
@@ -279,7 +276,6 @@ public class pinlocation extends AppCompatActivity {
 
     public void prevPin(View view){
         try {
-            int previousLocation = loc;
             this.loc--;
             if (this.loc < 0) {
                 this.loc = this.uniqueConnections.size() - 1;

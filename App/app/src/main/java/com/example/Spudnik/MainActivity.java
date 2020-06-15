@@ -1,6 +1,5 @@
 package com.example.Spudnik;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -12,7 +11,6 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -21,6 +19,10 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.Objects;
+
+/*
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -30,19 +32,15 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
-
+*/
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
     private ProgressBar progressBar;
     private TextView textView;
     private int progressStatus = 0;
     private Handler handler = new Handler();
     private vehicle myVehicle;
-    private SharedPreferences preferences;
-    private SharedPreferences.Editor editor;
     private FirebaseUser user;
-    private FirebaseAuth auth;
     /*
     private FirebaseDatabase firebaseDatabase;
     private FirebaseStorage firebaseStorage;
@@ -57,12 +55,12 @@ public class MainActivity extends AppCompatActivity {
             Toolbar toolbar = findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
             toolbar.setTitleTextColor(Color.WHITE);
+            Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
             myVehicle = new vehicle();
 
-            preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            editor = preferences.edit();
+            //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-            auth = FirebaseAuth.getInstance();
+            FirebaseAuth auth = FirebaseAuth.getInstance();
             user = auth.getCurrentUser();
 
 

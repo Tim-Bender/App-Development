@@ -3,7 +3,6 @@
 
     <item
         android:id="@+id/action_settings"
-        android:icon="@drawable/cogwheeltransparent"
         android:title="@string/settings" />
 
 </menu>

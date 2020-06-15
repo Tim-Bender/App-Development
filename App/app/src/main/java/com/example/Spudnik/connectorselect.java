@@ -23,7 +23,6 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,8 +36,6 @@ import java.util.Objects;
 public class connectorselect extends AppCompatActivity {
     private vehicle myvehicle;
     private EditText editText;
-    private Toolbar toolbar;
-    private Spinner mySpinner;
     private SharedPreferences preferences;
 
     @SuppressLint("SetTextI18n")
@@ -46,10 +43,11 @@ public class connectorselect extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_connectorselect);
-        this.toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        this.toolbar.setTitleTextColor(Color.WHITE);
-        this.mySpinner = findViewById(R.id.myconnectorspinner);
+        toolbar.setTitleTextColor(Color.WHITE);
+        Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
+        Spinner mySpinner = findViewById(R.id.myconnectorspinner);
         try {
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             setTitle("Connector Selection");
@@ -60,7 +58,7 @@ public class connectorselect extends AppCompatActivity {
 
             ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, connections);
             dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            this.mySpinner.setAdapter(dataAdapter);
+            mySpinner.setAdapter(dataAdapter);
             this.editText = findViewById(R.id.connectorinput);
             this.editText.setOnKeyListener(new View.OnKeyListener() {
                 @Override
@@ -74,7 +72,7 @@ public class connectorselect extends AppCompatActivity {
                 }
             });
 
-            this.mySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            mySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     Object item = parent.getItemAtPosition(position);
@@ -187,7 +185,7 @@ public class connectorselect extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Empty", Toast.LENGTH_SHORT).show();
             }
-        } catch (Exception Ignored) {
+        } catch (Exception ignored) {
 
         }
 
@@ -223,7 +221,7 @@ public class connectorselect extends AppCompatActivity {
             Button button = findViewById(R.id.connectorselectbutton3);
             button.setBackgroundResource(R.drawable.nightmodebuttonselector);
             button.setTextColor(Color.WHITE);
-        } catch (Exception Ignored) {
+        } catch (Exception ignored) {
         }
 
     }
@@ -243,7 +241,7 @@ public class connectorselect extends AppCompatActivity {
             Button button = findViewById(R.id.connectorselectbutton3);
             button.setBackgroundResource(R.drawable.daymodebuttonselector);
             button.setTextColor(Color.BLACK);
-        } catch (Exception Ignored) {
+        } catch (Exception ignored) {
         }
     }
 
