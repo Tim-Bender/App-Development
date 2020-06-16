@@ -29,9 +29,15 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
@@ -41,7 +47,6 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseUser user;
     private EditText emailEditText;
     private EditText passwordEditText;
-    private vehicle myVehicle;
     private SharedPreferences.Editor editor;
     private FirebaseStorage firebaseStorage;
 
@@ -59,7 +64,6 @@ public class LoginActivity extends AppCompatActivity {
             goToHome();
             finish();
         }
-        myVehicle = getIntent().getParcelableExtra("myvehicle");
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("Login");
@@ -90,8 +94,7 @@ public class LoginActivity extends AppCompatActivity {
                         if(task.isSuccessful()){
                             Toast.makeText(LoginActivity.this, "Logged in", Toast.LENGTH_SHORT).show();
                             user = auth.getCurrentUser();
-                            updateDataBase(new View(LoginActivity.this));
-                            goToHome();
+                            updateDataBase();
                         }
                         else{
                             Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_SHORT).show();
@@ -101,39 +104,92 @@ public class LoginActivity extends AppCompatActivity {
                 });
 
     }
-    public void updateDataBase(View view){
-        StorageReference reference = firebaseStorage.getReference().getRoot();
+    public void updateDataBase(){
 
+        StorageReference reference = firebaseStorage.getReference().getRoot();
+        Toast.makeText(this, "Updating...", Toast.LENGTH_SHORT).show();
         final File rootpath = new File(getFilesDir(),"database");
+        File temp1 = new File(getFilesDir(),"");
+        File temp2 = new File(temp1,"machineids");
+        temp2.delete();
+        Log.i(TAG,"Settings file is null: " + temp2.exists());
+        Log.i(TAG,"Settings deleted " + temp2);
+
         if(!rootpath.exists()){
-           Log.i(TAG,"Folder created: " + rootpath.mkdirs());
+            Log.i(TAG,"Folder Created: " + rootpath.mkdirs());
         }
         reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
             @Override
             public void onSuccess(ListResult listResult) {
-                for(StorageReference item : listResult.getItems()){
-                    final File localFile = new File(rootpath,item.getName());
-                    Log.i(TAG,localFile.delete() + " file removed");
-                    Log.i(TAG,"Item Name: " + item.getName());
-                    item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                for(final StorageReference item : listResult.getItems()) {
+                    final File localFile = new File(rootpath, item.getName());
+                    item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
                         @Override
-                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            Toast.makeText(LoginActivity.this, "Downloaded: " + localFile, Toast.LENGTH_SHORT).show();
-                            Toast.makeText(LoginActivity.this, "FileDownloaded", Toast.LENGTH_SHORT).show();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
+                        public void onSuccess(StorageMetadata storageMetadata) {
+                            if(localFile.lastModified() < storageMetadata.getUpdatedTimeMillis()) {
+                                Log.i(TAG, "File deleted " + localFile.delete());
+                                item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                        Log.i(TAG,"ItemName " + item.getName());
 
+                                        File root = new File(getFilesDir(),"");
+                                        FileWriter fw;
+                                        File toEdit = new File(root,"machineids");
+                                        try {
+                                            String line = "",toPrint;
+                                            if(toEdit.exists()) {
+                                                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
+                                                line = reader.readLine();
+                                            }
+                                            String editedItemName = item.getName().toLowerCase().replace(".csv","").replace("machine","") + ",";
+                                            toPrint = (line != null) ? line +editedItemName : editedItemName;
+                                            fw = new FileWriter(toEdit);
+                                            fw.append(toPrint);
+                                            fw.flush();
+                                            fw.close();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                            }
+                            else if(localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()){
+                                File root = new File(getFilesDir(),"");
+                                FileWriter fw;
+                                File toEdit = new File(root,"machineids");
+                                try {
+                                    String line = "",toPrint;
+                                    if(toEdit.exists()) {
+                                        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
+                                        line = reader.readLine();
+                                    }
+                                    String editedItemName = item.getName().toLowerCase().replace(".csv","").replace("machine","") + ",";
+                                    toPrint = (line != null) ? line +editedItemName : editedItemName;
+                                    fw = new FileWriter(toEdit);
+                                    fw.append(toPrint);
+                                    fw.flush();
+                                    fw.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+
+
+                            }
                         }
                     });
-
-
                 }
                 editor.putBoolean("databaseupdated",true);
                 editor.commit();
                 Toast.makeText(LoginActivity.this, "Update Complete", Toast.LENGTH_SHORT).show();
+                if(getIntent().getBooleanExtra("fromsettings",false)){
+                    finish();
+                }
+                else {
+                    goToHome();
+                }
             }
+
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
@@ -145,7 +201,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private void goToHome(){
         Intent i = new Intent(getBaseContext(),home.class);
-        i.putExtra("myvehicle",myVehicle);
         startActivity(i);
     }
 

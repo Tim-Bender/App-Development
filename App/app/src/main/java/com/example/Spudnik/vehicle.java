@@ -156,7 +156,7 @@ public class vehicle implements Parcelable {
      * @param i Inputstream
      */
 
-     void buildVehicleIds(final InputStreamReader i){
+    void buildVehicleIds(final InputStreamReader i){
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -164,19 +164,25 @@ public class vehicle implements Parcelable {
                     BufferedReader reader = new BufferedReader(i);
                     String line;
                     String[] holder;
-                    while((line = reader.readLine()) != null) {
-                        line = line.toLowerCase();
-                        holder = line.split(",");
-                        if (!vehicleIds.contains(holder[0])) {
-                            vehicleIds.add(holder[0]);
+                    line = reader.readLine();
+                    line = line.toLowerCase();
+                    holder = line.split(",");
+                    for(String s : holder) {
+                        if (!vehicleIds.contains(s)) {
+                            vehicleIds.add(s);
                         }
                     }
+
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
+    }
+
+    void buildVehicleIds(ArrayList<String> ids){
+         vehicleIds = ids;
     }
 
      boolean checkDealer(String dealerid){

@@ -23,12 +23,20 @@ import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class settings extends AppCompatActivity {
     private static final String TAG = settings.class.getSimpleName();
@@ -71,11 +79,15 @@ public class settings extends AppCompatActivity {
             nightMode();
             aSwitch.setChecked(true);
         }
+        else{
+            dayMode();
+        }
 
     }
 
      @Override
      public void onStart(){
+
         super.onStart();
      }
 
@@ -143,6 +155,9 @@ public class settings extends AppCompatActivity {
             button = findViewById(R.id.settingsloginbutton);
             button.setBackgroundResource(R.drawable.nightmodebuttonselector);
             button.setTextColor(Color.WHITE);
+            button = findViewById(R.id.settingslogoutbutton);
+            button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+            button.setTextColor(Color.WHITE);
             aSwitch.setTextColor(Color.WHITE);
         } catch (Exception ignored) {}
 
@@ -169,6 +184,9 @@ public class settings extends AppCompatActivity {
             button = findViewById(R.id.settingsloginbutton);
             button.setBackgroundResource(R.drawable.daymodebuttonselector);
             button.setTextColor(Color.BLACK);
+            button = findViewById(R.id.settingslogoutbutton);
+            button.setBackgroundResource(R.drawable.daymodebuttonselector);
+            button.setTextColor(Color.BLACK);
             aSwitch.setTextColor(Color.BLACK);
         }catch(Exception ignored){}
 
@@ -182,37 +200,86 @@ public class settings extends AppCompatActivity {
     }
 
     public void updateDataBase(View view){
+
         StorageReference reference = firebaseStorage.getReference().getRoot();
 
         final File rootpath = new File(getFilesDir(),"database");
+        File temp1 = new File(getFilesDir(),"");
+        File temp2 = new File(temp1,"machineids");
+        temp2.delete();
+        Log.i(TAG,"Settings file is null: " + temp2.exists());
+        Log.i(TAG,"Settings deleted " + temp2);
+
         if(!rootpath.exists()){
             Log.i(TAG,"Folder Created: " + rootpath.mkdirs());
         }
         reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
             @Override
             public void onSuccess(ListResult listResult) {
-                for(StorageReference item : listResult.getItems()){
-                    final File localFile = new File(rootpath,item.getName());
-                    Log.i(TAG,"File deleted " + localFile.delete());
-                    Log.i(TAG,"Item Name: " + item.getName());
-                    item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                for(final StorageReference item : listResult.getItems()) {
+                    final File localFile = new File(rootpath, item.getName());
+                    item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
                         @Override
-                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            Toast.makeText(settings.this, "Downloaded: " + localFile, Toast.LENGTH_SHORT).show();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
+                        public void onSuccess(StorageMetadata storageMetadata) {
+                            if(localFile.lastModified() < storageMetadata.getUpdatedTimeMillis()) {
+                                Log.i(TAG, "File deleted " + localFile.delete());
+                                item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                        Log.i(TAG,"ItemName " + item.getName());
 
+                                        File root = new File(getFilesDir(),"");
+                                        FileWriter fw;
+                                        File toEdit = new File(root,"machineids");
+                                        try {
+                                            String line = "",toPrint;
+                                            if(toEdit.exists()) {
+                                                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
+                                                line = reader.readLine();
+                                            }
+                                            String editedItemName = item.getName().toLowerCase().replace(".csv","").replace("machine","") + ",";
+                                            toPrint = (line != null) ? line +editedItemName : editedItemName;
+                                            fw = new FileWriter(toEdit);
+                                            fw.append(toPrint);
+                                            fw.flush();
+                                            fw.close();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        Toast.makeText(settings.this, "Downloaded: " + localFile, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                            else if(localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()){
+                                File root = new File(getFilesDir(),"");
+                                FileWriter fw;
+                                File toEdit = new File(root,"machineids");
+                                try {
+                                    String line = "",toPrint;
+                                    if(toEdit.exists()) {
+                                        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
+                                        line = reader.readLine();
+                                    }
+                                    String editedItemName = item.getName().toLowerCase().replace(".csv","").replace("machine","") + ",";
+                                    toPrint = (line != null) ? line +editedItemName : editedItemName;
+                                    fw = new FileWriter(toEdit);
+                                    fw.append(toPrint);
+                                    fw.flush();
+                                    fw.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+
+
+                            }
                         }
                     });
-
-
                 }
                 editor.putBoolean("databaseupdated",true);
                 editor.commit();
                 Toast.makeText(settings.this, "Update Complete", Toast.LENGTH_SHORT).show();
             }
+
         }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
@@ -221,8 +288,22 @@ public class settings extends AppCompatActivity {
                 });
     }
     public void login(View view){
-        Intent i = new Intent(getBaseContext(),LoginActivity.class);
-        startActivity(i);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user == null) {
+            Intent i = new Intent(getBaseContext(), LoginActivity.class);
+            i.putExtra("fromsettings", true);
+            startActivity(i);
+        }
+        else{
+            Toast.makeText(this, "Already Logged In", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    public void logout(View view){
+       FirebaseAuth auth = FirebaseAuth.getInstance();
+       auth.signOut();
+       Toast.makeText(this, "Signed Out", Toast.LENGTH_SHORT).show();
     }
 
 }

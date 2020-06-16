@@ -25,7 +25,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="1.5"
+            android:layout_weight="1.2"
             android:orientation="horizontal">
 
             <Space
@@ -40,7 +40,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight=".9"
                 android:gravity="center_vertical"
-                android:text="Welcome to Settings"
+                android:text="Settings"
                 android:textColor="#000000"
                 android:textSize="24sp"
                 android:textStyle="bold" />
@@ -100,7 +100,7 @@
         <Space
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight=".22" />
+            android:layout_weight=".12" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -131,7 +131,7 @@
         <Space
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight=".22" />
+            android:layout_weight=".12" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -150,7 +150,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight=".4"
                 android:onClick="submitFeedback"
-                android:text="Report Feedback" />
+                android:text="Send Feedback" />
 
             <Space
                 android:layout_width="0dp"
@@ -162,7 +162,7 @@
         <Space
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight=".22" />
+            android:layout_weight=".12" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -192,7 +192,7 @@
         <Space
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight=".22" />
+            android:layout_weight=".12" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -217,12 +217,43 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight=".5" />
+
         </LinearLayout>
 
         <Space
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="1.25" />
+            android:layout_weight=".12" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="1.125"
+            android:orientation="horizontal">
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".05" />
+
+            <Button
+                android:id="@+id/settingslogoutbutton"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight=".4"
+                android:onClick="logout"
+                android:text="Logout" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5" />
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight=".2" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

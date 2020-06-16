@@ -35,7 +35,6 @@ import java.util.Objects;
  */
 
 public class home extends AppCompatActivity {
-    private vehicle myvehicle;
     private SharedPreferences preferences;
     private InputStreamReader is;
     private InputStreamReader d;
@@ -50,7 +49,6 @@ public class home extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
         setTitle("Home");
         myToolBar.setTitleTextColor(Color.WHITE);
-        this.myvehicle = new vehicle();
         FirebaseAuth auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
 
@@ -64,35 +62,6 @@ public class home extends AppCompatActivity {
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if(preferences.getBoolean("nightmode",false)){
             nightMode();
-        }
-        if(user != null) {
-            AsyncTask.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-
-                        boolean updated = preferences.getBoolean("databaseupdated", false);
-                        d = new InputStreamReader(getResources().openRawResource(R.raw.dealerids));
-
-                        System.out.println("Updated : " + updated);
-                        FileInputStream fis2;
-                        if (updated) {
-                            //String filename = getFilesDir().getPath() + File.separator + "database" + File.separator +"parsedtest.csv";
-                            final File rootpath = new File(getFilesDir(),"database");
-                            File localFile = new File(rootpath,"machine83xx.csv");
-                            fis2 = new FileInputStream(localFile);
-                            is = new InputStreamReader(fis2, StandardCharsets.UTF_8);
-                        } else {
-                            is = new InputStreamReader(getResources().openRawResource(R.raw.machine83xx));
-                        }
-
-                        myvehicle.buildDealers(d);
-                        myvehicle.buildVehicleIds(is);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
         }
 
 
@@ -110,9 +79,14 @@ public class home extends AppCompatActivity {
     }
     public void diagTool(View view){
         try {
-            Intent i = new Intent(getBaseContext(), inputserial.class);
-            i.putExtra("myvehicle",myvehicle);
-            startActivity(i);
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if(user != null) {
+                Intent i = new Intent(getBaseContext(), inputserial.class);
+                startActivity(i);
+            }
+            else{
+                Toast.makeText(this, "Please Sign In", Toast.LENGTH_SHORT).show();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,5 +1,6 @@
 package com.example.Spudnik;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -9,17 +10,35 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Objects;
 
 /*
@@ -34,17 +53,14 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 */
 public class MainActivity extends AppCompatActivity {
-
+    private final static String TAG = MainActivity.class.getSimpleName();
     private ProgressBar progressBar;
     private TextView textView;
     private int progressStatus = 0;
     private Handler handler = new Handler();
-    private vehicle myVehicle;
     private FirebaseUser user;
-    /*
-    private FirebaseDatabase firebaseDatabase;
-    private FirebaseStorage firebaseStorage;
-    */
+    private SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,62 +72,14 @@ public class MainActivity extends AppCompatActivity {
             setSupportActionBar(toolbar);
             toolbar.setTitleTextColor(Color.WHITE);
             Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
-            myVehicle = new vehicle();
 
-            //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-
+            preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            editor = preferences.edit();
             FirebaseAuth auth = FirebaseAuth.getInstance();
             user = auth.getCurrentUser();
-
-
-            /*firebaseDatabase = FirebaseDatabase.getInstance();
-            firebaseStorage = FirebaseStorage.getInstance();
-            DatabaseReference addressReference = firebaseDatabase.getReference("address");
-            addressReference.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    String newAddress = dataSnapshot.getValue(String.class);
-                    Log.i(TAG,"New Address: " + newAddress);
-                    editor.putString("ftpaddress",newAddress);
-                    editor.commit();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-            DatabaseReference passwordReference = firebaseDatabase.getReference("password");
-            passwordReference.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    String newPassword = dataSnapshot.getValue(String.class);
-                    Log.i(TAG,"New Password: " + newPassword);
-                    editor.putString("ftppassword",newPassword);
-                    editor.commit();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-            DatabaseReference passwordReference3 = firebaseDatabase.getReference("username");
-            passwordReference3.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    String newUsername = dataSnapshot.getValue(String.class);
-                    Log.i(TAG,"New Username: " + newUsername);
-                    editor.putString("ftpusername",newUsername);
-                    editor.commit();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });*/
-
+            if(user != null){
+                updateDataBase();
+            }
             progressBar = findViewById(R.id.loadingbar);
             progressBar.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
             textView = findViewById(R.id.loadingText);
@@ -138,13 +106,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                     Intent i;
                     if(user != null) {
-
                         i = new Intent(getBaseContext(), home.class);
                     }
                     else{
                         i = new Intent(getBaseContext(),LoginActivity.class);
                     }
-                    i.putExtra("myvehicle",myVehicle);
                     startActivity(i);
                     finish();
                 }
@@ -160,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
 
     @Override
     protected void onStart() {
@@ -178,5 +145,93 @@ public class MainActivity extends AppCompatActivity {
         textView.setTextColor(Color.WHITE);
         textView = findViewById(R.id.textView3);
         textView.setTextColor(Color.WHITE);
+    }
+
+    public void updateDataBase() {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                StorageReference reference = FirebaseStorage.getInstance().getReference().getRoot();
+
+                final File rootpath = new File(getFilesDir(), "database");
+                File temp1 = new File(getFilesDir(), "");
+                File temp2 = new File(temp1, "machineids");
+                boolean temp3 = temp2.delete();
+
+                if (!rootpath.exists()) {
+                    Log.i(TAG, "Folder Created: " + rootpath.mkdirs());
+                }
+                reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
+                    @Override
+                    public void onSuccess(ListResult listResult) {
+                        for (final StorageReference item : listResult.getItems()) {
+                            final File localFile = new File(rootpath, item.getName());
+                            item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
+                                @Override
+                                public void onSuccess(StorageMetadata storageMetadata) {
+                                    if (localFile.lastModified() < storageMetadata.getUpdatedTimeMillis()) {
+                                        Log.i(TAG, "File deleted " + localFile.delete());
+                                        item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                                Log.i(TAG, "ItemName " + item.getName());
+
+                                                File root = new File(getFilesDir(), "");
+                                                FileWriter fw;
+                                                File toEdit = new File(root, "machineids");
+                                                try {
+                                                    String line = "", toPrint;
+                                                    if (toEdit.exists()) {
+                                                        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
+                                                        line = reader.readLine();
+                                                    }
+                                                    String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
+                                                    toPrint = (line != null) ? line + editedItemName : editedItemName;
+                                                    fw = new FileWriter(toEdit);
+                                                    fw.append(toPrint);
+                                                    fw.flush();
+                                                    fw.close();
+                                                } catch (IOException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        });
+                                    } else if (localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()) {
+                                        File root = new File(getFilesDir(), "");
+                                        FileWriter fw;
+                                        File toEdit = new File(root, "machineids");
+                                        try {
+                                            String line = "", toPrint;
+                                            if (toEdit.exists()) {
+                                                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
+                                                line = reader.readLine();
+                                            }
+                                            String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
+                                            toPrint = (line != null) ? line + editedItemName : editedItemName;
+                                            fw = new FileWriter(toEdit);
+                                            fw.append(toPrint);
+                                            fw.flush();
+                                            fw.close();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+
+
+                                    }
+                                }
+                            });
+                        }
+                        editor.putBoolean("databaseupdated", true);
+                        editor.commit();
+                    }
+
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Firebase Update Error");
+                    }
+                });
+            }
+        });
     }
 }
