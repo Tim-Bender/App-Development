@@ -3,7 +3,6 @@ package com.example.Spudnik;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,7 +46,18 @@ public class connectorselect extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
         Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
+        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    }
+    @SuppressLint("SetTextI18n")
+    @Override
+    protected void onStart(){
+        super.onStart();
+        boolean nightMode = preferences.getBoolean("nightmode",false);
+        if(nightMode){
+            nightMode();
+        }
         Spinner mySpinner = findViewById(R.id.myconnectorspinner);
+
         try {
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             setTitle("Connector Selection");
@@ -55,8 +65,10 @@ public class connectorselect extends AppCompatActivity {
             Objects.requireNonNull(this.myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
 
             List<String> connections = this.myvehicle.getUniqueConnections();
+            ArrayAdapter<String> dataAdapter;
+            dataAdapter = (nightMode) ? new ArrayAdapter<>(this, R.layout.spinner_item_night, connections) :
+                    new ArrayAdapter<>(this, R.layout.spinner_item_day, connections);
 
-            ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, connections);
             dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             mySpinner.setAdapter(dataAdapter);
             this.editText = findViewById(R.id.connectorinput);
@@ -94,20 +106,8 @@ public class connectorselect extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "No Connections", Toast.LENGTH_SHORT).show();
             }
-        } catch (Resources.NotFoundException e) {
-            Toast.makeText(this, "File Not Found Exception", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
             e.printStackTrace();
-        }catch(Exception e){
-            Toast.makeText(this, "Unidentified error", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-
-    }
-    @Override
-    protected void onStart(){
-        super.onStart();
-        if(preferences.getBoolean("nightmode",false)){
-            nightMode();
         }
 
 

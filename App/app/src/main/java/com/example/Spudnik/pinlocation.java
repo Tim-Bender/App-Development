@@ -22,6 +22,9 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +41,7 @@ public class pinlocation extends AppCompatActivity {
     private static final int VERTICAL = 1;
     private final String TAG = this.getClass().getSimpleName();
     private boolean built = false;
+    private ArrayList<TextView> textViews = new ArrayList<>();
 
 
     @Override
@@ -162,6 +166,7 @@ public class pinlocation extends AppCompatActivity {
                         textView.setBackgroundResource(R.drawable.pinlocationcurrentbuttonbackground);
                     }
                     innerlayout1.addView(textView);
+                    textViews.add(textView);
                 }
             }
             else{
@@ -177,6 +182,7 @@ public class pinlocation extends AppCompatActivity {
                        textView.setBackgroundResource(R.drawable.pinlocationcurrentbuttonbackground);
                    }
                    innerlayout2.addView(textView);
+                   textViews.add(textView);
                }
                 for(int i = pinnumber/2+1; i <= pinnumber; i++){
                     textView = new TextView(this);
@@ -190,6 +196,7 @@ public class pinlocation extends AppCompatActivity {
                         textView.setBackgroundResource(R.drawable.pinlocationcurrentbuttonbackground);
                     }
                     innerlayout1.addView(textView);
+                    textViews.add(textView);
                 }
             }
             built = true;
@@ -226,6 +233,7 @@ public class pinlocation extends AppCompatActivity {
                     textView.setBackgroundResource(R.drawable.pinlocationcurrentbuttonbackground);
                 }
                 innerlayout1.addView(textView);
+                textViews.add(textView);
             }
             for(int i = pinnumber/2; i >=1; i--){
                 textView = new TextView(this);
@@ -239,6 +247,7 @@ public class pinlocation extends AppCompatActivity {
                     textView.setBackgroundResource(R.drawable.pinlocationcurrentbuttonbackground);
                 }
                 innerlayout2.addView(textView);
+                textViews.add(textView);
             }
 
             built = true;
@@ -265,24 +274,52 @@ public class pinlocation extends AppCompatActivity {
 
     public void nextPin(View view){
         try {
-            this.loc++;
-            if (this.loc == this.uniqueConnections.size()) {
-                this.loc = 0;
+            int pastPos = loc;
+            loc++;
+            if (loc == textViews.size()+1) {
+                loc = 1;
             }
+            System.out.println("Past: " + pastPos + " Current " + loc);
+            removeHighlight(pastPos);
+            addHighlight(loc);
             updateValues();
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public void prevPin(View view){
         try {
-            this.loc--;
-            if (this.loc < 0) {
-                this.loc = this.uniqueConnections.size() - 1;
+            int pastPos = loc;
+            loc--;
+            if (loc < 1) {
+                loc = textViews.size();
             }
+            System.out.println("Past: " + pastPos + " Current " + loc);
+            removeHighlight(pastPos);
+            addHighlight(loc);
             updateValues();
         } catch (Exception ignored) {
 
+        }
+    }
+
+    public void removeHighlight(int loc){
+
+        for(TextView t : textViews){
+            if(t.getText().toString().equals(Integer.toString(loc))){
+                t.setBackgroundResource(R.drawable.back);
+                return;
+            }
+        }
+    }
+
+    public void addHighlight(int loc){
+        for(TextView t : textViews){
+            if(t.getText().toString().equals(Integer.toString(loc))){
+                t.setBackgroundResource(R.drawable.pinlocationcurrentbuttonbackground);
+                return;
+            }
         }
     }
 

@@ -6,10 +6,13 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.net.ConnectivityManager;
+import android.net.Network;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -148,90 +151,95 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateDataBase() {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                StorageReference reference = FirebaseStorage.getInstance().getReference().getRoot();
+        ConnectivityManager cm = (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        Network activeNetwork = cm.getActiveNetwork();
+        boolean isConnected = activeNetwork != null;
+        if(isConnected) {
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    StorageReference reference = FirebaseStorage.getInstance().getReference().getRoot();
 
-                final File rootpath = new File(getFilesDir(), "database");
-                File temp1 = new File(getFilesDir(), "");
-                File temp2 = new File(temp1, "machineids");
-                boolean temp3 = temp2.delete();
+                    final File rootpath = new File(getFilesDir(), "database");
+                    File temp1 = new File(getFilesDir(), "");
+                    File temp2 = new File(temp1, "machineids");
+                    boolean temp3 = temp2.delete();
 
-                if (!rootpath.exists()) {
-                    Log.i(TAG, "Folder Created: " + rootpath.mkdirs());
-                }
-                reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
-                    @Override
-                    public void onSuccess(ListResult listResult) {
-                        for (final StorageReference item : listResult.getItems()) {
-                            final File localFile = new File(rootpath, item.getName());
-                            item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
-                                @Override
-                                public void onSuccess(StorageMetadata storageMetadata) {
-                                    if (localFile.lastModified() < storageMetadata.getUpdatedTimeMillis()) {
-                                        Log.i(TAG, "File deleted " + localFile.delete());
-                                        item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                                            @Override
-                                            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                                                Log.i(TAG, "ItemName " + item.getName());
+                    if (!rootpath.exists()) {
+                        Log.i(TAG, "Folder Created: " + rootpath.mkdirs());
+                    }
+                    reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
+                        @Override
+                        public void onSuccess(ListResult listResult) {
+                            for (final StorageReference item : listResult.getItems()) {
+                                final File localFile = new File(rootpath, item.getName());
+                                item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
+                                    @Override
+                                    public void onSuccess(StorageMetadata storageMetadata) {
+                                        if (localFile.lastModified() < storageMetadata.getUpdatedTimeMillis()) {
+                                            Log.i(TAG, "File deleted " + localFile.delete());
+                                            item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                                @Override
+                                                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                                    Log.i(TAG, "ItemName " + item.getName());
 
-                                                File root = new File(getFilesDir(), "");
-                                                FileWriter fw;
-                                                File toEdit = new File(root, "machineids");
-                                                try {
-                                                    String line = "", toPrint;
-                                                    if (toEdit.exists()) {
-                                                        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
-                                                        line = reader.readLine();
+                                                    File root = new File(getFilesDir(), "");
+                                                    FileWriter fw;
+                                                    File toEdit = new File(root, "machineids");
+                                                    try {
+                                                        String line = "", toPrint;
+                                                        if (toEdit.exists()) {
+                                                            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
+                                                            line = reader.readLine();
+                                                        }
+                                                        String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
+                                                        toPrint = (line != null) ? line + editedItemName : editedItemName;
+                                                        fw = new FileWriter(toEdit);
+                                                        fw.append(toPrint);
+                                                        fw.flush();
+                                                        fw.close();
+                                                    } catch (IOException e) {
+                                                        e.printStackTrace();
                                                     }
-                                                    String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
-                                                    toPrint = (line != null) ? line + editedItemName : editedItemName;
-                                                    fw = new FileWriter(toEdit);
-                                                    fw.append(toPrint);
-                                                    fw.flush();
-                                                    fw.close();
-                                                } catch (IOException e) {
-                                                    e.printStackTrace();
                                                 }
+                                            });
+                                        } else if (localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()) {
+                                            File root = new File(getFilesDir(), "");
+                                            FileWriter fw;
+                                            File toEdit = new File(root, "machineids");
+                                            try {
+                                                String line = "", toPrint;
+                                                if (toEdit.exists()) {
+                                                    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
+                                                    line = reader.readLine();
+                                                }
+                                                String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
+                                                toPrint = (line != null) ? line + editedItemName : editedItemName;
+                                                fw = new FileWriter(toEdit);
+                                                fw.append(toPrint);
+                                                fw.flush();
+                                                fw.close();
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
                                             }
-                                        });
-                                    } else if (localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()) {
-                                        File root = new File(getFilesDir(), "");
-                                        FileWriter fw;
-                                        File toEdit = new File(root, "machineids");
-                                        try {
-                                            String line = "", toPrint;
-                                            if (toEdit.exists()) {
-                                                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
-                                                line = reader.readLine();
-                                            }
-                                            String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
-                                            toPrint = (line != null) ? line + editedItemName : editedItemName;
-                                            fw = new FileWriter(toEdit);
-                                            fw.append(toPrint);
-                                            fw.flush();
-                                            fw.close();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
+
+
                                         }
-
-
                                     }
-                                }
-                            });
+                                });
+                            }
+                            editor.putBoolean("databaseupdated", true);
+                            editor.commit();
                         }
-                        editor.putBoolean("databaseupdated", true);
-                        editor.commit();
-                    }
 
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Firebase Update Error");
-                    }
-                });
-            }
-        });
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "Firebase Update Error");
+                        }
+                    });
+                }
+            });
+        }
     }
 }
