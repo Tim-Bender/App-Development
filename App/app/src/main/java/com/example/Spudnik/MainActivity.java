@@ -17,19 +17,15 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
@@ -44,17 +40,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Objects;
 
-/*
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
-import java.io.File;
-*/
+/**
+ * Welcome to the starting activity of the app. This activity will serve as a loading screen, an authentication check, and an automate database update.
+ */
 public class MainActivity extends AppCompatActivity {
     private final static String TAG = MainActivity.class.getSimpleName();
     private ProgressBar progressBar;
@@ -62,85 +51,99 @@ public class MainActivity extends AppCompatActivity {
     private int progressStatus = 0;
     private Handler handler = new Handler();
     private FirebaseUser user;
-    private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
 
+    /**
+     * Setup the toolbar, this will be the same across all activities, and will thus only be mentioned here.
+     * Assign values to instance fields, including SharedPreferences and firebath authentication/user.
+     * @param savedInstanceState savedInstanceState
+     */
+    @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setTitle("Loading");
-        try {
-            Toolbar toolbar = findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
-            toolbar.setTitleTextColor(Color.WHITE);
-            Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setTitleTextColor(Color.WHITE);
+        Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
 
-            preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            editor = preferences.edit();
-            FirebaseAuth auth = FirebaseAuth.getInstance();
-            user = auth.getCurrentUser();
-            if(user != null){
-                updateDataBase();
-            }
-            progressBar = findViewById(R.id.loadingbar);
-            progressBar.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
-            textView = findViewById(R.id.loadingText);
-            ImageView image = findViewById(R.id.gifloadingscreen);
-            Glide.with(this).load(R.drawable.heartbeatgiftransparent).into(image);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (progressStatus < 100) {
-                        progressStatus += 1;
-                        handler.post(new Runnable() {
-                            @SuppressLint("SetTextI18n")
-                            @Override
-                            public void run() {
-                                progressBar.setProgress(progressStatus);
-                                textView.setText("Loading " + progressStatus + "%");
-                            }
-                        });
-                        try {
-                            Thread.sleep(30);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    Intent i;
-                    if(user != null) {
-                        i = new Intent(getBaseContext(), home.class);
-                    }
-                    else{
-                        i = new Intent(getBaseContext(),LoginActivity.class);
-                    }
-                    startActivity(i);
-                    finish();
-                }
-               /* StorageReference reference = firebaseStorage.getReference().getRoot();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        editor = preferences.edit();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        user = auth.getCurrentUser();
 
-                final File rootpath = new File(getFilesDir(),"database");
-        if(!rootpath.exists()){
-                    rootpath.mkdirs();
-                }*/
-            }).start();
-        } catch (Exception e) {
-            Toast.makeText(this, "Boot Error", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
+        progressBar = findViewById(R.id.loadingbar);
+        progressBar.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
+        textView = findViewById(R.id.loadingText);
+
     }
 
+    /**
+     * This method will toggle night and day mode, initiate gif glide,
+     * then begin asynchronous background tasks involving database construction, and loading bar updates
+     */
 
     @Override
     protected void onStart() {
+        //Night/Day Mode Toggle
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if(preferences.getBoolean("nightmode",false)){
             nightMode();
         }
-
+        //If the firebase user != null, then they are authenticated and we can attempt a database update.
+        if(user != null){
+            updateDataBase();
+        }
+        //GIF Glide animation begin
+        ImageView image = findViewById(R.id.gifloadingscreen);
+        Glide.with(this).load(R.drawable.heartbeatgiftransparent).into(image);
+        //Begin Asynchronous threading
+        try{
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //Continuously update the loading bar
+                while (progressStatus < 100) {
+                    progressStatus += 1;
+                    handler.post(new Runnable() {
+                        @SuppressLint("SetTextI18n")
+                        @Override
+                        public void run() {
+                            progressBar.setProgress(progressStatus);
+                            textView.setText("Loading " + progressStatus + "%");
+                        }
+                    });
+                    try {
+                        Thread.sleep(30);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                Intent i;
+                //If user is authenticated, we redirect them to home
+                if(user != null) {
+                    i = new Intent(getBaseContext(), home.class);
+                }
+                //Otherwise they are directed towards the login activity.
+                else{
+                    i = new Intent(getBaseContext(),LoginActivity.class);
+                }
+                startActivity(i);
+                //Closes the App if someone attempts to "back" into the loading activity.
+                finish();
+            }
+        }).start();
+    } catch (Exception ignored) {
+    }
         super.onStart();
     }
-
+    /**
+     * NightMode Toggle
+     * Most activities will have a nightmode and a daymode toggle, so that they might be switched in the middle
+     * of runtime, however since we are only showing the loading screen once, it does not need a daymode toggle.
+     */
     public void nightMode(){
         ConstraintLayout constraints = findViewById(R.id.mainactivityconstraintlayout);
         constraints.setBackgroundColor(Color.parseColor("#333333"));
@@ -150,32 +153,51 @@ public class MainActivity extends AppCompatActivity {
         textView.setTextColor(Color.WHITE);
     }
 
+    /**
+     * Asynchronous database construction and updatability. Connects to firebase's server,
+     * iterates through all items in the bucket, and downloads needed files, replacing the old ones.
+     * It will also update the list of acceptable vehicle id numbers stored in com.example.Spudnik/files/machineids
+     */
+
     public void updateDataBase() {
+        //Check if there is an internet connection, if not then we exit.
         ConnectivityManager cm = (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
         Network activeNetwork = cm.getActiveNetwork();
         boolean isConnected = activeNetwork != null;
+        //if there is a connection, we go ahead and update
         if(isConnected) {
+            //the entire database updating will be done Asynchronously
             AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {
+                    //get firebase storage reference
                     StorageReference reference = FirebaseStorage.getInstance().getReference().getRoot();
-
                     final File rootpath = new File(getFilesDir(), "database");
+
+                    //Here we delete the current machineids file.
                     File temp1 = new File(getFilesDir(), "");
                     File temp2 = new File(temp1, "machineids");
-                    boolean temp3 = temp2.delete();
+                    temp2.delete();
 
+                    //if the database folder has not been created yet, usually the first time someone installs the app,
+                    // then it is created.
                     if (!rootpath.exists()) {
                         Log.i(TAG, "Folder Created: " + rootpath.mkdirs());
                     }
+
+                    //Make a listall request to firebase to retrieve a list of all items within the storage bucket
                     reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
                         @Override
                         public void onSuccess(ListResult listResult) {
+                            //loop through all items in the bucket
                             for (final StorageReference item : listResult.getItems()) {
                                 final File localFile = new File(rootpath, item.getName());
+                                //retrieve the metadata of the object
                                 item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
                                     @Override
                                     public void onSuccess(StorageMetadata storageMetadata) {
+                                        //compare the Last updated time of the local file, and the file stored on firebase.
+                                        //If the new one needs to be downloaded, download it
                                         if (localFile.lastModified() < storageMetadata.getUpdatedTimeMillis()) {
                                             Log.i(TAG, "File deleted " + localFile.delete());
                                             item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
@@ -183,6 +205,7 @@ public class MainActivity extends AppCompatActivity {
                                                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                                                     Log.i(TAG, "ItemName " + item.getName());
 
+                                                    //If the download is a success, add that machine id to the machineids's list file
                                                     File root = new File(getFilesDir(), "");
                                                     FileWriter fw;
                                                     File toEdit = new File(root, "machineids");
@@ -203,6 +226,7 @@ public class MainActivity extends AppCompatActivity {
                                                     }
                                                 }
                                             });
+                                            //If we don't need to download the file, add the machine id to the list anyway.
                                         } else if (localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()) {
                                             File root = new File(getFilesDir(), "");
                                             FileWriter fw;

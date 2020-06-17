@@ -42,26 +42,46 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+/**
+ * Author: Timothy Bender
+ * timothy.bender@spudnik.com
+ * 530-414-6778
+ * Please see README before updating anything
+ *
+ *
+ * Welcome to the Settings activity.
+ */
 public class settings extends AppCompatActivity {
     private static final String TAG = settings.class.getSimpleName();
     private FirebaseStorage firebaseStorage;
     private Switch aSwitch;
     boolean nightmode = false;
+    SharedPreferences preferences;
     private SharedPreferences.Editor editor;
 
+    /**
+     * Only thing out of the ordinary here in onCreate would be the switch's OnCheckedChangeListener.
+     * This will toggle night and day mode for the entire app by pushing a boolean value into permanent storage via
+     * shared preferences
+     * @param savedInstanceState Bundle
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
         Toolbar myToolBar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolBar);
         getSupportActionBar().setIcon(R.mipmap.ic_launcher);
         setTitle("Settings");
         myToolBar.setTitleTextColor(Color.WHITE);
+
         aSwitch = findViewById(R.id.settingsToggle);
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        firebaseStorage = FirebaseStorage.getInstance();
+        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = preferences.edit();
+        firebaseStorage = FirebaseStorage.getInstance();
+
+        //set a listener to the nightmode switch button.
         aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -79,65 +99,231 @@ public class settings extends AppCompatActivity {
                 }
             }
         });
-        if(preferences.getBoolean("nightmode",false)){
+
+    }
+
+    /**
+     * Check if its in day or night mode.
+     */
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        nightmode = preferences.getBoolean("nightmode",false);
+        if(nightmode){
             nightMode();
             aSwitch.setChecked(true);
         }
         else{
             dayMode();
         }
-
     }
 
-     @Override
-     public void onStart(){
-
-        super.onStart();
-     }
+    /**
+     * Report a bug button redirect, create an email with auto-filled fields
+     * @param view view
+     */
 
     public void reportBug(View view){
         try{
+            //get screen size
             Display display = getWindowManager().getDefaultDisplay();
             Point size = new Point();
             display.getSize(size);
             int width = size.x;
             int height = size.y;
-
+            //create an email intent and fill in necessary information
             Intent emailIntent = new Intent(Intent.ACTION_SEND);
             emailIntent.setType("message/rfc822");
+            //THIS IS WHERE YOU CHANGE THE DESTINATION EMAIL ADDRESS!!!!!!!!
+            //Dev note: Might switch this to database grab?
             emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"timothy.bender@spudnik.com"});
             emailIntent.putExtra(Intent.EXTRA_SUBJECT,"Bug report Diagnostic Tool");
             emailIntent.putExtra(Intent.EXTRA_TEXT, "Device: " + Build.DEVICE + " \nScreenSize:" + height +" x "+ width + "\nAndroid Version: " +
                                                     Build.VERSION.CODENAME + " " + Build.VERSION.RELEASE + "\n\nPlease describe the bug in detail:\n");
+            //start the intent and start an email
             startActivity(Intent.createChooser(emailIntent,"Send mail..."));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Its literally the same function as above. With a different email subject...
+     * @param view view
+     */
+
     public void submitFeedback(View view){
         try{
-            Display display = getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            int width = size.x;
-            int height = size.y;
-
             Intent emailIntent = new Intent(Intent.ACTION_SEND);
             emailIntent.setType("message/rfc822");
-            //emailIntent.setData(Uri.parse("mailto:"));
 
             emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"timothy.bender@spudnik.com"});
             emailIntent.putExtra(Intent.EXTRA_SUBJECT,"Feedback Diagnostic Tool");
-            emailIntent.putExtra(Intent.EXTRA_TEXT, "Device: " + Build.DEVICE + " \nScreenSize:" + height +" x "+ width + "\nAndroid Version: " +
-                    Build.VERSION.CODENAME + " " + Build.VERSION.RELEASE + "\n\nPlease describe the bug in detail:\n");
+            emailIntent.putExtra(Intent.EXTRA_TEXT, "Device: " + Build.DEVICE + "\nAndroid Version: " +
+                    Build.VERSION.CODENAME + " " + Build.VERSION.RELEASE + "\n\nComments: \n");
             startActivity(Intent.createChooser(emailIntent,"Send mail..."));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }}
+        } catch (Exception ignored) {
+        }
+    }
+
+    /**
+     * Update DataBase button redirect, for a description see MainActivity's comments, its the exact same function.
+      * @param view view
+     */
+
+    public void updateDataBase(View view){
+        ConnectivityManager cm = (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        Network activeNetwork = cm.getActiveNetwork();
+        boolean isConnected = activeNetwork != null;
+       if(isConnected) {
+           StorageReference reference = firebaseStorage.getReference().getRoot();
+
+           final File rootpath = new File(getFilesDir(), "database");
+           File temp1 = new File(getFilesDir(), "");
+           File temp2 = new File(temp1, "machineids");
+           temp2.delete();
+
+           if (!rootpath.exists()) {
+               Log.i(TAG, "Folder Created: " + rootpath.mkdirs());
+           }
+           reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
+               @Override
+               public void onSuccess(ListResult listResult) {
+                   for (final StorageReference item : listResult.getItems()) {
+                       final int numberOfFiles = listResult.getItems().size();
+                       final int[] fileNumber = { 1 };
+                       final File localFile = new File(rootpath, item.getName());
+                       item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
+                           @Override
+                           public void onSuccess(StorageMetadata storageMetadata) {
+                               if (localFile.lastModified() < storageMetadata.getUpdatedTimeMillis()) {
+                                   Log.i(TAG, "File deleted " + localFile.delete());
+                                   item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                       @Override
+                                       public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                           Log.i(TAG, "ItemName " + item.getName());
+
+                                           File root = new File(getFilesDir(), "");
+                                           FileWriter fw;
+                                           File toEdit = new File(root, "machineids");
+                                           try {
+                                               String line = "", toPrint;
+                                               if (toEdit.exists()) {
+                                                   BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
+                                                   line = reader.readLine();
+                                               }
+                                               String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
+                                               toPrint = (line != null) ? line + editedItemName : editedItemName;
+                                               fw = new FileWriter(toEdit);
+                                               fw.append(toPrint);
+                                               fw.flush();
+                                               fw.close();
+                                               fileNumber[0]++;
+                                               if(fileNumber[0] == numberOfFiles){
+                                                   Toast.makeText(settings.this, "Update Complete", Toast.LENGTH_SHORT).show();
+                                               }
+                                           } catch (IOException e) {
+                                               e.printStackTrace();
+                                           }
+                                       }
+                                   });
+                               } else if (localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()) {
+                                   File root = new File(getFilesDir(), "");
+                                   FileWriter fw;
+                                   File toEdit = new File(root, "machineids");
+                                   try {
+                                       String line = "", toPrint;
+                                       if (toEdit.exists()) {
+                                           BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
+                                           line = reader.readLine();
+                                       }
+                                       String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
+                                       toPrint = (line != null) ? line + editedItemName : editedItemName;
+                                       fw = new FileWriter(toEdit);
+                                       fw.append(toPrint);
+                                       fw.flush();
+                                       fw.close();
+                                       fileNumber[0]++;
+                                       if(fileNumber[0] == numberOfFiles){
+                                           Toast.makeText(settings.this, "Update Complete", Toast.LENGTH_SHORT).show();
+                                       }
+                                   } catch (IOException e) {
+                                       e.printStackTrace();
+                                   }
 
 
+                               }
+                           }
+                       });
+                   }
+                   editor.putBoolean("databaseupdated", true);
+                   editor.commit();
+               }
 
+           }).addOnFailureListener(new OnFailureListener() {
+               @Override
+               public void onFailure(@NonNull Exception e) {
+               }
+           });
+       }
+       else{
+           Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
+       }
+    }
+
+    /**
+     * Login button redirect
+     * @param view view
+     */
+    public void login(View view){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        //if the user hasn't been authenticated, then we pass them to the login activity
+        if(user == null) {
+            Intent i = new Intent(getBaseContext(), LoginActivity.class);
+            i.putExtra("fromsettings", true);
+            startActivity(i);
+        }
+        //otherwise we assume it was a mistake
+        else{
+            Toast.makeText(this, "Already Logged In", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    /**
+     * Log out button redirect
+     * @param view view
+     */
+    public void logout(View view){
+        //log the user out.
+       FirebaseAuth auth = FirebaseAuth.getInstance();
+       FirebaseUser user = auth.getCurrentUser();
+       //if logged in, log out
+       if(user != null) {
+           auth.signOut();
+           Toast.makeText(this, "Signed Out", Toast.LENGTH_SHORT).show();
+       }
+       //else we assume it was a mistake.
+       else{
+           Toast.makeText(this, "Already Signed In", Toast.LENGTH_SHORT).show();
+       }
+    }
+
+    /**
+     * DEV MODE FEATURE, WILL BE REMOVED LATER
+     * @param view view
+     */
+    public void testBluetooth(View view){
+        try{
+            Intent i = new Intent(getBaseContext(), BluetoothTestActivity.class);
+            startActivity(i);
+        }catch(Exception ignored){}
+    }
+
+    /**
+     * NightMode Toggle
+     */
     public void nightMode(){
         try {
             LinearLayout layout = findViewById(R.id.settingsbackground);
@@ -166,6 +352,10 @@ public class settings extends AppCompatActivity {
         } catch (Exception ignored) {}
 
     }
+
+    /**
+     * DayMode Toggle
+     */
 
     public void dayMode(){
         try {
@@ -196,124 +386,6 @@ public class settings extends AppCompatActivity {
 
     }
 
-    public void testBluetooth(View view){
-        try{
-            Intent i = new Intent(getBaseContext(), BluetoothTestActivity.class);
-            startActivity(i);
-        }catch(Exception ignored){}
-    }
 
-    public void updateDataBase(View view){
-        ConnectivityManager cm = (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        Network activeNetwork = cm.getActiveNetwork();
-        boolean isConnected = activeNetwork != null;
-       if(isConnected) {
-           StorageReference reference = firebaseStorage.getReference().getRoot();
-
-           final File rootpath = new File(getFilesDir(), "database");
-           File temp1 = new File(getFilesDir(), "");
-           File temp2 = new File(temp1, "machineids");
-           temp2.delete();
-           Log.i(TAG, "Settings file is null: " + temp2.exists());
-           Log.i(TAG, "Settings deleted " + temp2);
-
-           if (!rootpath.exists()) {
-               Log.i(TAG, "Folder Created: " + rootpath.mkdirs());
-           }
-           reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
-               @Override
-               public void onSuccess(ListResult listResult) {
-                   for (final StorageReference item : listResult.getItems()) {
-                       final File localFile = new File(rootpath, item.getName());
-                       item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
-                           @Override
-                           public void onSuccess(StorageMetadata storageMetadata) {
-                               if (localFile.lastModified() < storageMetadata.getUpdatedTimeMillis()) {
-                                   Log.i(TAG, "File deleted " + localFile.delete());
-                                   item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                                       @Override
-                                       public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                                           Log.i(TAG, "ItemName " + item.getName());
-
-                                           File root = new File(getFilesDir(), "");
-                                           FileWriter fw;
-                                           File toEdit = new File(root, "machineids");
-                                           try {
-                                               String line = "", toPrint;
-                                               if (toEdit.exists()) {
-                                                   BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
-                                                   line = reader.readLine();
-                                               }
-                                               String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
-                                               toPrint = (line != null) ? line + editedItemName : editedItemName;
-                                               fw = new FileWriter(toEdit);
-                                               fw.append(toPrint);
-                                               fw.flush();
-                                               fw.close();
-                                           } catch (IOException e) {
-                                               e.printStackTrace();
-                                           }
-                                           Toast.makeText(settings.this, "Downloaded: " + localFile, Toast.LENGTH_SHORT).show();
-                                       }
-                                   });
-                               } else if (localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()) {
-                                   File root = new File(getFilesDir(), "");
-                                   FileWriter fw;
-                                   File toEdit = new File(root, "machineids");
-                                   try {
-                                       String line = "", toPrint;
-                                       if (toEdit.exists()) {
-                                           BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
-                                           line = reader.readLine();
-                                       }
-                                       String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
-                                       toPrint = (line != null) ? line + editedItemName : editedItemName;
-                                       fw = new FileWriter(toEdit);
-                                       fw.append(toPrint);
-                                       fw.flush();
-                                       fw.close();
-                                   } catch (IOException e) {
-                                       e.printStackTrace();
-                                   }
-
-
-                               }
-                           }
-                       });
-                   }
-                   editor.putBoolean("databaseupdated", true);
-                   editor.commit();
-                   Toast.makeText(settings.this, "Update Complete", Toast.LENGTH_SHORT).show();
-               }
-
-           }).addOnFailureListener(new OnFailureListener() {
-               @Override
-               public void onFailure(@NonNull Exception e) {
-                   Log.e(TAG, "Firebase Update Error");
-               }
-           });
-       }
-       else{
-           Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
-       }
-    }
-    public void login(View view){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user == null) {
-            Intent i = new Intent(getBaseContext(), LoginActivity.class);
-            i.putExtra("fromsettings", true);
-            startActivity(i);
-        }
-        else{
-            Toast.makeText(this, "Already Logged In", Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
-    public void logout(View view){
-       FirebaseAuth auth = FirebaseAuth.getInstance();
-       auth.signOut();
-       Toast.makeText(this, "Signed Out", Toast.LENGTH_SHORT).show();
-    }
 
 }

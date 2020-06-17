@@ -43,6 +43,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Objects;
 
+
+/**
+ * Author: Timothy Bender
+ * timothy.bender@spudnik.com
+ * 530-414-6778
+ *
+ *
+ * Welcome to the login activity...
+ */
+
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = LoginActivity.class.getSimpleName();
 
@@ -53,33 +63,45 @@ public class LoginActivity extends AppCompatActivity {
     private SharedPreferences.Editor editor;
     private FirebaseStorage firebaseStorage;
 
+    /**
+     * Nothing special in the onCreate, just assigning instance fields and setting up the toolbar.
+     * There is a redundancy check to see if the user is already logged in, if they are we send them to the home activity.
+     * @param savedInstanceState Bundle
+     */
     @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        //setup firebase user and auth
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         firebaseStorage = FirebaseStorage.getInstance();
-        editor = sharedPreferences.edit();
+        //If they are already logged in, send them to the home activity
         if(user != null){
             goToHome();
             finish();
         }
+        //setup the toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("Login");
         Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
         toolbar.setTitleTextColor(Color.WHITE);
+        //grab the two edit text views
         emailEditText = findViewById(R.id.loginemailedittext);
         passwordEditText = findViewById(R.id.loginpasswordedittext);
     }
 
+    /**
+     * Just your typical nightmode daymode check in onstart
+     */
+    @SuppressLint("CommitPrefEdits")
     @Override
     protected void onStart(){
         super.onStart();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        editor = preferences.edit();
         boolean nightmode = preferences.getBoolean("nightmode", false);
         if(nightmode){
             nightMode();
@@ -89,24 +111,33 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Pass the contents of the two edittext fields into a firebase authentication request.
+     * If the task is successful, then we
+     * @param view view
+     */
     public void login(View view){
         auth.signInWithEmailAndPassword(emailEditText.getText().toString().trim(),passwordEditText.getText().toString().trim())
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
+                        if(task.isSuccessful()){ //if the task is successful, we welcome the user, assign the user variable, then update the database
                             Toast.makeText(LoginActivity.this, "Logged in", Toast.LENGTH_SHORT).show();
                             user = auth.getCurrentUser();
                             updateDataBase();
                         }
                         else{
+                            //otherwise we inform them that authentication has failed.
                             Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_SHORT).show();
                         }
 
                     }
                 });
-
     }
+
+    /**
+     * Update database function, for comments see MainActivity's version. It's the exact same function.
+     */
     public void updateDataBase(){
         ConnectivityManager cm = (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
         Network activeNetwork = cm.getActiveNetwork();
@@ -119,9 +150,6 @@ public class LoginActivity extends AppCompatActivity {
             File temp1 = new File(getFilesDir(), "");
             File temp2 = new File(temp1, "machineids");
             temp2.delete();
-            Log.i(TAG, "Settings file is null: " + temp2.exists());
-            Log.i(TAG, "Settings deleted " + temp2);
-
             if (!rootpath.exists()) {
                 Log.i(TAG, "Folder Created: " + rootpath.mkdirs());
             }
@@ -129,6 +157,8 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(ListResult listResult) {
                     for (final StorageReference item : listResult.getItems()) {
+                        final int numberOfFiles = listResult.getItems().size();
+                        final int[] fileNumber = { 1 };
                         final File localFile = new File(rootpath, item.getName());
                         item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
                             @Override
@@ -155,6 +185,10 @@ public class LoginActivity extends AppCompatActivity {
                                                 fw.append(toPrint);
                                                 fw.flush();
                                                 fw.close();
+                                                fileNumber[0]++;
+                                                if(fileNumber[0] == numberOfFiles){
+                                                    Toast.makeText(LoginActivity.this, "Update Complete", Toast.LENGTH_SHORT).show();
+                                                }
                                             } catch (IOException e) {
                                                 e.printStackTrace();
                                             }
@@ -176,6 +210,10 @@ public class LoginActivity extends AppCompatActivity {
                                         fw.append(toPrint);
                                         fw.flush();
                                         fw.close();
+                                        fileNumber[0]++;
+                                        if(fileNumber[0] == numberOfFiles){
+                                            Toast.makeText(LoginActivity.this, "Update Complete", Toast.LENGTH_SHORT).show();
+                                        }
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
@@ -187,7 +225,6 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     editor.putBoolean("databaseupdated", true);
                     editor.commit();
-                    Toast.makeText(LoginActivity.this, "Update Complete", Toast.LENGTH_SHORT).show();
                     if (getIntent().getBooleanExtra("fromsettings", false)) {
                         finish();
                     } else {
@@ -205,11 +242,17 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * This function will be used to send the user to the home activity.
+     */
     private void goToHome(){
         Intent i = new Intent(getBaseContext(),home.class);
         startActivity(i);
     }
 
+    /**
+     * nightMode toggle
+     */
     public void nightMode(){
         TextView textView = findViewById(R.id.logintextview1);
         textView.setTextColor(Color.WHITE);
@@ -227,6 +270,10 @@ public class LoginActivity extends AppCompatActivity {
         button.setBackgroundResource(R.drawable.nightmodebuttonselector);
         button.setTextColor(Color.WHITE);
     }
+
+    /**
+     * DayMode toggle
+     */
 
     public void dayMode(){
         TextView textView = findViewById(R.id.logintextview1);

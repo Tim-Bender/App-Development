@@ -102,6 +102,8 @@ public class vehicle implements Parcelable {
      * It will run on an async thread in the background to avoid UI thread blocking
      */
     void buildDataBase(){
+        connections.clear();
+        uniqueConnections.clear();
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -336,6 +338,9 @@ public class vehicle implements Parcelable {
         return ("Id: "+ this.vehicleId + "\n Connections: " + this.connections.size() + "\n Unique Connections: " + this.uniqueConnections.size());
     }
 
+    public void setUniqueConnections(ArrayList<String> in){
+        uniqueConnections = in;
+    }
     ArrayList<String> getUniquePins() {
         return uniquePins;
     }

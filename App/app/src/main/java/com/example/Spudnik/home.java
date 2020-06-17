@@ -3,7 +3,6 @@ package com.example.Spudnik;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -21,10 +20,7 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -32,14 +28,19 @@ import java.util.Objects;
  * timothy.bender@spudnik.com
  * 530-414-6778
  * Please see README before updating anything
+ *
+ *
+ *
+ * Welcome to the homescreen activity. This activity's primary job is to direct the user where they want to go.
  */
 
 public class home extends AppCompatActivity {
     private SharedPreferences preferences;
-    private InputStreamReader is;
-    private InputStreamReader d;
-    private FirebaseUser user;
 
+    /**
+     *
+     * @param savedInstanceState savedInstancestate
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,13 +50,14 @@ public class home extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
         setTitle("Home");
         myToolBar.setTitleTextColor(Color.WHITE);
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        user = auth.getCurrentUser();
-
         Toast.makeText(this, "Welcome!", Toast.LENGTH_SHORT).show();
 
 
     }
+
+    /**
+     * Nightmode and daymode toggle is contained here
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -66,6 +68,10 @@ public class home extends AppCompatActivity {
 
 
     }
+
+    /**
+     * Another night and daymode toggle will be checked in onResume
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -77,8 +83,14 @@ public class home extends AppCompatActivity {
            dayMode();
        }
     }
+
+    /**
+     * Button Redirect for the Diagnostic Tool button.
+     * @param view view
+     */
     public void diagTool(View view){
         try {
+            //Users are required to be authenticated before they may proceed to the tool.
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if(user != null) {
                 Intent i = new Intent(getBaseContext(), inputserial.class);
@@ -87,46 +99,59 @@ public class home extends AppCompatActivity {
             else{
                 Toast.makeText(this, "Please Sign In", Toast.LENGTH_SHORT).show();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
 
     }
 
+    /**
+     * Update Button redirect, currently disabled.
+     * @param view view
+     */
     public void update(View view){
         try {
             Toast.makeText(this, "Function Not Supported", Toast.LENGTH_SHORT).show();
             //Intent i = new Intent(getBaseContext(), inputserial.class);
-            //i.putExtra("myvehicle",myvehicle);
             //startActivity(i);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
 
     }
+
+    /**
+     * Log Data button redirect, currently disabled
+     * @param view view
+     */
 
     public void logData(View view){
         try {
             Toast.makeText(this, "Function Not Supported", Toast.LENGTH_SHORT).show();
             //Intent i = new Intent(getBaseContext(), inputserial.class);
-            //i.putExtra("myvehicle",myvehicle);
             //startActivity(i);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
 
     }
 
+    /**
+     * Settings button redirect, will start the settings activity.
+     * @param view view
+     */
     public void settings(View view){
         try{
             Intent i = new Intent(getBaseContext(), settings.class);
             startActivity(i);
-        }catch(Exception e){
-            e.printStackTrace();
+        }catch(Exception ignored){
         }
 
     }
 
+    /**
+     * The next two methods will create the toolbar menu item on the top right, this will be on every
+     * activity that contains this shortcut.
+     * @param item MenuItem
+     * @return onOptionsItemSelected(item)
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         if(item.getItemId() == R.id.action_settings){
@@ -143,6 +168,9 @@ public class home extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Nightmode Toggle
+     */
     public void nightMode(){
         try {
             ConstraintLayout constraintLayout = findViewById(R.id.homeconstraintlayout);
@@ -165,6 +193,10 @@ public class home extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    /**
+     * DayMode Toggle
+     */
 
     public void dayMode(){
         ConstraintLayout constraintLayout = findViewById(R.id.homeconstraintlayout);

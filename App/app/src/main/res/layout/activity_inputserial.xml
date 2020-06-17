@@ -87,6 +87,20 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
+        <TextView
+            android:id="@+id/inputserialerrorserialtextview"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight=".5"
+            android:gravity="center_vertical"
+            android:paddingStart="10dp"
+            android:text="Holder"
+            android:textColor="#FF0000"
+            android:textColorHint="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            android:visibility="gone" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
