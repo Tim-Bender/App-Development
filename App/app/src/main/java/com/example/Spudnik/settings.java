@@ -12,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -29,6 +30,11 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
@@ -41,7 +47,6 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
 /**
  * Author: Timothy Bender
  * timothy.bender@spudnik.com
@@ -55,9 +60,10 @@ public class settings extends AppCompatActivity {
     private static final String TAG = settings.class.getSimpleName();
     private FirebaseStorage firebaseStorage;
     private Switch aSwitch;
-    boolean nightmode = false;
-    SharedPreferences preferences;
+    private boolean nightmode = false;
+    private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
+    private FirebaseDatabase firebaseDatabase;
 
     /**
      * Only thing out of the ordinary here in onCreate would be the switch's OnCheckedChangeListener.
@@ -80,6 +86,7 @@ public class settings extends AppCompatActivity {
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = preferences.edit();
         firebaseStorage = FirebaseStorage.getInstance();
+        firebaseDatabase = FirebaseDatabase.getInstance();
 
         //set a listener to the nightmode switch button.
         aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -126,23 +133,35 @@ public class settings extends AppCompatActivity {
 
     public void reportBug(View view){
         try{
-            //get screen size
-            Display display = getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            int width = size.x;
-            int height = size.y;
-            //create an email intent and fill in necessary information
-            Intent emailIntent = new Intent(Intent.ACTION_SEND);
-            emailIntent.setType("message/rfc822");
-            //THIS IS WHERE YOU CHANGE THE DESTINATION EMAIL ADDRESS!!!!!!!!
-            //Dev note: Might switch this to database grab?
-            emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"timothy.bender@spudnik.com"});
-            emailIntent.putExtra(Intent.EXTRA_SUBJECT,"Bug report Diagnostic Tool");
-            emailIntent.putExtra(Intent.EXTRA_TEXT, "Device: " + Build.DEVICE + " \nScreenSize:" + height +" x "+ width + "\nAndroid Version: " +
-                                                    Build.VERSION.CODENAME + " " + Build.VERSION.RELEASE + "\n\nPlease describe the bug in detail:\n");
-            //start the intent and start an email
-            startActivity(Intent.createChooser(emailIntent,"Send mail..."));
+            DatabaseReference reference = firebaseDatabase.getReference("settings").child("reportemail");
+            reference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    String email = dataSnapshot.getValue(String.class);
+                    //get screen size
+                    Display display = getWindowManager().getDefaultDisplay();
+                    Point size = new Point();
+                    display.getSize(size);
+                    int width = size.x;
+                    int height = size.y;
+                    //create an email intent and fill in necessary information
+                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                    emailIntent.setType("message/rfc822");
+                    emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT,"Bug report Diagnostic Tool");
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, "Device: " + Build.DEVICE + " \nScreenSize:" + height +" x "+ width + "\nAndroid Version: " +
+                            Build.VERSION.CODENAME + " " + Build.VERSION.RELEASE + "\n\nPlease describe the bug in detail:\n");
+                    //start the intent and start an email
+                    startActivity(Intent.createChooser(emailIntent,"Send mail..."));
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -155,14 +174,26 @@ public class settings extends AppCompatActivity {
 
     public void submitFeedback(View view){
         try{
-            Intent emailIntent = new Intent(Intent.ACTION_SEND);
-            emailIntent.setType("message/rfc822");
+            DatabaseReference reference = firebaseDatabase.getReference("settings").child("reportemail");
+            reference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    String email = dataSnapshot.getValue(String.class);
+                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                    emailIntent.setType("message/rfc822");
 
-            emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"timothy.bender@spudnik.com"});
-            emailIntent.putExtra(Intent.EXTRA_SUBJECT,"Feedback Diagnostic Tool");
-            emailIntent.putExtra(Intent.EXTRA_TEXT, "Device: " + Build.DEVICE + "\nAndroid Version: " +
-                    Build.VERSION.CODENAME + " " + Build.VERSION.RELEASE + "\n\nComments: \n");
-            startActivity(Intent.createChooser(emailIntent,"Send mail..."));
+                    emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT,"Feedback Diagnostic Tool");
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, "Device: " + Build.DEVICE + "\nAndroid Version: " +
+                            Build.VERSION.CODENAME + " " + Build.VERSION.RELEASE + "\n\nComments: \n");
+                    startActivity(Intent.createChooser(emailIntent,"Send mail..."));
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
         } catch (Exception ignored) {
         }
     }
@@ -177,7 +208,7 @@ public class settings extends AppCompatActivity {
         Network activeNetwork = cm.getActiveNetwork();
         boolean isConnected = activeNetwork != null;
        if(isConnected) {
-           StorageReference reference = firebaseStorage.getReference().getRoot();
+           StorageReference reference = firebaseStorage.getReference().getRoot().child("DataBase");
 
            final File rootpath = new File(getFilesDir(), "database");
            File temp1 = new File(getFilesDir(), "");
@@ -203,7 +234,6 @@ public class settings extends AppCompatActivity {
                                        @Override
                                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                                            Log.i(TAG, "ItemName " + item.getName());
-
                                            File root = new File(getFilesDir(), "");
                                            FileWriter fw;
                                            File toEdit = new File(root, "machineids");
@@ -213,7 +243,7 @@ public class settings extends AppCompatActivity {
                                                    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
                                                    line = reader.readLine();
                                                }
-                                               String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
+                                               String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("_", "") + ",";
                                                toPrint = (line != null) ? line + editedItemName : editedItemName;
                                                fw = new FileWriter(toEdit);
                                                fw.append(toPrint);
@@ -238,7 +268,7 @@ public class settings extends AppCompatActivity {
                                            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
                                            line = reader.readLine();
                                        }
-                                       String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
+                                       String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("_", "") + ",";
                                        toPrint = (line != null) ? line + editedItemName : editedItemName;
                                        fw = new FileWriter(toEdit);
                                        fw.append(toPrint);
@@ -266,11 +296,55 @@ public class settings extends AppCompatActivity {
                public void onFailure(@NonNull Exception e) {
                }
            });
+           //checkForAppUpdate();
        }
        else{
            Toast.makeText(this, "No Internet Connection", Toast.LENGTH_SHORT).show();
        }
     }
+
+
+    public void checkForAppUpdate() {
+        ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        Network activeNetwork = cm.getActiveNetwork();
+        boolean isConnected = activeNetwork != null;
+        if (isConnected) {
+
+
+            StorageReference reference = firebaseStorage.getReference().getRoot().child("Apk-Release");
+            final File rootpath = new File(Environment.getExternalStorageDirectory(), "");
+            if(!rootpath.exists()){
+                rootpath.mkdirs();
+            }
+            reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
+                @Override
+                public void onSuccess(ListResult listResult) {
+                    for(final StorageReference item : listResult.getItems()){
+                        if(Integer.parseInt(item.getName().replace("_","").replace("ver","").replace(".apk","")) > BuildConfig.VERSION_CODE){
+                            final File localfile = new File(rootpath,item.getName());
+                            item.getFile(localfile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                    /*Intent i = new Intent();
+                                    i.setAction(Intent.ACTION_VIEW);
+                                    Uri data = FileProvider.getUriForFile(settings.this, settings.this.getApplicationContext().getPackageName() + ".provider",localfile);
+                                    i.setDataAndType(data,"application/vnd.android.package-archive");
+                                    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    System.out.println(localfile.getAbsolutePath());
+                                    System.out.println(data.getPath());
+                                    startActivity(i);*/
+                                }
+                            });
+                            break;
+                        }
+                    }
+                }
+            });
+
+        }
+    }
+
 
     /**
      * Login button redirect

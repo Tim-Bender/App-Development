@@ -112,12 +112,10 @@ public class vehicle implements Parcelable {
                     String line;
                     while((line = reader.readLine()) != null) {
                         String[] tokens = line.split(",");
-                        if (testConnection(vehicleId,tokens[0])) {
-                            addConnection(new connection(tokens[0].toLowerCase(), tokens[1].toLowerCase(), tokens[2].toLowerCase(),
-                                    tokens[3].toLowerCase(), tokens[4].toLowerCase(), tokens[5].toLowerCase()));
-                            if(!getUniqueConnections().contains(tokens[1].toLowerCase())){
-                                addUniqueconnection(tokens[1]);
-                            }
+                        addConnection(new connection(vehicleId.toLowerCase(), tokens[0].toLowerCase(), tokens[1].toLowerCase(),
+                                tokens[2].toLowerCase(), tokens[3].toLowerCase(), tokens[4].toLowerCase()));
+                        if(!getUniqueConnections().contains(tokens[0].toLowerCase())){
+                            addUniqueconnection(tokens[0]);
                         }
                     }
 
@@ -187,35 +185,39 @@ public class vehicle implements Parcelable {
          vehicleIds = ids;
     }
 
-     boolean checkDealer(String dealerid){
+    boolean checkDealer(String dealerid){
         return this.dealers.contains(dealerid);
     }
 
-    /**
-     * Used to determine if an input'ed vehicle id is valid.
-     * @param vehicleid String
-     * @param s String
-     * @return boolean
-     */
-    private boolean testConnection(String vehicleid, String s){
-        try {
-            for (int i = 0; i < s.length(); i++) {
-                if (s.charAt(i) == 'X') {
-                    return true;
+    public String determineComparison(String machineid){
+        int maximum = - 16;
+        String toReturn = "";
+        System.out.println("MACHINE ID: " + machineid);
+        if(machineid.length() > 0 && !vehicleIds.isEmpty()) {
+            for (String id : vehicleIds) {
+                char[] storage = machineid.toCharArray(),
+                        idCharArray = id.toCharArray();
+                int points = 0;
+                if (idCharArray[0] != storage[0] || storage.length != idCharArray.length) {
+                    continue;
                 }
-                if (i < s.length() - 1 && i > 2) {
-                    if (s.charAt(i) == '5' && s.charAt(i + 1) == '5') {
-                        return true;
+                for (int i = 0; i < idCharArray.length; i++) {
+                    if (i < storage.length) {
+                        if (storage[i] == idCharArray[i]) {
+                            points++;
+                        } else {
+                            if (idCharArray[i] != 'x' && idCharArray[i] != 'X')
+                                points--;
+                        }
                     }
                 }
-                if (s.charAt(i) != vehicleid.charAt(i)) {
-                    return false;
+                if (maximum < points) {
+                    maximum = points;
+                    toReturn = id;
                 }
             }
-            return true;
-        } catch (Exception ignored) {
-            return false;
         }
+        return toReturn;
     }
 
     /**

@@ -38,6 +38,8 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Objects;
 
 
@@ -58,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
      * Assign values to instance fields, including SharedPreferences and firebath authentication/user.
      * @param savedInstanceState savedInstanceState
      */
-    @SuppressLint("CommitPrefEdits")
+    @SuppressLint({"CommitPrefEdits", "SetTextI18n"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,13 +71,17 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE);
         Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        //setup shared preferences and firebase auth
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = preferences.edit();
         FirebaseAuth auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
 
         progressBar = findViewById(R.id.loadingbar);
         progressBar.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
+        //set the version code
+        textView = findViewById(R.id.textView3);
+        textView.setText(BuildConfig.VERSION_NAME);
         textView = findViewById(R.id.loadingText);
 
     }
@@ -151,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
         textView.setTextColor(Color.WHITE);
         textView = findViewById(R.id.textView3);
         textView.setTextColor(Color.WHITE);
+
     }
 
     /**
@@ -164,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
         ConnectivityManager cm = (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
         Network activeNetwork = cm.getActiveNetwork();
         boolean isConnected = activeNetwork != null;
+
         //if there is a connection, we go ahead and update
         if(isConnected) {
             //the entire database updating will be done Asynchronously
@@ -171,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     //get firebase storage reference
-                    StorageReference reference = FirebaseStorage.getInstance().getReference().getRoot();
+                    StorageReference reference = FirebaseStorage.getInstance().getReference().getRoot().child("DataBase");
                     final File rootpath = new File(getFilesDir(), "database");
 
                     //Here we delete the current machineids file.
@@ -190,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(ListResult listResult) {
                             //loop through all items in the bucket
+                            final int totalNumberOfFiles = listResult.getItems().size();
                             for (final StorageReference item : listResult.getItems()) {
                                 final File localFile = new File(rootpath, item.getName());
                                 //retrieve the metadata of the object
@@ -204,7 +213,6 @@ public class MainActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                                                     Log.i(TAG, "ItemName " + item.getName());
-
                                                     //If the download is a success, add that machine id to the machineids's list file
                                                     File root = new File(getFilesDir(), "");
                                                     FileWriter fw;
@@ -215,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
                                                             BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
                                                             line = reader.readLine();
                                                         }
-                                                        String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
+                                                        String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("_", "") + ",";
                                                         toPrint = (line != null) ? line + editedItemName : editedItemName;
                                                         fw = new FileWriter(toEdit);
                                                         fw.append(toPrint);
@@ -237,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
                                                     BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
                                                     line = reader.readLine();
                                                 }
-                                                String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
+                                                String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("_", "") + ",";
                                                 toPrint = (line != null) ? line + editedItemName : editedItemName;
                                                 fw = new FileWriter(toEdit);
                                                 fw.append(toPrint);
@@ -266,4 +274,5 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+
 }

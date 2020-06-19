@@ -144,7 +144,7 @@ public class LoginActivity extends AppCompatActivity {
         boolean isConnected = activeNetwork != null;
         if(isConnected) {
 
-            StorageReference reference = firebaseStorage.getReference().getRoot();
+            StorageReference reference = firebaseStorage.getReference().getRoot().child("DataBase");
             Toast.makeText(this, "Updating...", Toast.LENGTH_SHORT).show();
             final File rootpath = new File(getFilesDir(), "database");
             File temp1 = new File(getFilesDir(), "");
@@ -179,7 +179,7 @@ public class LoginActivity extends AppCompatActivity {
                                                     BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
                                                     line = reader.readLine();
                                                 }
-                                                String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
+                                                String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("_", "") + ",";
                                                 toPrint = (line != null) ? line + editedItemName : editedItemName;
                                                 fw = new FileWriter(toEdit);
                                                 fw.append(toPrint);
@@ -204,7 +204,7 @@ public class LoginActivity extends AppCompatActivity {
                                             BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
                                             line = reader.readLine();
                                         }
-                                        String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("machine", "") + ",";
+                                        String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("_", "") + ",";
                                         toPrint = (line != null) ? line + editedItemName : editedItemName;
                                         fw = new FileWriter(toEdit);
                                         fw.append(toPrint);
@@ -239,6 +239,10 @@ public class LoginActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    public void updateApp(View view){
+
     }
 
 

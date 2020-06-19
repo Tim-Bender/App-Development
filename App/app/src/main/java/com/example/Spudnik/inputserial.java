@@ -145,6 +145,7 @@ public class inputserial extends AppCompatActivity {
                     }
                     //any other keystroke will lead to an attempt to build the database
                     else {
+                        if(event.getAction() != KeyEvent.ACTION_DOWN)
                             tryBuildDataBase();
                     }
 
@@ -257,7 +258,7 @@ public class inputserial extends AppCompatActivity {
         try {
             this.empty = true;
             String vehicleId = edittext.getText().toString();
-            if (!(edittext.getText().length() < 2)) {
+            if (!(edittext.getText().length() < 3)) {
                 if (myvehicle.getConnections().isEmpty()) {
                     this.myvehicle = new vehicle(vehicleId);
                     this.myvehicle.setIs(is);
@@ -286,62 +287,37 @@ public class inputserial extends AppCompatActivity {
                 }
                 Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
     }
     public void tryBuildDataBase(){
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final String vehicleId = edittext.getText().toString().toLowerCase().trim();
-                    FileInputStream fis2;
-                    boolean updated = preferences.getBoolean("databaseupdated",false);
-                    if (myvehicle.getVehicleIds().contains(vehicleId)) {
-                        if(updated){
-                            final File rootpath = new File(getFilesDir(),"database");
-                            File localFile = new File(rootpath,"machine"+vehicleId +".csv");
-                            fis2 = new FileInputStream(localFile);
-                            is = new InputStreamReader(fis2, StandardCharsets.UTF_8);
-                        }
-                        System.out.println("BUILDING DATABASE ON SERIAL!");
-                        myvehicle.setIs(is);
-                        myvehicle.setVehicleId(vehicleId.toLowerCase().trim());
-                        myvehicle.buildDataBase();
-                    }
-                    else if(myvehicle.getVehicleIds().contains(vehicleId + "xx")){
-                        if(updated){
-                            final File rootpath = new File(getFilesDir(),"database");
-                            File localFile = new File(rootpath,"machine"+vehicleId +"xx" +".csv");
-                            fis2 = new FileInputStream(localFile);
-                            is = new InputStreamReader(fis2, StandardCharsets.UTF_8);
-                        }
-                        System.out.println("BUILDING DATABASE ON SERIAL!");
-                        myvehicle.setIs(is);
-                        myvehicle.setVehicleId(vehicleId.toLowerCase().trim());
-                        myvehicle.buildDataBase();
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        final String vehicleId = edittext.getText().toString().toLowerCase().trim();
+                        FileInputStream fis2;
+                        if (vehicleId.length() > 2) {
+                            final String determined = myvehicle.determineComparison(vehicleId);
+                            System.out.println("DETERMINED: " + determined);
+                            if (myvehicle.getVehicleIds().contains(determined)) {
+                                if (user != null) {
+                                    final File rootpath = new File(getFilesDir(), "database");
+                                    File localFile = new File(rootpath, "_" + determined + ".csv");
+                                    fis2 = new FileInputStream(localFile);
+                                    is = new InputStreamReader(fis2, StandardCharsets.UTF_8);
 
-                    }
-                    else if(myvehicle.getVehicleIds().contains(vehicleId + "x")){
-                        if(updated){
-                            final File rootpath = new File(getFilesDir(),"database");
-                            File localFile = new File(rootpath,"machine"+vehicleId +"xx" +".csv");
-                            fis2 = new FileInputStream(localFile);
-                            is = new InputStreamReader(fis2, StandardCharsets.UTF_8);
+                                    myvehicle.setIs(is);
+                                    myvehicle.setVehicleId(vehicleId.toLowerCase().trim());
+                                    myvehicle.buildDataBase();
+                                }
+                            }
                         }
-                        System.out.println("BUILDING DATABASE ON SERIAL!");
-                        myvehicle.setIs(is);
-                        myvehicle.setVehicleId(vehicleId.toLowerCase().trim());
-                        myvehicle.buildDataBase();
-
+                    } catch (Exception ignored) {
                     }
-                } catch (Exception ignored) {
                 }
-            }
-        });
-
-    }
+            });
+        }
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         if(item.getItemId() == R.id.action_settings){
