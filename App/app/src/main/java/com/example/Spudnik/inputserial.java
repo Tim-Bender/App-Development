@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -54,8 +55,9 @@ public class inputserial extends AppCompatActivity {
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
     private CheckBox checkBox;
-    private InputStreamReader d;
     private FirebaseUser user;
+    private int currentMode = 0;
+    private Handler handler = new Handler();
 
     /**
      * Oncreate will do its typical tasks, of assigning instance fields to values, and setting up the toolbar.
@@ -80,10 +82,14 @@ public class inputserial extends AppCompatActivity {
         checkBox = findViewById(R.id.rememberdealeridcheckbox);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        editor = preferences.edit();
         user = FirebaseAuth.getInstance().getCurrentUser();
 
         //VEHICLE CREATION
-        myvehicle = new vehicle();
+        myvehicle = getIntent().getParcelableExtra("myvehicle");
+        if(myvehicle.getVehicleIds() == null){
+            myvehicle.preBuildVehicleObject(this);
+        }
 
     }
 
@@ -96,137 +102,104 @@ public class inputserial extends AppCompatActivity {
     @Override
     protected void onStart(){
         super.onStart();
-        try {
-            //check if the database has been loaded before.
-            final boolean updated = preferences.getBoolean("databaseupdated", false);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            //When a user makes a change to the inputid edit text view, then we will check if the new value is a valid id, and if it is, then we attempt to build our database of connections
+                            edittext = findViewById(R.id.inputid);
+                            edittext.setOnKeyListener(new View.OnKeyListener() {
+                                @Override
+                                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                                    //if they hit enter, then we will attempt to begin the next activity.
+                                    if((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)){
+                                        go(getCurrentFocus());
+                                        return true;
+                                    }
+                                    //any other keystroke will lead to an attempt to build the database
+                                    else {
+                                        if(event.getAction() != KeyEvent.ACTION_DOWN)
+                                            tryBuildDataBaseObject();
+                                    }
 
-            preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-            editor = preferences.edit();
-            //If the user is authenticated, then we begin.
-            if(user != null) {
-                //All this building will be done asynchronously
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            //create an inputstreamreader from our dealerids resource csv file
-                            d = new InputStreamReader(getResources().openRawResource(R.raw.dealerids));
+                                    return false;
+                                }
+                            });
 
-                            FileInputStream fis2;
-                            InputStreamReader as;
-                            //if the database has been updated, then we use those files, otherwise we use the pre-loaded set
-                            if (updated) {
-                                final File rootpath = new File(getFilesDir(), "");
-                                File localFile = new File(rootpath, "machineids");
-                                fis2 = new FileInputStream(localFile);
-                                as = new InputStreamReader(fis2, StandardCharsets.UTF_8);
-                            }else{
-                                as = null;
+                            //Here we add a keystroke listener to the dealerText edittext field
+                            dealerText = findViewById(R.id.dealeridtextview);
+                            dealerText.setOnKeyListener(new View.OnKeyListener() {
+                                @Override
+                                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                                    //if the user presses enter, then they will be re-focused onto the input serial number edit text view
+                                    if((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)){
+                                        Toast.makeText(inputserial.this, "Enter A Serial Number", Toast.LENGTH_SHORT).show();
+                                        return true;
+                                    }
+                                    return false;
+                                }
+                            });
+
+                            //Attempt to load a saved dealer id from shared preferences.
+                            if(!preferences.getString("dealerid", "").equals("")){
+                                dealerText.setText(preferences.getString("dealerid",""));
+                                checkBox.setChecked(true);
                             }
 
-                            //pass the inputstreams to our vehicle object  so that it might build it's lists.
-                            myvehicle.buildDealers(d);
-                            myvehicle.buildVehicleIds(as);
-                        } catch (Exception ignored) {
+                            // Set the oncheckedchange listener for the  "remember" checkbox. If it is checked, then we put the contents
+                            // of the dealertext edittext view into shared preferences.
+                            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                    //if checked, save the dealer id
+                                    if(isChecked){
+                                        editor.putString("dealerid", dealerText.getText().toString().trim());
+                                    }
+                                    //else we wipe it
+                                    else{
+                                        editor.putString("dealerid","");
+                                    }
+                                    editor.apply();
+                                }
+                            });
+
+                            //If there is a dealer id in shared preferences, then we set the checkbox to checked.
+                            if(!preferences.getString("dealerid", "").equals("")){
+                                checkBox.setChecked(true);
+                                dealerText.setText(preferences.getString("dealerid",""));
+                            }
+
+                            //Here's the toggle listener for the "Where's my serial number?" toggle
+                            toggle = findViewById(R.id.helptoggle);
+                            //heres our background image
+                            final ImageView spudnikelectrical = findViewById(R.id.spudnikelectrical);
+                            toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                    //if it is checked, we swap the views and display the helpful diagram and description
+                                    if(isChecked){
+                                        spudnikelectrical.setVisibility(View.GONE);
+                                        imageView.setVisibility(View.VISIBLE);
+                                        textView.setVisibility(View.VISIBLE);
+
+                                    }
+                                    else{
+                                        //otherwise we show the decoration electrical background
+                                        imageView.setVisibility(View.GONE);
+                                        textView.setVisibility(View.GONE);
+                                        spudnikelectrical.setVisibility(View.VISIBLE);
+
+                                    }
+                                }
+                            });
                         }
-                    }
-                });
+                    });
+                }catch(Exception ignored){}
             }
-
-            //When a user makes a change to the inputid edit text view, then we will check if the new value is a valid id, and if it is, then we attempt to build our database of connections
-            this.edittext = findViewById(R.id.inputid);
-            this.edittext.setOnKeyListener(new View.OnKeyListener() {
-                @Override
-                public boolean onKey(View v, int keyCode, KeyEvent event) {
-                    //if they hit enter, then we will attempt to begin the next activity.
-                    if((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)){
-                        go(getCurrentFocus());
-                        return true;
-                    }
-                    //any other keystroke will lead to an attempt to build the database
-                    else {
-                        if(event.getAction() != KeyEvent.ACTION_DOWN)
-                            tryBuildDataBase();
-                    }
-
-                    return false;
-                }
-            });
-
-            //Here we add a keystroke listener to the dealerText edittext field
-            this.dealerText = findViewById(R.id.dealeridtextview);
-            this.dealerText.setOnKeyListener(new View.OnKeyListener() {
-                @Override
-                public boolean onKey(View v, int keyCode, KeyEvent event) {
-                    //if the user presses enter, then they will be re-focused onto the input serial number edit text view
-                    if((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)){
-                        Toast.makeText(inputserial.this, "Enter A Serial Number", Toast.LENGTH_SHORT).show();
-                        return true;
-                    }
-                    return false;
-                }
-            });
-
-            //Attempt to load a saved dealer id from shared preferences.
-            if(!preferences.getString("dealerid", "").equals("")){
-                dealerText.setText(preferences.getString("dealerid",""));
-                checkBox.setChecked(true);
-            }
-
-            // Set the oncheckedchange listener for the  "remember" checkbox. If it is checked, then we put the contents
-            // of the dealertext edittext view into shared preferences.
-            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    //if checked, save the dealer id
-                    if(isChecked){
-                        editor.putString("dealerid", dealerText.getText().toString().trim());
-                    }
-                    //else we wipe it
-                    else{
-                        editor.putString("dealerid","");
-                    }
-                    editor.apply();
-                }
-            });
-
-            //If there is a dealer id in shared preferences, then we set the checkbox to checked.
-            if(!preferences.getString("dealerid", "").equals("")){
-                checkBox.setChecked(true);
-                dealerText.setText(preferences.getString("dealerid",""));
-            }
-
-            //Here's the toggle listener for the "Where's my serial number?" toggle
-            toggle = findViewById(R.id.helptoggle);
-            //heres our background image
-            final ImageView spudnikelectrical = findViewById(R.id.spudnikelectrical);
-            toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    //if it is checked, we swap the views and display the helpful diagram and description
-                    if(isChecked){
-                        spudnikelectrical.setVisibility(View.GONE);
-                        imageView.setVisibility(View.VISIBLE);
-                        textView.setVisibility(View.VISIBLE);
-
-                    }
-                    else{
-                        //otherwise we show the decoration electrical background
-                        imageView.setVisibility(View.GONE);
-                        textView.setVisibility(View.GONE);
-                        spudnikelectrical.setVisibility(View.VISIBLE);
-
-                    }
-                }
-            });
-            //finally a nightmode check
-            if (preferences.getBoolean("nightmode", false)) {
-                nightMode();
-            }
-            else{
-                dayMode();
-            }
-        }catch(Exception ignored){}
+        });
 
 
     }
@@ -237,15 +210,16 @@ public class inputserial extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        try {
-            if (preferences.getBoolean("nightmode", false)) {
-                nightMode();
-                return;
-            }
-            if (!preferences.getBoolean("nightmode", false)) {
-                dayMode();
-            }
-        }catch(Exception ignored){}
+        boolean nightmode = preferences.getBoolean("nightmode",false);
+        int NIGHTMODE = 1, DAYMODE = 2;
+        if(nightmode && currentMode != NIGHTMODE){
+            nightMode();
+            currentMode = NIGHTMODE;
+        }
+        else if(!nightmode && currentMode != DAYMODE){
+            dayMode();
+            currentMode = DAYMODE;
+        }
     }
 
 
@@ -256,15 +230,15 @@ public class inputserial extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     public void go(View view) {
         try {
-            this.empty = true;
+            empty = true;
             String vehicleId = edittext.getText().toString();
             if (!(edittext.getText().length() < 3)) {
                 if (myvehicle.getConnections().isEmpty()) {
-                    this.myvehicle = new vehicle(vehicleId);
-                    this.myvehicle.setIs(is);
-                    this.myvehicle.buildDataBase();
+                    myvehicle = new vehicle(vehicleId);
+                    myvehicle.setIs(is);
+                    myvehicle.buildDataBase();
                 }
-                if (!myvehicle.getConnections().isEmpty() && this.myvehicle.checkDealer(this.dealerText.getText().toString().toLowerCase().trim())) {
+                if (!myvehicle.getConnections().isEmpty() && myvehicle.checkDealer(dealerText.getText().toString().toLowerCase().trim())) {
                     if (checkBox.isChecked()) {
                         editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());
                     }
@@ -274,7 +248,7 @@ public class inputserial extends AppCompatActivity {
                     }
                     Intent i = new Intent(getBaseContext(), connectorselect.class);
                     i.putExtra("myvehicle", myvehicle);
-                    i.putParcelableArrayListExtra("connections", this.myvehicle.getConnections());
+                    i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
                     startActivity(i);
                 } else {
                     Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
@@ -283,15 +257,17 @@ public class inputserial extends AppCompatActivity {
                 if(!edittext.getText().toString().isEmpty()) {
                     TextView errorMessage = findViewById(R.id.inputserialerrorserialtextview);
                     errorMessage.setVisibility(View.VISIBLE);
-                    errorMessage.setText("Not a valid serial number, try updating the database.");
+                    errorMessage.setText("Not a valid serial number. Try Updating the Database");
                 }
                 Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
-    public void tryBuildDataBase(){
-            AsyncTask.execute(new Runnable() {
+
+    public void tryBuildDataBaseObject(){
+        AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -335,53 +311,59 @@ public class inputserial extends AppCompatActivity {
     }
 
     public void nightMode(){
-        try {
-            ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
-            constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
-            TextView view = findViewById(R.id.inputserialtextview1);
-            view.setTextColor(Color.WHITE);
-            view = findViewById(R.id.inputserialtextview2);
-            view.setTextColor(Color.WHITE);
-            view = findViewById(R.id.helptextview);
-            view.setTextColor(Color.WHITE);
-            EditText editText = findViewById(R.id.dealeridtextview);
-            editText.setTextColor(Color.WHITE);
-            editText = findViewById(R.id.inputid);
-            editText.setTextColor(Color.WHITE);
-            CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
-            checkBox.setTextColor(Color.WHITE);
-            Switch myswitch = findViewById(R.id.helptoggle);
-            myswitch.setTextColor(Color.WHITE);
-            Button button = findViewById(R.id.gobutton);
-            button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-            button.setTextColor(Color.WHITE);
-        }catch(Exception ignored){}
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
+                constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
+                TextView view = findViewById(R.id.inputserialtextview1);
+                view.setTextColor(Color.WHITE);
+                view = findViewById(R.id.inputserialtextview2);
+                view.setTextColor(Color.WHITE);
+                view = findViewById(R.id.helptextview);
+                view.setTextColor(Color.WHITE);
+                EditText editText = findViewById(R.id.dealeridtextview);
+                editText.setTextColor(Color.WHITE);
+                editText = findViewById(R.id.inputid);
+                editText.setTextColor(Color.WHITE);
+                CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
+                checkBox.setTextColor(Color.WHITE);
+                Switch myswitch = findViewById(R.id.helptoggle);
+                myswitch.setTextColor(Color.WHITE);
+                Button button = findViewById(R.id.gobutton);
+                button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+                button.setTextColor(Color.WHITE);
+            }
+        });
     }
 
 
-    public void dayMode(){
-        try {
-            ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
-            constraintLayout.setBackgroundColor(Color.WHITE);
-            TextView view = findViewById(R.id.inputserialtextview1);
-            view.setTextColor(Color.BLACK);
-            view = findViewById(R.id.inputserialtextview2);
-            view.setTextColor(Color.BLACK);
-            view = findViewById(R.id.helptextview);
-            view.setTextColor(Color.BLACK);
-            EditText editText = findViewById(R.id.dealeridtextview);
-            editText.setTextColor(Color.BLACK);
-            editText = findViewById(R.id.inputid);
-            editText.setTextColor(Color.BLACK);
-            CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
-            checkBox.setTextColor(Color.BLACK);
-            Switch myswitch = findViewById(R.id.helptoggle);
-            myswitch.setTextColor(Color.BLACK);
-            Button button = findViewById(R.id.gobutton);
-            button.setBackgroundResource(R.drawable.daymodebuttonselector);
-            button.setTextColor(Color.BLACK);
-        }
-        catch(Exception ignored){}
+    public void dayMode() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
+                constraintLayout.setBackgroundColor(Color.WHITE);
+                TextView view = findViewById(R.id.inputserialtextview1);
+                view.setTextColor(Color.BLACK);
+                view = findViewById(R.id.inputserialtextview2);
+                view.setTextColor(Color.BLACK);
+                view = findViewById(R.id.helptextview);
+                view.setTextColor(Color.BLACK);
+                EditText editText = findViewById(R.id.dealeridtextview);
+                editText.setTextColor(Color.BLACK);
+                editText = findViewById(R.id.inputid);
+                editText.setTextColor(Color.BLACK);
+                CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
+                checkBox.setTextColor(Color.BLACK);
+                Switch myswitch = findViewById(R.id.helptoggle);
+                myswitch.setTextColor(Color.BLACK);
+                Button button = findViewById(R.id.gobutton);
+                button.setBackgroundResource(R.drawable.daymodebuttonselector);
+                button.setTextColor(Color.BLACK);
+            }
+        });
+
     }
 
 }

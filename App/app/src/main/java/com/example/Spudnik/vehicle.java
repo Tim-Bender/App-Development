@@ -6,8 +6,15 @@ import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +46,7 @@ public class vehicle implements Parcelable {
     private InputStreamReader isr;
     private static final int SORT_BY_S4 = 1;
     private Map<String,Integer> pinnumbers = new HashMap<>();
+    private InputStreamReader d;
 
     vehicle(String id){
         this.vehicleId = id;
@@ -181,9 +189,6 @@ public class vehicle implements Parcelable {
         });
     }
 
-    void buildVehicleIds(ArrayList<String> ids){
-         vehicleIds = ids;
-    }
 
     boolean checkDealer(String dealerid){
         return this.dealers.contains(dealerid);
@@ -218,6 +223,42 @@ public class vehicle implements Parcelable {
             }
         }
         return toReturn;
+    }
+    public void preBuildVehicleObject(final Context context){
+        //check if the database has been loaded before.
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        //If the user is authenticated, then we begin.
+        if(user != null) {
+            //All this building will be done asynchronously
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        //create an inputstreamreader from our dealerids resource csv file
+                        d = new InputStreamReader(context.getResources().openRawResource(R.raw.dealerids));
+
+                        FileInputStream fis2;
+                        final InputStreamReader as;
+                        //if the database has been updated, then we use those files, otherwise we use the pre-loaded set
+
+                            final File rootpath = new File(context.getFilesDir(), "");
+                            File localFile = new File(rootpath, "machineids");
+                            fis2 = new FileInputStream(localFile);
+                            as = new InputStreamReader(fis2, StandardCharsets.UTF_8);
+
+                        //pass the inputstreams to our vehicle object  so that it might build it's lists.
+                        AsyncTask.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                               buildVehicleIds(as);
+                            }
+                        });
+                        buildDealers(d);
+                    } catch (Exception ignored) {
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -317,6 +358,7 @@ public class vehicle implements Parcelable {
         this.isr = s;
     }
 
+
     private void setPinnumbers(){
         this.pinnumbers.put("in1",14);
         this.pinnumbers.put("in2",14);
@@ -340,9 +382,6 @@ public class vehicle implements Parcelable {
         return ("Id: "+ this.vehicleId + "\n Connections: " + this.connections.size() + "\n Unique Connections: " + this.uniqueConnections.size());
     }
 
-    public void setUniqueConnections(ArrayList<String> in){
-        uniqueConnections = in;
-    }
     ArrayList<String> getUniquePins() {
         return uniquePins;
     }

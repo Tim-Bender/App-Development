@@ -3,17 +3,20 @@ package com.example.Spudnik;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,7 +39,11 @@ import java.util.Objects;
 
 public class home extends AppCompatActivity {
     private SharedPreferences preferences;
-
+    private int currentMode = 0;
+    private Handler handler = new Handler();
+    private vehicle myvehicle;
+    private FirebaseUser user;
+    private InputStreamReader d;
     /**
      *
      * @param savedInstanceState savedInstancestate
@@ -51,23 +58,14 @@ public class home extends AppCompatActivity {
         setTitle("Home");
         myToolBar.setTitleTextColor(Color.WHITE);
         Toast.makeText(this, "Welcome!", Toast.LENGTH_SHORT).show();
-
-
-    }
-
-    /**
-     * Nightmode and daymode toggle is contained here
-     */
-    @Override
-    protected void onStart() {
-        super.onStart();
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        if(preferences.getBoolean("nightmode",false)){
-            nightMode();
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        myvehicle = getIntent().getParcelableExtra("myvehicle");
+        if(myvehicle.getVehicleIds() == null) {
+            myvehicle.preBuildVehicleObject(this);
         }
-
-
     }
+
 
     /**
      * Another night and daymode toggle will be checked in onResume
@@ -75,13 +73,21 @@ public class home extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(preferences.getBoolean("nightmode",false)){
-            nightMode();
-            return;
-        }
-       if(!preferences.getBoolean("nightmode",false)){
-           dayMode();
-       }
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                boolean nightmode = preferences.getBoolean("nightmode",false);
+                int NIGHTMODE = 1, DAYMODE = 2;
+                if(nightmode && currentMode != NIGHTMODE){
+                    nightMode();
+                    currentMode = NIGHTMODE;
+                }
+                else if(!nightmode && currentMode != DAYMODE){
+                    dayMode();
+                    currentMode = DAYMODE;
+                }
+            }
+        });
     }
 
     /**
@@ -94,6 +100,7 @@ public class home extends AppCompatActivity {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if(user != null) {
                 Intent i = new Intent(getBaseContext(), inputserial.class);
+                i.putExtra("myvehicle",myvehicle);
                 startActivity(i);
             }
             else{
@@ -146,6 +153,7 @@ public class home extends AppCompatActivity {
 
     }
 
+
     /**
      * The next two methods will create the toolbar menu item on the top right, this will be on every
      * activity that contains this shortcut.
@@ -172,26 +180,33 @@ public class home extends AppCompatActivity {
      * Nightmode Toggle
      */
     public void nightMode(){
-        try {
-            ConstraintLayout constraintLayout = findViewById(R.id.homeconstraintlayout);
-            constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
-            Button button = findViewById(R.id.rundiagtoolbutton);
-            button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-            button.setTextColor(Color.WHITE);
-            button = findViewById(R.id.updatesoftwarebutton);
-            button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-            button.setTextColor(Color.WHITE);
-            button = findViewById(R.id.logdatabutton);
-            button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-            button.setTextColor(Color.WHITE);
-            button = findViewById(R.id.settingshomebutton);
-            button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-            button.setTextColor(Color.WHITE);
-            TextView textView = findViewById(R.id.hometextview);
-            textView.setTextColor(Color.WHITE);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    LinearLayout layout = findViewById(R.id.homelinearlayout);
+                    ConstraintLayout constraintLayout = findViewById(R.id.homeconstraintlayout);
+                    constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
+                    Button button = findViewById(R.id.rundiagtoolbutton);
+                    button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+                    button.setTextColor(Color.WHITE);
+                    button = findViewById(R.id.updatesoftwarebutton);
+                    button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+                    button.setTextColor(Color.WHITE);
+                    button = findViewById(R.id.logdatabutton);
+                    button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+                    button.setTextColor(Color.WHITE);
+                    button = findViewById(R.id.settingshomebutton);
+                    button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+                    button.setTextColor(Color.WHITE);
+                    TextView textView = findViewById(R.id.hometextview);
+                    textView.setTextColor(Color.WHITE);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
     }
 
     /**
@@ -199,22 +214,27 @@ public class home extends AppCompatActivity {
      */
 
     public void dayMode(){
-        ConstraintLayout constraintLayout = findViewById(R.id.homeconstraintlayout);
-        constraintLayout.setBackgroundColor(Color.WHITE);
-        Button button = findViewById(R.id.rundiagtoolbutton);
-        button.setBackgroundResource(R.drawable.daymodebuttonselector);
-        button.setTextColor(Color.BLACK);
-        button = findViewById(R.id.updatesoftwarebutton);
-        button.setBackgroundResource(R.drawable.daymodebuttonselector);
-        button.setTextColor(Color.BLACK);
-        button = findViewById(R.id.logdatabutton);
-        button.setBackgroundResource(R.drawable.daymodebuttonselector);
-        button.setTextColor(Color.BLACK);
-        button = findViewById(R.id.settingshomebutton);
-        button.setBackgroundResource(R.drawable.daymodebuttonselector);
-        button.setTextColor(Color.BLACK);
-        TextView textView = findViewById(R.id.hometextview);
-        textView.setTextColor(Color.BLACK);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                ConstraintLayout constraintLayout = findViewById(R.id.homeconstraintlayout);
+                constraintLayout.setBackgroundColor(Color.WHITE);
+                Button button = findViewById(R.id.rundiagtoolbutton);
+                button.setBackgroundResource(R.drawable.daymodebuttonselector);
+                button.setTextColor(Color.BLACK);
+                button = findViewById(R.id.updatesoftwarebutton);
+                button.setBackgroundResource(R.drawable.daymodebuttonselector);
+                button.setTextColor(Color.BLACK);
+                button = findViewById(R.id.logdatabutton);
+                button.setBackgroundResource(R.drawable.daymodebuttonselector);
+                button.setTextColor(Color.BLACK);
+                button = findViewById(R.id.settingshomebutton);
+                button.setBackgroundResource(R.drawable.daymodebuttonselector);
+                button.setTextColor(Color.BLACK);
+                TextView textView = findViewById(R.id.hometextview);
+                textView.setTextColor(Color.BLACK);
+            }
+        });
 
     }
 

@@ -18,7 +18,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -29,7 +29,7 @@ public class Pindiagnostic extends AppCompatActivity {
     private ArrayList<connection> uniqueConnections;
     private int loc;
     private SharedPreferences preferences;
-
+    private int currentMode = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,46 +52,40 @@ public class Pindiagnostic extends AppCompatActivity {
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             updateValues();
         }catch (Exception e){
-            Toast.makeText(this, "ArrayList Parse Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }
-    @Override
-    protected void onStart(){
-        super.onStart();
-        if(preferences.getBoolean("nightmode",false)){
-            nightMode();
-        }
 
 
-    }
     @Override
     protected void onResume() {
         super.onResume();
-        if(preferences.getBoolean("nightmode",false)){
+        boolean nightmode = preferences.getBoolean("nightmode",false);
+        int NIGHTMODE = 1, DAYMODE = 2;
+        if(nightmode && currentMode != NIGHTMODE){
             nightMode();
-            return;
+            currentMode = NIGHTMODE;
         }
-        if(!preferences.getBoolean("nightmode",false)){
-            dayMode();
+       else if(!nightmode && currentMode != DAYMODE){
+           dayMode();
+           currentMode = DAYMODE;
         }
     }
 
     @SuppressLint("SetTextI18n")
     public void updateValues(){
         try {
-            this.myConnection = uniqueConnections.get(loc);
-            String temp = this.myConnection.getDirection();
+            myConnection = uniqueConnections.get(loc);
+            String temp = myConnection.getDirection();
             String s1 = temp.substring(0, 1).toUpperCase();
-            this.direction.setText(s1 + temp.substring(1));
-            this.pinnumber.setText("Pin:" + myConnection.getS4());
-            temp = this.myConnection.getName();
+            direction.setText(s1 + temp.substring(1));
+            pinnumber.setText("Pin:" + myConnection.getS4());
+            temp = myConnection.getName();
             s1 = temp.substring(0,1).toUpperCase();
-            this.pinname.setText(s1 + temp.substring(1));
-            this.connectorinformation.setText(this.myvehicle.getMap(this.myConnection.getDirection().toLowerCase()) + " " + this.myConnection.inout() + " Connector");
+            pinname.setText(s1 + temp.substring(1));
+            connectorinformation.setText(myvehicle.getMap(myConnection.getDirection().toLowerCase()) + " " + myConnection.inout() + " Connector");
             setTitle("Viewing Pin:" + myConnection.getS4());
         } catch (Exception e) {
-            Toast.makeText(this, "ArrayList Parse Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }
@@ -119,7 +113,6 @@ public class Pindiagnostic extends AppCompatActivity {
             }
             updateValues();
         } catch (Exception e) {
-            Toast.makeText(this, "Bounds Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }
@@ -132,7 +125,6 @@ public class Pindiagnostic extends AppCompatActivity {
             }
             updateValues();
         } catch (Exception e) {
-            Toast.makeText(this, "Bounds Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }
@@ -146,6 +138,7 @@ public class Pindiagnostic extends AppCompatActivity {
     }
 
     public void nightMode(){
+        System.out.println("Background Thread");
         ConstraintLayout constraintLayout = findViewById(R.id.pindiagnosticconstraintlayout);
         constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
         LinearLayout layout = findViewById(R.id.pindiagnosticlayout1);

@@ -1,13 +1,11 @@
 package com.example.Spudnik;
 
 import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,6 +14,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
+
+import android.os.Handler;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,25 +25,26 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class selectpin extends AppCompatActivity {
     private vehicle myvehicle;
     private TextView  textView;
-    private ArrayList<connection> connections = new ArrayList<>();
-    //private  BluetoothAdapter mBluetoothAdapter;
-    //private ArrayList<BluetoothDevice> mBTdevices = new ArrayList<>();
-    //private BluetoothDevice mBTDevice;
-    //private final String TAG = "SelectPin";
-    //private static final UUID uuid = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
-    private TextView incomingMessage;
-    private StringBuilder messages;
+    private CopyOnWriteArrayList<connection> connections = new CopyOnWriteArrayList<>();
     private SharedPreferences preferences;
-    //private int lastsorted = vehicle.SORT_BY_S4;
+    private int currentMode = 0;
+    private Handler handler = new Handler();
+    /*private  BluetoothAdapter mBluetoothAdapter;
+    private ArrayList<BluetoothDevice> mBTdevices = new ArrayList<>();
+    private BluetoothDevice mBTDevice;
+    private final String TAG = "SelectPin";
+    private static final UUID uuid = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
+    private TextView incomingMessage;
+    private StringBuilder messages;*/
     @SuppressLint("SetTextI18n")
 
 
@@ -51,11 +52,11 @@ public class selectpin extends AppCompatActivity {
     protected void onDestroy(){
         super.onDestroy();
         try {
-            unregisterReceiver(mBroadcastReceiver1);
+            /*unregisterReceiver(mBroadcastReceiver1);
             unregisterReceiver(mBroadcastReceiver2);
-            //unregisterReceiver(mBroadcastReceiver3);
-            //unregisterReceiver(mBroadcastReceiver4);
-            unregisterReceiver(mReceiver);
+            unregisterReceiver(mBroadcastReceiver3);
+            unregisterReceiver(mBroadcastReceiver4);
+            unregisterReceiver(mReceiver);*/
             unregisterReceiver(mReceiver2);
         } catch (Exception ignored) {}
 
@@ -72,17 +73,13 @@ public class selectpin extends AppCompatActivity {
             setTitle("Pin Selection");
             toolbar.setTitleTextColor(Color.WHITE);
             getSupportActionBar().setIcon(R.mipmap.ic_launcher);
-            messages = new StringBuilder();
-            incomingMessage = findViewById(R.id.selectpinvoltage);
-            //mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver,new IntentFilter("incomingMessage"));
             LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver2,new IntentFilter("incomingboolean"));
             this.myvehicle = getIntent().getParcelableExtra("myvehicle");
             Objects.requireNonNull(this.myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             this.textView = findViewById(R.id.connectorid);
-            //Switch toggle = findViewById(R.id.sortbytoggle);
-            /*toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            /*Switch toggle = findViewById(R.id.sortbytoggle);
+            toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if(isChecked){
@@ -99,37 +96,30 @@ public class selectpin extends AppCompatActivity {
 
                     }
                 }
-            });*/
-        } catch (Resources.NotFoundException e) {
+            });
+            mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver,new IntentFilter("incomingMessage"));
+             messages = new StringBuilder();
+            incomingMessage = findViewById(R.id.selectpinvoltage);*/
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        if(item.getItemId() == R.id.action_settings){
-            Intent i = new Intent(getBaseContext(),settings.class);
-            startActivity(i);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    public boolean onCreateOptionsMenu(Menu menu){
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.toolbarbuttons,menu);
-        return true;
-    }
 
     @Override
     public void onResume(){
         super.onResume();
-        if(preferences.getBoolean("nightmode",false)){
+        boolean nightmode = preferences.getBoolean("nightmode",false);
+        int NIGHTMODE = 1, DAYMODE = 2;
+        if(nightmode && currentMode != NIGHTMODE){
             nightMode();
+            currentMode = NIGHTMODE;
         }
-        else{
+        else if(!nightmode && currentMode != DAYMODE){
             dayMode();
+            currentMode = DAYMODE;
         }
     }
     @Override
@@ -140,37 +130,27 @@ public class selectpin extends AppCompatActivity {
                 @Override
                 public void run() {
                     myvehicle.sortConnections(getApplicationContext());
-                    if(preferences.getBoolean("nightmode",false)){
-                        nightMode();
-                    }
                     if(connections.isEmpty()) {
                         buildConnections();
                     }
                 }
             });
-            //masterBTStart();
-
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String text = intent.getStringExtra("theMessage");
-            messages.append(text).append("\n");
-            Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
-            incomingMessage.setText(messages);
-            //send("R,In4,4,V");
-        }
-    };
     BroadcastReceiver mReceiver2 = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            boolean bool = intent.getBooleanExtra("boolean",false);
-            if(bool){
-                sortConnections();
-                updatevalues();
+            try {
+                boolean bool = intent.getBooleanExtra("boolean", false);
+                if (bool) {
+                    sortConnections();
+                    updatevalues();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     };
@@ -199,65 +179,73 @@ public class selectpin extends AppCompatActivity {
                     }
                 }
             }
-        }catch (Exception ignored){}
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 
 
     @SuppressLint("SetTextI18n")
     public void updatevalues(){
-        try{
-            String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc());
-            String s1 = temp.substring(0, 1).toUpperCase();
-            textView.setText(s1 + temp.substring(1));
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
 
-            LinearLayout layout = findViewById(R.id.pins);
-            layout.removeAllViews();
-            boolean nightMode = preferences.getBoolean("nightmode",false);
-            int counter = 0;
-            if (!connections.isEmpty()) {
-                for (connection c : connections){
-                    final Button btn = new Button(this);
-                    LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1.5f);
-                    textParams.setMarginStart(10);
-                    textParams.setMarginEnd(10);
-                    btn.setLayoutParams(textParams);
-                    btn.setTextSize(14);
+                try{
+                    String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc());
+                    String s1 = temp.substring(0, 1).toUpperCase();
+                    textView.setText(s1 + temp.substring(1));
 
-                    if(nightMode) {
-                        btn.setTextColor(Color.WHITE);
-                        btn.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                    }
-                    else {
-                        btn.setTextColor(Color.BLACK);
-                        btn.setBackgroundResource(R.drawable.daymodebuttonselector);
-                    }
-                    btn.setGravity(Gravity.START);
-                    btn.setGravity(Gravity.CENTER_VERTICAL);
-                    btn.setPadding(20,0,0,0);
-                    btn.setTag(counter);
-                    btn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            pinSelected((Integer) v.getTag());
+                    LinearLayout layout = findViewById(R.id.pins);
+                    layout.removeAllViews();
+                    boolean nightMode = preferences.getBoolean("nightmode",false);
+                    int counter = 0;
+                    if (!connections.isEmpty()) {
+                        for (connection c : connections){
+                            final Button btn = new Button(getApplicationContext());
+                            LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1.5f);
+                            textParams.setMarginStart(10);
+                            textParams.setMarginEnd(10);
+                            btn.setLayoutParams(textParams);
+                            btn.setTextSize(14);
+
+                            if(nightMode) {
+                                btn.setTextColor(Color.WHITE);
+                                btn.setBackgroundResource(R.drawable.nightmodebuttonselector);
+                            }
+                            else {
+                                btn.setTextColor(Color.BLACK);
+                                btn.setBackgroundResource(R.drawable.daymodebuttonselector);
+                            }
+                            btn.setGravity(Gravity.START);
+                            btn.setGravity(Gravity.CENTER_VERTICAL);
+                            btn.setPadding(20,0,0,0);
+                            btn.setTag(counter);
+                            btn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    pinSelected((Integer) v.getTag());
+                                }
+                            });
+                            btn.setText("Pin" + c.getS4() +" " +  c.getName());
+                            layout.addView(btn);
+                            final Space space = new Space(getApplicationContext());
+                            space.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, .1f));
+                            layout.addView(space);
+                            counter++;
+
                         }
-                    });
-                    btn.setText("Pin" + c.getS4() +" " +  c.getName());
-                    layout.addView(btn);
-                    final Space space = new Space(this);
-                    space.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, .1f));
-                    layout.addView(space);
-                    counter++;
+                    }
+                    textView = findViewById(R.id.numberofpinstextfield);
+                    textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections().get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector");
 
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
-            textView = findViewById(R.id.numberofpinstextfield);
-            textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections().get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector");
-
-
-        } catch (Resources.NotFoundException e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     public void sortConnections(){
@@ -277,13 +265,142 @@ public class selectpin extends AppCompatActivity {
         i.putExtra("myvehicle", this.myvehicle);
         i.putParcelableArrayListExtra("connections",this.myvehicle.getConnections());
         i.putExtra("loc",loc);
-        i.putParcelableArrayListExtra("uniqueconnections",this.connections);
+        i.putParcelableArrayListExtra("uniqueconnections",new ArrayList<>(connections));
         startActivity(i);
 
 
     }
 
-    /*public void masterBTStart(){
+
+    public void nightMode(){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                ConstraintLayout constraintLayout = findViewById(R.id.selectpinconstraintlayout);
+                constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
+                TextView textView = findViewById(R.id.connectorid);
+                textView.setTextColor(Color.WHITE);
+                textView = findViewById(R.id.numberofpinstextfield);
+                textView.setTextColor(Color.WHITE);
+                textView = findViewById(R.id.selectpintextview3);
+                textView.setTextColor(Color.WHITE);
+                textView = findViewById(R.id.selectpinvoltage);
+                textView.setTextColor(Color.WHITE);
+                textView = findViewById(R.id.selectpintextview5);
+                textView.setTextColor(Color.WHITE);
+                LinearLayout linearLayout = findViewById(R.id.selectpinhorizontallayout1);
+                linearLayout.setBackgroundResource(R.drawable.nightmodeback);
+                textView = findViewById(R.id.connectorid);
+                textView.setBackgroundResource(R.drawable.nightmodeback);
+            }
+        });
+
+    }
+
+    public void dayMode(){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                ConstraintLayout constraintLayout = findViewById(R.id.selectpinconstraintlayout);
+                constraintLayout.setBackgroundColor(Color.WHITE);
+                TextView textView = findViewById(R.id.connectorid);
+                textView.setTextColor(Color.BLACK);
+                textView = findViewById(R.id.numberofpinstextfield);
+                textView.setTextColor(Color.BLACK);
+                textView = findViewById(R.id.selectpintextview3);
+                textView.setTextColor(Color.BLACK);
+                textView = findViewById(R.id.selectpinvoltage);
+                textView.setTextColor(Color.BLACK);
+                textView = findViewById(R.id.selectpintextview5);
+                textView.setTextColor(Color.BLACK);
+                LinearLayout linearLayout = findViewById(R.id.selectpinhorizontallayout1);
+                linearLayout.setBackgroundResource(R.drawable.back);
+                textView = findViewById(R.id.connectorid);
+                textView.setBackgroundResource(R.drawable.back);
+            }
+        });
+
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        if(item.getItemId() == R.id.action_settings){
+            Intent i = new Intent(getBaseContext(),settings.class);
+            startActivity(i);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.toolbarbuttons,menu);
+        return true;
+    }
+
+    /*private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action != null && action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+                switch (state) {
+                    case BluetoothAdapter.STATE_OFF:
+                        System.out.println("onReceive: STATE OFF");
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_OFF:
+                        System.out.println("onReceive: STATE TURNING OFF");
+                        break;
+                    case BluetoothAdapter.STATE_ON:
+                        System.out.println("onReceive: STATE ON");
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_ON:
+                        System.out.println("onReceive: STATE TURNING ON");
+                        break;
+                }
+
+            }
+        }
+    };
+    Create a broadcast receiver for action_found #2
+    private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action != null && action.equals(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
+                switch (state) {
+                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
+                        System.out.println("mBroadcastReceiver2: Discovery Enabled.");
+                        break;
+                    case BluetoothAdapter.SCAN_MODE_NONE:
+                        System.out.println("mBroadCastReceiver2: Discoverability Disabled. Not able to receive connections.");
+                        break;
+                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE:
+                        System.out.println("mBroadCastReceiver2: Discovery Enabled. Able to receive communication");
+                        break;
+                    case BluetoothAdapter.STATE_CONNECTING:
+                        System.out.println("mBroadCastReceiver2: Connecting...");
+                        break;
+                    case BluetoothAdapter.STATE_CONNECTED:
+                        System.out.println("mBroadCastReceiver2: Connected");
+                        break;
+                }
+            }
+        }
+    };
+        BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String text = intent.getStringExtra("theMessage");
+            messages.append(text).append("\n");
+            Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+            incomingMessage.setText(messages);
+            //send("R,In4,4,V");
+        }
+    };
+
+
+     public void masterBTStart(){
         enableBluetooth();
         //enableDiscoverable();
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
@@ -293,7 +410,7 @@ public class selectpin extends AppCompatActivity {
         createBond();
 
     }
-    /*public void startBTConnection(BluetoothDevice device, UUID uuid){
+    public void startBTConnection(BluetoothDevice device, UUID uuid){
         Log.d(TAG,"startBtConnection: Initializing RFZOM bluetooth connection");
         mBluetoothConnection.startclient(this.mBTDevice, selectpin.uuid);
     }
@@ -375,108 +492,7 @@ public class selectpin extends AppCompatActivity {
     public void send(String tosend){
         byte[] bytes = tosend.getBytes(Charset.defaultCharset());
         mBluetoothConnection.write(bytes);
-    }*/
-
-    public void nightMode(){
-        try {
-            ConstraintLayout constraintLayout = findViewById(R.id.selectpinconstraintlayout);
-            constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
-            TextView textView = findViewById(R.id.connectorid);
-            textView.setTextColor(Color.WHITE);
-            textView = findViewById(R.id.numberofpinstextfield);
-            textView.setTextColor(Color.WHITE);
-            textView = findViewById(R.id.selectpintextview3);
-            textView.setTextColor(Color.WHITE);
-            textView = findViewById(R.id.selectpinvoltage);
-            textView.setTextColor(Color.WHITE);
-            textView = findViewById(R.id.selectpintextview5);
-            textView.setTextColor(Color.WHITE);
-            LinearLayout linearLayout = findViewById(R.id.selectpinhorizontallayout1);
-            linearLayout.setBackgroundResource(R.drawable.nightmodeback);
-            textView = findViewById(R.id.connectorid);
-            textView.setBackgroundResource(R.drawable.nightmodeback);
-
-        } catch (Exception ignored) {
-        }
     }
-
-    public void dayMode(){
-        try {
-            ConstraintLayout constraintLayout = findViewById(R.id.selectpinconstraintlayout);
-            constraintLayout.setBackgroundColor(Color.WHITE);
-            TextView textView = findViewById(R.id.connectorid);
-            textView.setTextColor(Color.BLACK);
-            textView = findViewById(R.id.numberofpinstextfield);
-            textView.setTextColor(Color.BLACK);
-            textView = findViewById(R.id.selectpintextview3);
-            textView.setTextColor(Color.BLACK);
-            textView = findViewById(R.id.selectpinvoltage);
-            textView.setTextColor(Color.BLACK);
-            textView = findViewById(R.id.selectpintextview5);
-            textView.setTextColor(Color.BLACK);
-            LinearLayout linearLayout = findViewById(R.id.selectpinhorizontallayout1);
-            linearLayout.setBackgroundResource(R.drawable.back);
-            textView = findViewById(R.id.connectorid);
-            textView.setBackgroundResource(R.drawable.back);
-        } catch (Exception ignored) {
-        }
-        //updatevalues();
-
-    }
-
-    //Create a broadcast receiver for action_found #1
-    private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action != null && action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-                switch (state) {
-                    case BluetoothAdapter.STATE_OFF:
-                        System.out.println("onReceive: STATE OFF");
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_OFF:
-                        System.out.println("onReceive: STATE TURNING OFF");
-                        break;
-                    case BluetoothAdapter.STATE_ON:
-                        System.out.println("onReceive: STATE ON");
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_ON:
-                        System.out.println("onReceive: STATE TURNING ON");
-                        break;
-                }
-
-            }
-        }
-    };
-    //Create a broadcast receiver for action_found #2
-    private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action != null && action.equals(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED)) {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
-                switch (state) {
-                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
-                        System.out.println("mBroadcastReceiver2: Discovery Enabled.");
-                        break;
-                    case BluetoothAdapter.SCAN_MODE_NONE:
-                        System.out.println("mBroadCastReceiver2: Discoverability Disabled. Not able to receive connections.");
-                        break;
-                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE:
-                        System.out.println("mBroadCastReceiver2: Discovery Enabled. Able to receive communication");
-                        break;
-                    case BluetoothAdapter.STATE_CONNECTING:
-                        System.out.println("mBroadCastReceiver2: Connecting...");
-                        break;
-                    case BluetoothAdapter.STATE_CONNECTED:
-                        System.out.println("mBroadCastReceiver2: Connected");
-                        break;
-                }
-            }
-        }
-    };
-
     /*private BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {

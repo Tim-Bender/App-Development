@@ -9,21 +9,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
+
+import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,6 +37,8 @@ public class connectorselect extends AppCompatActivity {
     private vehicle myvehicle;
     private EditText editText;
     private SharedPreferences preferences;
+    private int currentMode = 0;
+    private Handler handler = new Handler();
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -50,16 +51,14 @@ public class connectorselect extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
     }
+
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onStart(){
         super.onStart();
         boolean nightMode = preferences.getBoolean("nightmode",false);
-        if(nightMode){
-            nightMode();
-        }
         Spinner mySpinner = findViewById(R.id.myconnectorspinner);
-
         try {
             preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             setTitle("Connector Selection");
@@ -105,8 +104,6 @@ public class connectorselect extends AppCompatActivity {
                 String temp = this.myvehicle.getUniqueConnections().get(this.myvehicle.getLoc());
                 String s1 = temp.substring(0, 1).toUpperCase();
                 this.editText.setText(s1 + temp.substring(1));
-            } else {
-                Toast.makeText(this, "No Connections", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -117,12 +114,15 @@ public class connectorselect extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(preferences.getBoolean("nightmode",false)){
+        boolean nightmode = preferences.getBoolean("nightmode",false);
+        int NIGHTMODE = 1, DAYMODE = 2;
+        if(nightmode && currentMode != NIGHTMODE){
             nightMode();
-            return;
+            currentMode = NIGHTMODE;
         }
-        if(!preferences.getBoolean("nightmode",false)){
+        else if(!nightmode && currentMode != DAYMODE){
             dayMode();
+            currentMode = DAYMODE;
         }
     }
 
@@ -141,11 +141,8 @@ public class connectorselect extends AppCompatActivity {
                 System.out.println(s1 + temp.substring(1));
                 System.out.println("Unique connections len: " + this.myvehicle.getUniqueConnections().size());
                 this.editText.setText(s1 + temp.substring(1));
-            } else {
-                Toast.makeText(this, "No Connections", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
-            Toast.makeText(this, "Arraylist Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }
@@ -162,11 +159,8 @@ public class connectorselect extends AppCompatActivity {
                 String temp = this.myvehicle.getUniqueConnections().get(this.myvehicle.getLoc());
                 String s1 = temp.substring(0, 1).toUpperCase();
                 this.editText.setText(s1 + temp.substring(1));
-            } else {
-                Toast.makeText(this, "No Connections", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
-            Toast.makeText(this, "ArrayList Error", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }
@@ -178,16 +172,13 @@ public class connectorselect extends AppCompatActivity {
                 if (this.myvehicle.getUniqueConnections().contains(connector.toLowerCase())) {
                     this.myvehicle.setLoc(this.myvehicle.getUniqueConnections().indexOf(connector.toLowerCase()));
                     Intent i = new Intent(getBaseContext(), selectpin.class);
-                    i.putParcelableArrayListExtra("connections",this.myvehicle.getConnections());
+                    i.putParcelableArrayListExtra("connections", this.myvehicle.getConnections());
                     i.putExtra("myvehicle", this.myvehicle);
                     startActivity(i);
-                } else {
-                    Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
                 }
-            } else {
-                Toast.makeText(this, "Empty", Toast.LENGTH_SHORT).show();
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            e.printStackTrace();
 
         }
 
@@ -209,42 +200,47 @@ public class connectorselect extends AppCompatActivity {
     }
 
     public void nightMode(){
-        try {
-            ConstraintLayout constraintLayout = findViewById(R.id.connectorselectcontraintlayout);
-            constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
-            TextView textView = findViewById(R.id.connectorselecttextview1);
-            textView.setTextColor(Color.WHITE);
-            EditText editText = findViewById(R.id.connectorinput);
-            editText.setTextColor(Color.WHITE);
-            ImageButton imageButton = findViewById(R.id.connectorselectbutton1);
-            imageButton.setBackgroundResource(R.drawable.nightmodebuttonselector);
-            imageButton = findViewById(R.id.connectorselectbutton2);
-            imageButton.setBackgroundResource(R.drawable.nightmodebuttonselector);
-            Button button = findViewById(R.id.connectorselectbutton3);
-            button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-            button.setTextColor(Color.WHITE);
-        } catch (Exception ignored) {
-        }
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                ConstraintLayout constraintLayout = findViewById(R.id.connectorselectcontraintlayout);
+                constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
+                TextView textView = findViewById(R.id.connectorselecttextview1);
+                textView.setTextColor(Color.WHITE);
+                EditText editText = findViewById(R.id.connectorinput);
+                editText.setTextColor(Color.WHITE);
+                ImageButton imageButton = findViewById(R.id.connectorselectbutton1);
+                imageButton.setBackgroundResource(R.drawable.nightmodebuttonselector);
+                imageButton = findViewById(R.id.connectorselectbutton2);
+                imageButton.setBackgroundResource(R.drawable.nightmodebuttonselector);
+                Button button = findViewById(R.id.connectorselectbutton3);
+                button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+                button.setTextColor(Color.WHITE);
+            }
+        });
 
     }
 
-    public void dayMode(){
-        try {
-            ConstraintLayout constraintLayout = findViewById(R.id.connectorselectcontraintlayout);
-            constraintLayout.setBackgroundColor(Color.WHITE);
-            TextView textView = findViewById(R.id.connectorselecttextview1);
-            textView.setTextColor(Color.BLACK);
-            EditText editText = findViewById(R.id.connectorinput);
-            editText.setTextColor(Color.BLACK);
-            ImageButton imageButton = findViewById(R.id.connectorselectbutton1);
-            imageButton.setBackgroundResource(R.drawable.daymodebuttonselector);
-            imageButton = findViewById(R.id.connectorselectbutton2);
-            imageButton.setBackgroundResource(R.drawable.daymodebuttonselector);
-            Button button = findViewById(R.id.connectorselectbutton3);
-            button.setBackgroundResource(R.drawable.daymodebuttonselector);
-            button.setTextColor(Color.BLACK);
-        } catch (Exception ignored) {
-        }
+    public void dayMode() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                ConstraintLayout constraintLayout = findViewById(R.id.connectorselectcontraintlayout);
+                constraintLayout.setBackgroundColor(Color.WHITE);
+                TextView textView = findViewById(R.id.connectorselecttextview1);
+                textView.setTextColor(Color.BLACK);
+                EditText editText = findViewById(R.id.connectorinput);
+                editText.setTextColor(Color.BLACK);
+                ImageButton imageButton = findViewById(R.id.connectorselectbutton1);
+                imageButton.setBackgroundResource(R.drawable.daymodebuttonselector);
+                imageButton = findViewById(R.id.connectorselectbutton2);
+                imageButton.setBackgroundResource(R.drawable.daymodebuttonselector);
+                Button button = findViewById(R.id.connectorselectbutton3);
+                button.setBackgroundResource(R.drawable.daymodebuttonselector);
+                button.setTextColor(Color.BLACK);
+
+            }
+        });
     }
 
 }
