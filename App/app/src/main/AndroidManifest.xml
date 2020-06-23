@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.Spudnik">
+    package="com.Diagnostic.Spudnik">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -21,37 +21,37 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".LoginActivity"
+        <activity android:name="com.Diagnostic.Spudnik.LoginActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait"/>
-        <activity android:name=".BluetoothTestActivity"
+        <activity android:name="com.Diagnostic.Spudnik.BluetoothTestActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait"/>
 
-        <service android:name=".BluetoothLeService" />
+        <service android:name="com.Diagnostic.Spudnik.BluetoothLeService" />
 
-        <activity android:name=".settings"
+        <activity android:name="com.Diagnostic.Spudnik.settings"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait"/>
-        <activity android:name=".pinlocation"
+        <activity android:name="com.Diagnostic.Spudnik.pinlocation"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait"/>
-        <activity android:name=".Pindiagnostic"
+        <activity android:name="com.Diagnostic.Spudnik.Pindiagnostic"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait"/>
-        <activity android:name=".selectpin"
+        <activity android:name="com.Diagnostic.Spudnik.selectpin"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait"/>
-        <activity android:name=".connectorselect"
+        <activity android:name="com.Diagnostic.Spudnik.connectorselect"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait"/>
-        <activity android:name=".inputserial"
+        <activity android:name="com.Diagnostic.Spudnik.inputserial"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait"/>
-        <activity android:name=".home"
+        <activity android:name="com.Diagnostic.Spudnik.home"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait"/>
-        <activity android:name=".MainActivity"
+        <activity android:name="com.Diagnostic.Spudnik.MainActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait">
             <intent-filter>
