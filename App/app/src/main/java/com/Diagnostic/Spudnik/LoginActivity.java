@@ -29,10 +29,8 @@ import java.util.Objects;
 
 
 /**
- * Author: Timothy Bender
- * timothy.bender@spudnik.com
- * 530-414-6778
- *
+ * @author timothy.bender
+ * @version dev1.0.0
  *
  * Welcome to the login activity...
  */
@@ -60,27 +58,27 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        //setup firebase user and auth
-        auth = FirebaseAuth.getInstance();
+        auth = FirebaseAuth.getInstance();  //setup firebase user and auth
         user = auth.getCurrentUser();
-        //If they are already logged in, send them to the home activity
-        if(user != null){
+        if(user != null){   //If they are already logged in, send them to the home activity
             finish();
         }
-        //setup the toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("Login");
         Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
         toolbar.setTitleTextColor(Color.WHITE);
-        //grab the two edit text views
+
         emailEditText = findViewById(R.id.loginemailedittext);
         passwordEditText = findViewById(R.id.loginpasswordedittext);
+
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        fromSettings = getIntent().getBooleanExtra("fromsettings",false);
-        System.out.println("FROM SETTINGS " + fromSettings);
+        fromSettings = getIntent().getBooleanExtra("fromsettings",false); //a boolean value is used to determine where the user came from
     }
 
+    /**
+     * Day and night mode toggle.
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -98,11 +96,11 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Pass the contents of the two edittext fields into a firebase authentication request.
-     * If the task is successful, then we
+     * If the task is successful, then we send them on their way.
      * @param view view
      */
     public void login(View view){
-        auth.signInWithEmailAndPassword(emailEditText.getText().toString().trim(),passwordEditText.getText().toString().trim())
+        auth.signInWithEmailAndPassword(emailEditText.getText().toString().trim(),passwordEditText.getText().toString().trim()) //pass the information into an authentication request
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -110,13 +108,13 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "Logged in", Toast.LENGTH_SHORT).show();
                             user = auth.getCurrentUser();
                             if(fromSettings){
-                                finish();
+                                finish(); //if they logged in from the settings page we will just close this page and send them back there
                             }
-                            else{
-                                myvehicle = new vehicle();
-                                updateDataBase();
-                                myvehicle.preBuildVehicleObject(getApplicationContext());
-                                goToHome();
+                            else{ //otherwise they came from the loading screen.
+                                myvehicle = new vehicle(); //create a new vehicle, since it couldn't have been done on loading
+                                new UpdateDatabase(getApplicationContext()); //update the database
+                                myvehicle.preBuildVehicleObject(getApplicationContext()); //prebuild the vehicle
+                                goToHome(); //go to the home activity
                             }
                         }
                         else{
@@ -128,23 +126,15 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    /**
-     * Update database function, for comments see MainActivity's version. It's the exact same function.
-     */
-    public void updateDataBase(){
-        if(user != null)
-        new UpdateDatabase(this);
-    }
-
 
     /**
      * This function will be used to send the user to the home activity.
      */
     private void goToHome(){
-        if(user != null) {
+        if(user != null) { //redundancy check
             Intent i = new Intent(getBaseContext(), home.class);
-            i.putExtra("myvehicle",myvehicle);
-            startActivity(i);
+            i.putExtra("myvehicle",myvehicle); //put the vehicle as a parcelable extra
+            startActivity(i); //go to home
         }
     }
 

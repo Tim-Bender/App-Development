@@ -24,10 +24,8 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.Objects;
 
 /**
- * Author: Timothy Bender
- * timothy.bender@spudnik.com
- * 530-414-6778
- * Please see README before updating anything
+ * @author timothy.bender
+ * @version dev1.0.0
  *
  * Welcome to the homescreen activity. This activity's primary job is to direct the user where they want to go.
  */
@@ -50,17 +48,17 @@ public class home extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
         setTitle("Home");
         myToolBar.setTitleTextColor(Color.WHITE);
-        Toast.makeText(this, "Welcome!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Welcome!", Toast.LENGTH_SHORT).show(); //Welcome the user
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        myvehicle = getIntent().getParcelableExtra("myvehicle");
+        myvehicle = getIntent().getParcelableExtra("myvehicle"); //get out parcelabled vehicle object
         if(myvehicle.getVehicleIds() == null) {
-            myvehicle.preBuildVehicleObject(this);
+            myvehicle.preBuildVehicleObject(this); //try again to prebuild the vehicle ids and dealer names.
         }
     }
 
 
     /**
-     * Another night and daymode toggle will be checked in onResume
+     * Just another day and night toggle
      */
     @Override
     protected void onResume() {
@@ -88,9 +86,8 @@ public class home extends AppCompatActivity {
      */
     public void diagTool(View view){
         try {
-            //Users are required to be authenticated before they may proceed to the tool.
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            if(user != null) {
+            if(user != null) { //authentication is required before one can access the diagnostic tool
                 Intent i = new Intent(getBaseContext(), inputserial.class);
                 i.putExtra("myvehicle",myvehicle);
                 startActivity(i);

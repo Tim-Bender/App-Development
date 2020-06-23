@@ -24,6 +24,8 @@ import java.util.Objects;
 
 
 /**
+ * @author timothy.bender
+ * @version dev1.0.0
  * Welcome to the starting activity of the app. This activity will serve as a loading screen, an authentication check, and an automate database update.
  */
 public class MainActivity extends AppCompatActivity {
@@ -53,21 +55,23 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE);
         Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
 
-        //setup shared preferences and firebase auth
-        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());  //setup shared preferences and firebase auth
         FirebaseAuth auth = FirebaseAuth.getInstance();
-        user = auth.getCurrentUser();
+        user = auth.getCurrentUser(); //get the current user. if this is null, they aren't logged in
 
         progressBar = findViewById(R.id.loadingbar);
         progressBar.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
-        //set the version code
-        textView = findViewById(R.id.textView3);
+
+        textView = findViewById(R.id.textView3); //set the version name dynamically. This will be the version_name that is packaged during apk building.
         textView.setText(BuildConfig.VERSION_NAME);
         textView = findViewById(R.id.loadingText);
-        myvehicle = new vehicle();
-        myvehicle.preBuildVehicleObject(this);
+        myvehicle = new vehicle(); //create the first vehicle object.
+        myvehicle.preBuildVehicleObject(this); //try and pre-build the list of acceptable ids and dealer names.
     }
 
+    /**
+     * This method is primarily used to toggle between night and day mode. It also begins the gif animation.
+     */
     @Override
     protected void onResume(){
         super.onResume();
@@ -75,80 +79,66 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 boolean nightmode = preferences.getBoolean("nightmode",false);
-                int NIGHTMODE = 1;
+                int NIGHTMODE = 1; //this integer allows us to track the current mode, and therefore not re-call the nightmode method if unecessary.
                 if(nightmode && currentMode != NIGHTMODE){
                     nightMode();
                     currentMode = NIGHTMODE;
                 }
-                ImageView image = findViewById(R.id.gifloadingscreen);
-                Glide.with(getApplicationContext()).load(R.drawable.heartbeatgiftransparent).into(image);
+                ImageView image = findViewById(R.id.gifloadingscreen); //image reference
+                Glide.with(getApplicationContext()).load(R.drawable.heartbeatgiftransparent).into(image); //begin the gif animation
             }
         });
     }
 
     /**
-     * This method will toggle night and day mode, initiate gif glide,
-     * then begin asynchronous background tasks involving database construction, and loading bar updates
+     * This method will attempt to do database update, then begin updating the progress bar and also
+     * Nested threads are used to achieve this. Since UpdateDataBase is an Asynchronous object it doesn't need to be inside of the Asnyc execution.
      */
 
     @Override
     protected void onStart() {
         super.onStart();
-        //Night/Day Mode Toggle
-        //If the firebase user != null, then they are authenticated and we can attempt a database update.
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                if(user != null){
-                    updateDataBase();
-                }
-            }
-        });
-        //GIF Glide animation begin
-        //Begin Asynchronous threading
+        if(user != null){ //if user is null, they are not logged in
+           new UpdateDatabase(this); //attempt the database update
+        }
         try{
-            AsyncTask.execute(new Runnable() {
+            AsyncTask.execute(new Runnable() { //onto another thread we go
                 @Override
                 public void run() {
-                    //Continuously update the loading bar
-
-                    while (progressStatus < 100) {
+                    while (progressStatus < 100) { //lets loop until the progress bar is completely filled
                         progressStatus += 1;
-                        handler.post(new Runnable() {
+                        handler.post(new Runnable() {//a handler is required to modify ui elements.
                             @SuppressLint("SetTextI18n")
                             @Override
-                            public void run() {
-                                progressBar.setProgress(progressStatus);
+                            public void run() { //post the progress to the progress bar
+                                progressBar.setProgress(progressStatus); //1 - 100
                                 textView.setText("Loading " + progressStatus + "%");
                             }
                         });
                         try {
-                            Thread.sleep(30);
+                            Thread.sleep(30); //Adjust this to give more time during loading. 30 = 3 seconds.. 40 = 4 seconds ect. Milliseconds divided by 100 above...
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
                     Intent i;
-                    if(user != null){
+                    if(user != null){ //if the user is already logged in, then we send them to the home screen
                         i = new Intent(getBaseContext(), home.class);
                         i.putExtra("myvehicle",myvehicle);
                     }
-                    else{
+                    else{ //otherwise they get passed over to login
                         i = new Intent(getBaseContext(),LoginActivity.class);
                     }
                     startActivity(i);
                     finish();
-                    //Otherwise they are directed towards the login activity.
-
                 }
             });
         } catch (Exception ignored) {
         }
     }
+
     /**
-     * NightMode Toggle
-     * Most activities will have a nightmode and a daymode toggle, so that they might be switched in the middle
-     * of runtime, however since we are only showing the loading screen once, it does not need a daymode toggle.
+     * Nightmode toggle.
      */
     public void nightMode(){
         handler.post(new Runnable() {
@@ -163,16 +153,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-    }
-
-    /**
-     * Asynchronous database construction and updatability. Connects to firebase's server,
-     * iterates through all items in the bucket, and downloads needed files, replacing the old ones.
-     * It will also update the list of acceptable vehicle id numbers stored in com.example.Spudnik/files/machineids
-     */
-
-    public void updateDataBase() {
-        new UpdateDatabase(this);
     }
 
 }

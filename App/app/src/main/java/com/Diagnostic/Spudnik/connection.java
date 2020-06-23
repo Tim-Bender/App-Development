@@ -2,18 +2,17 @@ package com.Diagnostic.Spudnik;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+/**
+ * @author timothy.bender
+ * @version dev1.0.0
+ *
+ * This connection object will hold data about an individual connection. vehicle.java contains an arraylist of these objects which represents all the connections on a machine
+ * Parcelable is implemented here to allow for transfer of an list of connections between activities.
+ * Comparable is also implemented here to allow for easy sorting via the vehicle sort method.
+ */
 
 public class connection implements Parcelable,Comparable<connection> {
-    /**
-     * Author: Timothy Bender
-     * timothy.bender@spudnik.com
-     * 530-414-6778
-     * Please see README before updating anything
 
-     * This connection object will hold data about an individual connection. vehicle.java contains an arraylist of these objects which represents all the connections on a machine
-     * Parcelable is implemented here to allow for transfer of an list of connections between activities.
-     * Comparable is also implemented here to allow for easy sorting via the vehicle sort method.
-     */
     private String id,direction,name,units,plug,s4,type;
     private static final int SORT_BY_NAME = 2;
     private static int SORT_BY = 0;
@@ -82,9 +81,8 @@ public class connection implements Parcelable,Comparable<connection> {
             if(o != null){
                 if (SORT_BY == SORT_BY_NAME) {
                     int counter = 0;
-                    char[] lArray;
-                    char[] oArray;
-                    lArray = this.name.toCharArray();
+                    char[] lArray, oArray;
+                    lArray = name.toCharArray();
                     oArray = o.name.toCharArray();
                     while (comparison == 0 && counter < lArray.length && counter < oArray.length) {
                         comparison = Character.compare(lArray[counter], oArray[counter]);
@@ -92,7 +90,7 @@ public class connection implements Parcelable,Comparable<connection> {
                     }
                     return comparison;
                 }
-                return Integer.compare(Integer.parseInt(this.s4), Integer.parseInt(o.s4));
+                return Integer.compare(Integer.parseInt(s4), Integer.parseInt(o.s4));
             }
         } catch (Exception ignored) {
 
@@ -101,26 +99,22 @@ public class connection implements Parcelable,Comparable<connection> {
 
     }
 
+    /**
+     * This function will do a quick check of whether the connection is an input or an output.
+     * @return String
+     */
     String inout(){
+        String temp = this.direction,toReturn = "";
         try {
-            String temp = this.direction;
-            if (temp.contains("in") || temp.contains("In")) {
-                return "Input";
-            } else {
-                return "Output";
-            }
-        } catch (Exception e) {
-            return "NULL";
-        }
+            toReturn = (temp.contains("in") || temp.contains("In")) ? "Input" : "Output";
+        } catch (Exception ignored){}
+        return toReturn;
     }
-
+    //set methods
     static void setSortBy(int sortBy) {
         SORT_BY = sortBy;
     }
 
-    public String toString(){
-        return (this.id+" " + this.direction + " " + this.name + " " + this.units + " " + this.units + " " + this.type);
-    }
 
     //set methods
     public void setId(String id) {
@@ -148,6 +142,9 @@ public class connection implements Parcelable,Comparable<connection> {
 
     String getS4() {
         return s4;
+    }
+    public String toString(){
+        return (this.id+" " + this.direction + " " + this.name + " " + this.units + " " + this.units + " " + this.type);
     }
 
 }

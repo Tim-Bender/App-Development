@@ -2,17 +2,15 @@ package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.os.AsyncTask;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
@@ -26,26 +24,30 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+/**
+ * @author timothy.bender
+ * @version dev 1.0.0
+ *
+ * Welcome to the UpdateDataBase class, this class is used to synchronize the files stored within the Spudnik Diagnostic Firebase Storage Bucket
+ * with the phone's local copies. The simplest way to invoke a database update using this class is just: "new UpdateDatabase"
+ * The simplest way to initiate a database update is just: "new UpdateDataBase()". No need to store it. It will be picked up by the garbage connector when its done.
+ */
 class UpdateDatabase{
-    private SharedPreferences.Editor editor;
-    private FirebaseStorage firebaseStorage;
-    private Context context;
+
+    private final Context context;
 
     /**
-     * Constructor
+     * Constructor, a context is required to be passed from the parent activity. This context allows us to locate file directories...
      * @param c Context
      */
     @SuppressLint("CommitPrefEdits")
     UpdateDatabase(final Context c){
         context = c;
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        editor = preferences.edit();
-        firebaseStorage = FirebaseStorage.getInstance();
         updateDataBase();
     }
 
     /**
-     * Asynchronously check's the firebase database bucket for updated files, downloads them and updates the acceptable machine id's data file.
+     * Asynchronously check's the firebase database bucket for updated files, downloads them and updates the  amachine id's data file.
      * First we use ConnectivityManager to determine whether or not we are connected to a network, if we are then we attempt the update.
      * All event listeners are asynchronous and thus must be nested within one another for correct runtime execution.
      */
@@ -55,83 +57,42 @@ class UpdateDatabase{
             public void run() {
                 final ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE); //Check if a network is active
                 Network activeNetwork = cm.getActiveNetwork();
-                final boolean isConnected = activeNetwork != null;
-                if(isConnected) {   //If we are connected go ahead and try updating
-                    StorageReference reference = firebaseStorage.getReference().getRoot().child("DataBase"); //Storage reference to firebase bucket, at its child "Database"
+                if(activeNetwork != null && FirebaseAuth.getInstance().getCurrentUser() != null) {   //If we are connected go ahead and try updating. Also must be logged in...
+                    StorageReference reference = FirebaseStorage.getInstance().getReference().getRoot().child("DataBase"); //Storage reference to firebase bucket, at its child "Database"
 
-                    final File rootpath = new File(context.getFilesDir(), "database"); //rootpath to local database folder
-                    File temp1 = new File(context.getFilesDir(), "");
-                    File temp2 = new File(temp1, "machineids");  //delete the current list of machine id's.
-                    temp2.delete();
+                    final File rootpath = new File(context.getFilesDir(), "database"); //Rootpath to local database folder
 
-                    if (!rootpath.exists()) { //if the rootpath doesn't exist, we create the folder. This is necessary on first boot
-                       rootpath.mkdirs();
-                    }
+                    if (!rootpath.exists())  //if the rootpath doesn't exist, we create the folder. This is necessary on first boot
+                        rootpath.mkdirs();
+                    new File(context.getFilesDir(),"machineids").delete();    //delete the current list of machine id's.
+
                     reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() { //get all the items in at the firebase reference location
                         @Override
                         public void onSuccess(ListResult listResult) {
                             for (final StorageReference item : listResult.getItems()) {
-                                final File localFile = new File(rootpath, item.getName()); //get the local version of the file for comparison
+                                final File localFile = new File(rootpath, item.getName().toLowerCase()); //get the local version of the file for comparison
                                 item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() { //Get the metadata of the item.
                                     @Override
                                     public void onSuccess(StorageMetadata storageMetadata) {
                                         if (localFile.lastModified() < storageMetadata.getUpdatedTimeMillis()) {    //if the file either doesn't exist locally, or is outdated.. we download
-                                           localFile.delete(); //delete the old version
+                                            localFile.delete(); //delete the old version
                                             item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() { //download the file
                                                 @Override
                                                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                                                    //At this point the file is downloaded, and now we just need to update the machineids data file
-                                                    File root = new File(context.getFilesDir(), ""); //rootpath to the folder containing machine ids. The parent of rootpath ^
-                                                    FileWriter fw;
-                                                    File toEdit = new File(root, "machineids"); //reference to the machineids data file
-                                                    try {
-                                                        String line = "", toPrint;
-                                                        if (toEdit.exists()) { //We will need to append the newly downloaded file to the contents in machineids
-                                                            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
-                                                            line = reader.readLine();
-                                                        }
-                                                        //add it to the file, and close the file.
-                                                        String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("_", "") + ",";
-                                                        toPrint = (line != null) ? line + editedItemName : editedItemName; //ternary operator.
-                                                        fw = new FileWriter(toEdit);
-                                                        fw.append(toPrint);
-                                                        fw.flush();
-                                                        fw.close();
-                                                    } catch (IOException e) {
-                                                        e.printStackTrace();
-                                                    }
+                                                    writeMachineIdFile(item); //At this point the file is downloaded, and now we just need to update the machineids data file
                                                 }
                                             });
                                         } else if (localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()) { //If we don't need to download the file, we do still need to
-                                            File root = new File(context.getFilesDir(), "");                      //add the name to machineids data file, works the same as above ^
-                                            FileWriter fw;
-                                            File toEdit = new File(root, "machineids");
-                                            try {
-                                                String line = "", toPrint;
-                                                if (toEdit.exists()) {
-                                                    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
-                                                    line = reader.readLine();
-                                                }
-                                                String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("_", "") + ",";
-                                                toPrint = (line != null) ? line + editedItemName : editedItemName;
-                                                fw = new FileWriter(toEdit);
-                                                fw.append(toPrint);
-                                                fw.flush();
-                                                fw.close();
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
-
-
+                                            writeMachineIdFile(item);                                             //add it to the list
                                         }
                                     }
                                 });
                             }
-                            editor.putBoolean("databaseupdated", true);
-                            editor.commit();
+                            //editor.putBoolean("databaseupdated", true);
+                            //editor.commit();
                         }
 
-                    }).addOnFailureListener(new OnFailureListener() {
+                    }).addOnFailureListener(new OnFailureListener() { //If it fails, oh well.
                         @Override
                         public void onFailure(@NonNull Exception e) {
 
@@ -142,27 +103,26 @@ class UpdateDatabase{
         });
     }
 
-    public void writeMachineIdFile(StorageReference item){
-        File root = new File(context.getFilesDir(), ""); //rootpath to the folder containing machine ids. The parent of rootpath ^
-        FileWriter fw;
-        File toEdit = new File(root, "machineids"); //reference to the machineids data file
-        try {
-            String line = "", toPrint;
-            if (toEdit.exists()) { //We will need to append the newly downloaded file to the contents in machineids
-                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(toEdit)));
-                line = reader.readLine();
+    /**
+     * This method will update the machineids data file. It will take its current contents, and then append the new item's name onto the end.
+     * It is done Asynchronously so that our download file threads above may not be interrupted.
+     * @param item StorageReference
+     */
+    private void writeMachineIdFile(final StorageReference item) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                File toEdit = new File(context.getFilesDir(), "machineids"); //reference to the machineids data file
+                try {
+                    String line = (toEdit.exists()) ? new BufferedReader(new InputStreamReader(new FileInputStream(toEdit))).readLine() : null; //read the line, ternary operator
+                    String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("_", "") + ","; //format the item's name. Strip the .csv, and _ off
+                    editedItemName = (line != null) ? line + editedItemName : editedItemName; //ternary operator.
+                    FileWriter fw = new FileWriter(toEdit); //create the new FileWriter
+                    fw.append(editedItemName).flush(); //append the new name on.
+                    fw.close();//close the file
+                } catch (IOException ignored) {}
             }
-            //add it to the file, and close the file.
-            String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("_", "") + ",";
-            toPrint = (line != null) ? line + editedItemName : editedItemName; //ternary operator.
-            fw = new FileWriter(toEdit);
-            fw.append(toPrint);
-            fw.flush();
-            fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        });
     }
 }
 
