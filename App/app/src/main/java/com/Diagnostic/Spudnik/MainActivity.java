@@ -1,9 +1,5 @@
 package com.Diagnostic.Spudnik;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.preference.PreferenceManager;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,6 +11,11 @@ import android.os.Handler;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.preference.PreferenceManager;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
@@ -117,9 +118,7 @@ public class MainActivity extends AppCompatActivity {
                         });
                         try {
                             Thread.sleep(30); //Adjust this to give more time during loading. 30 = 3 seconds.. 40 = 4 seconds ect. Milliseconds divided by 100 above...
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        } catch (InterruptedException ignored) {}
                     }
                     Intent i;
                     if(user != null){ //if the user is already logged in, then we send them to the home screen
@@ -133,8 +132,7 @@ public class MainActivity extends AppCompatActivity {
                     finish();
                 }
             });
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
     }
 
     /**

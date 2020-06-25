@@ -91,12 +91,9 @@ class UpdateDatabase{
                             //editor.putBoolean("databaseupdated", true);
                             //editor.commit();
                         }
-
                     }).addOnFailureListener(new OnFailureListener() { //If it fails, oh well.
                         @Override
-                        public void onFailure(@NonNull Exception e) {
-
-                        }
+                        public void onFailure(@NonNull Exception e) {}
                     });
                 }
             }

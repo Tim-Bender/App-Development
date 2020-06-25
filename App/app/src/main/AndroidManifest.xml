@@ -33,6 +33,10 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <service android:name=".BluetoothLeService" />
+        <activity
+            android:name="com.google.firebase.auth.internal.FederatedSignInActivity"
+            tools:replace="android:launchMode"
+            android:launchMode="standard" />
 
         <activity
             android:name=".settings"

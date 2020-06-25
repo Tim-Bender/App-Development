@@ -186,7 +186,6 @@ public class home extends AppCompatActivity {
                 textView.setTextColor(Color.WHITE);
             }
         });
-
     }
 
     /**
