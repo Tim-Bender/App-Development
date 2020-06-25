@@ -4,11 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.preference.PreferenceManager;
-
 import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,6 +12,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.preference.PreferenceManager;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,7 +36,7 @@ public class home extends AppCompatActivity {
     private Handler handler = new Handler();
     private vehicle myvehicle;
     /**
-     *
+     * Nothing special in this onCreate. There is a check whether or not the vehicle object's id's have been constructed or not
      * @param savedInstanceState savedInstancestate
      */
     @Override
@@ -86,17 +86,16 @@ public class home extends AppCompatActivity {
      */
     public void diagTool(View view){
         try {
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get the current firebase user
             if(user != null) { //authentication is required before one can access the diagnostic tool
                 Intent i = new Intent(getBaseContext(), inputserial.class);
-                i.putExtra("myvehicle",myvehicle);
+                i.putExtra("myvehicle",myvehicle); //add the myvehicle object as a parcelable extra in the intent
                 startActivity(i);
             }
             else{
                 Toast.makeText(this, "Please Sign In", Toast.LENGTH_SHORT).show();
             }
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
 
     }
 
@@ -109,8 +108,7 @@ public class home extends AppCompatActivity {
             Toast.makeText(this, "Function Not Supported", Toast.LENGTH_SHORT).show();
             //Intent i = new Intent(getBaseContext(), inputserial.class);
             //startActivity(i);
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
 
     }
 
@@ -124,8 +122,7 @@ public class home extends AppCompatActivity {
             Toast.makeText(this, "Function Not Supported", Toast.LENGTH_SHORT).show();
             //Intent i = new Intent(getBaseContext(), inputserial.class);
             //startActivity(i);
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
 
     }
 
@@ -137,8 +134,7 @@ public class home extends AppCompatActivity {
         try{
             Intent i = new Intent(getBaseContext(), settings.class);
             startActivity(i);
-        }catch(Exception ignored){
-        }
+        }catch(Exception ignored){}
 
     }
 
@@ -172,26 +168,22 @@ public class home extends AppCompatActivity {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                try {
-                    ConstraintLayout constraintLayout = findViewById(R.id.homeconstraintlayout);
-                    constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
-                    Button button = findViewById(R.id.rundiagtoolbutton);
-                    button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                    button.setTextColor(Color.WHITE);
-                    button = findViewById(R.id.updatesoftwarebutton);
-                    button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                    button.setTextColor(Color.WHITE);
-                    button = findViewById(R.id.logdatabutton);
-                    button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                    button.setTextColor(Color.WHITE);
-                    button = findViewById(R.id.settingshomebutton);
-                    button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                    button.setTextColor(Color.WHITE);
-                    TextView textView = findViewById(R.id.hometextview);
-                    textView.setTextColor(Color.WHITE);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                ConstraintLayout constraintLayout = findViewById(R.id.homeconstraintlayout);
+                constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
+                Button button = findViewById(R.id.rundiagtoolbutton);
+                button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+                button.setTextColor(Color.WHITE);
+                button = findViewById(R.id.updatesoftwarebutton);
+                button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+                button.setTextColor(Color.WHITE);
+                button = findViewById(R.id.logdatabutton);
+                button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+                button.setTextColor(Color.WHITE);
+                button = findViewById(R.id.settingshomebutton);
+                button.setBackgroundResource(R.drawable.nightmodebuttonselector);
+                button.setTextColor(Color.WHITE);
+                TextView textView = findViewById(R.id.hometextview);
+                textView.setTextColor(Color.WHITE);
             }
         });
 
@@ -225,5 +217,6 @@ public class home extends AppCompatActivity {
         });
 
     }
+
 
 }

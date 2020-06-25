@@ -1,10 +1,5 @@
 package com.Diagnostic.Spudnik;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.preference.PreferenceManager;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,6 +21,11 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.preference.PreferenceManager;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -34,11 +34,8 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 /**
- * Author: Timothy Bender
- * timothy.bender@spudnik.com
- * 530-414-6778
- * Please see README before updating anything
- *
+ * @author timothy.bender
+ * @version dev1.0.0
  *
  * Welcome to the input serial activity. Here the user will input a dealer id, an implement serial number,
  * the validity of both will be checked, and then our all important machine object containing that data will be created.
@@ -47,7 +44,7 @@ import java.nio.charset.StandardCharsets;
 public class inputserial extends AppCompatActivity {
     public vehicle myvehicle;
     boolean empty = true;
-    private EditText edittext,dealerText;
+    private EditText serialNumberText,dealerText;
     public ImageView imageView;
     public TextView textView;
     public Switch toggle;
@@ -72,7 +69,7 @@ public class inputserial extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setIcon(R.mipmap.ic_launcher);
-        setTitle("Input Serial Numer");
+        setTitle("Input Serial Number");
         getSupportActionBar().setIcon(R.mipmap.ic_launcher);
         toolbar.setTitleTextColor(Color.WHITE);
 
@@ -86,7 +83,7 @@ public class inputserial extends AppCompatActivity {
         editor = preferences.edit();
         user = FirebaseAuth.getInstance().getCurrentUser();
 
-        //VEHICLE CREATION
+       //FINAL PRE-DATABASE CHECK ON THE VEHICLE OBJECT
         myvehicle = getIntent().getParcelableExtra("myvehicle");
             System.out.println("Prebuilding this stupid thing");
             myvehicle.preBuildVehicleObject(this);
@@ -111,8 +108,8 @@ public class inputserial extends AppCompatActivity {
                         @Override
                         public void run() {
                             //When a user makes a change to the inputid edit text view, then we will check if the new value is a valid id, and if it is, then we attempt to build our database of connections
-                            edittext = findViewById(R.id.inputid);
-                            edittext.setOnKeyListener(new View.OnKeyListener() {
+                            serialNumberText = findViewById(R.id.inputid);
+                            serialNumberText.setOnKeyListener(new View.OnKeyListener() {
                                 @Override
                                 public boolean onKey(View v, int keyCode, KeyEvent event) {
                                     //if they hit enter, then we will attempt to begin the next activity.
@@ -225,78 +222,84 @@ public class inputserial extends AppCompatActivity {
 
 
     /**
-     *
+     * This method will navigate the user to the connector select screen. It will also ensure that all necessary database objects are constructed.
+     * In addition the validity of user inputs is checked here using abstracted methods.
      * @param view view
      */
     @SuppressLint("SetTextI18n")
     public void go(View view) {
         try {
             empty = true;
-            if (!(edittext.getText().length() < 3)) {
-                if (myvehicle.getConnections().isEmpty()) {
-                    myvehicle.preBuildVehicleObject(getApplicationContext());
-                    myvehicle.setIs(is);
-                    myvehicle.buildDataBase();
+            if (!(serialNumberText.getText().length() < 3)) {  //If the contents of the inputserial edittext have a length less than three we will not accept it.
+                if (myvehicle.getConnections().isEmpty()) {    //If our vehicle object's connection database has not been built, we do it now
+                    myvehicle.preBuildVehicleObject(getApplicationContext()); //Just in case the prebuilding failed, we try it again
+                    myvehicle.setIs(is); //set the inputstream for building the database
+                    myvehicle.buildDataBase(); //build it
                 }
-                if (!myvehicle.getConnections().isEmpty() && myvehicle.checkDealer(dealerText.getText().toString().toLowerCase().trim())) {
-                    if (checkBox.isChecked()) {
-                        editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());
+                if (!myvehicle.getConnections().isEmpty() && myvehicle.checkDealer(dealerText.getText().toString().toLowerCase().trim())) { //final check that connections exist and checks if dealer id is valid
+                    if (checkBox.isChecked()) {                                                                    //if "Remember" toggle is enabled then we save the dealer id into sharedpreferences
+                        editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());   //Important to lowercase it and trim whitespace...
                     }
-                    TextView errorMessage = findViewById(R.id.inputserialerrorserialtextview);
-                    if(errorMessage.getVisibility() == View.VISIBLE) {
+                    TextView errorMessage = findViewById(R.id.inputserialerrorserialtextview);   //Hides the errormessage if it has been displayed.
+                    if(errorMessage.getVisibility() == View.VISIBLE) {  //This if statement is actually necessary to avoid a ui glitch.
                         errorMessage.setVisibility(View.INVISIBLE);
                     }
                     Intent i = new Intent(getBaseContext(), connectorselect.class);
-                    i.putExtra("myvehicle", myvehicle);
-                    i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
-                    startActivity(i);
+                    i.putExtra("myvehicle", myvehicle);                            //add our vehicle object as a parcelable extra.
+                    i.putParcelableArrayListExtra("connections", myvehicle.getConnections()); //add the list of connections as a parcelable extra
+                    startActivity(i); //go to connectorselect.class
                 } else {
                     Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                if(!edittext.getText().toString().isEmpty()) {
+                if(!serialNumberText.getText().toString().isEmpty()) {  //If necessary display the error message, but don't display it on an empty field error
                     TextView errorMessage = findViewById(R.id.inputserialerrorserialtextview);
                     errorMessage.setVisibility(View.VISIBLE);
                     errorMessage.setText("Not a valid serial number. Try Updating the Database");
                 }
                 Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception ignored) {}    //this method is fairly error prone due to the massive amount of multithreading, so we will just catch everything.
     }
 
+    /**
+     * This method will be called anytime a user edits the contents of the inputserial edittext field. The entire process is done asynchronously, with multiple
+     * extraneous threads splitting off from the original.
+     */
     public void tryBuildDataBaseObject(){
-        AsyncTask.execute(new Runnable() {
+        AsyncTask.execute(new Runnable() { //Begin a new thread
                 @Override
                 public void run() {
                     try {
-                        final String vehicleId = edittext.getText().toString().toLowerCase().trim();
-                        FileInputStream fis2;
-                        if (vehicleId.length() > 2) {
-                            final String determined = myvehicle.determineComparison(vehicleId);
-                            System.out.println("DETERMINED: " + determined);
-                            if (myvehicle.getVehicleIds().contains(determined)) {
-                                if (user != null) {
-                                    final File rootpath = new File(getFilesDir(), "database");
-                                    File localFile = new File(rootpath, "_" + determined + ".csv");
-                                    fis2 = new FileInputStream(localFile);
-                                    is = new InputStreamReader(fis2, StandardCharsets.UTF_8);
+                        final String vehicleId = serialNumberText.getText().toString().toLowerCase().trim(); //get their inputted vehicle id
+                        if (vehicleId.length() > 2) {          //It has to be at least 3 long for us to accept it
+                            final String determined = myvehicle.determineComparison(vehicleId); //Determine the most likely vehicle id to match with. See myvehicle's documentation for this function.
+                            if (myvehicle.getVehicleIds().contains(determined)) { //If the returned vehicleid from determineComparison() is valid, then we proceed
+                                if (user != null) { //user must be authenticated
+                                    final File rootpath = new File(getFilesDir(), "database"); //rootpath to the database folder
+                                    File localFile = new File(rootpath, "_" + determined + ".csv"); //We need to re-add the _ and .csv to the name of the file. Pointer to file we will reading from
+                                    FileInputStream fis2 = new FileInputStream(localFile);//our fileinputstream
+                                    is = new InputStreamReader(fis2, StandardCharsets.UTF_8); //new inputstreamreader
 
-                                    myvehicle.setIs(is);
-                                    myvehicle.setVehicleId(vehicleId.toLowerCase().trim());
-                                    myvehicle.buildDataBase();
+                                    myvehicle.setIs(is);        //give the inputstreamreader to our vehicle object
+                                    myvehicle.setVehicleId(vehicleId.toLowerCase().trim());     //set the vehicle id
+                                    myvehicle.buildDataBase();      //initiate database construction
                                 }
                             }
                         }
-                    } catch (Exception ignored) {
-                    }
+                    } catch (Exception ignored) {}
                 }
             });
         }
+
+    /**
+     * This method is called whenever a menuitem is selected from the toolbar menu.
+     * @param item MenuItem
+     * @return boolean
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
-        if(item.getItemId() == R.id.action_settings){
+        if(item.getItemId() == R.id.action_settings){       //if the settings button is pressed, we redirect them to the settings page.
             Intent i = new Intent(getBaseContext(),settings.class);
             startActivity(i);
             return true;
@@ -304,12 +307,20 @@ public class inputserial extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * This just inflates the menu view.
+     * @param menu Menu
+     * @return boolean
+     */
     public boolean onCreateOptionsMenu(Menu menu){
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.toolbarbuttons,menu);
         return true;
     }
 
+    /**
+     * Yet another nightmode toggle
+     */
     public void nightMode(){
         handler.post(new Runnable() {
             @Override
@@ -337,6 +348,9 @@ public class inputserial extends AppCompatActivity {
         });
     }
 
+    /**
+     * And yet another daymode toggle
+     */
 
     public void dayMode() {
         handler.post(new Runnable() {

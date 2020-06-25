@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -260,7 +261,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * @return String
      */
     String inout(){
-        String temp = this.uniqueConnections.get(this.loc),toReturn = "";
+        String temp = this.uniqueConnections.get(this.loc),toReturn;
         toReturn = (temp.contains("in") || temp.contains("In")) ? "Input" : "Output"; //ternary operator
         return toReturn;
     }

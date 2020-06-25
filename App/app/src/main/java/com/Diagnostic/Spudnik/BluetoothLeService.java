@@ -15,6 +15,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -118,6 +119,7 @@ public class BluetoothLeService extends Service {
         BluetoothLeService getService(){
             return BluetoothLeService.this;
         }
+
     }
 
     @Override
@@ -157,7 +159,7 @@ public class BluetoothLeService extends Service {
             return false;
         }
 
-        if(deviceAddress != null && address.equals(deviceAddress) && bluetoothGatt != null){
+        if(address.equals(deviceAddress) && bluetoothGatt != null){
             Log.d(TAG,"Tryingto use an existing Gatt for connection.");
             if(bluetoothGatt.connect()){
                 connectedState = STATE_CONNECTING;

@@ -6,11 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.preference.PreferenceManager;
-
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,6 +13,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -138,7 +138,6 @@ public class Pindiagnostic extends AppCompatActivity {
     }
 
     public void nightMode(){
-        System.out.println("Background Thread");
         ConstraintLayout constraintLayout = findViewById(R.id.pindiagnosticconstraintlayout);
         constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
         LinearLayout layout = findViewById(R.id.pindiagnosticlayout1);

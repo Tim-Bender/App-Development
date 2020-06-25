@@ -1,8 +1,5 @@
 package com.Diagnostic.Spudnik;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -19,6 +16,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
 
@@ -47,7 +46,6 @@ public class settings extends AppCompatActivity {
     private FirebaseDatabase firebaseDatabase;
     private int currentMode = 0;
     private Handler handler = new Handler();
-    private FirebaseUser user;
 
     /**
      * Only thing out of the ordinary here in onCreate would be the switch's OnCheckedChangeListener.
@@ -197,7 +195,7 @@ public class settings extends AppCompatActivity {
      */
 
     public void updateDataBase(View view){
-        user = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user != null)
         new UpdateDatabase(this);
         else
