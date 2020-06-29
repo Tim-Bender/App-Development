@@ -2,12 +2,12 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/settingsconstraintlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".settings">
 
     <LinearLayout
-        android:id="@+id/settingsbackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -34,42 +34,14 @@
                 android:layout_weight=".05" />
 
             <TextView
-                android:id="@+id/welcometosettingstextview"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
                 android:layout_weight=".9"
                 android:gravity="center_vertical"
-                android:text="Settings"
-                android:textColor="#000000"
+                android:text="@string/settings"
                 android:textSize="24sp"
                 android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-
-            <Space
-                android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:layout_weight=".05" />
-
-            <Switch
-                android:id="@+id/settingsToggle"
-                android:layout_width="0px"
-                android:layout_height="match_parent"
-                android:layout_weight=".4"
-                android:checked="false"
-                android:text="NightMode"
-                android:textSize="18sp" />
-
-            <Space
-                android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:layout_weight=".5" />
         </LinearLayout>
 
         <LinearLayout
@@ -84,12 +56,11 @@
                 android:layout_weight=".05" />
 
             <Button
-                android:id="@+id/updatedatabasebutton"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight=".4"
                 android:onClick="updateDataBase"
-                android:text="Update DataBase" />
+                android:text="@string/update_database" />
 
             <Space
                 android:layout_width="0dp"
@@ -114,12 +85,11 @@
                 android:layout_weight=".05" />
 
             <Button
-                android:id="@+id/reportbugbutton"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight=".4"
                 android:onClick="reportBug"
-                android:text="Report Bug " />
+                android:text="@string/report_bug" />
 
             <Space
                 android:layout_width="0dp"
@@ -145,12 +115,11 @@
                 android:layout_weight=".05" />
 
             <Button
-                android:id="@+id/reportfeedback"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight=".4"
                 android:onClick="submitFeedback"
-                android:text="Send Feedback" />
+                android:text="@string/send_feedback" />
 
             <Space
                 android:layout_width="0dp"
@@ -176,12 +145,11 @@
                 android:layout_weight=".05" />
 
             <Button
-                android:id="@+id/settingsbluetoothtestbutton"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight=".4"
                 android:onClick="testBluetooth"
-                android:text="Bluetooth Test" />
+                android:text="@string/bluetooth_test" />
 
             <Space
                 android:layout_width="0dp"
@@ -206,12 +174,11 @@
                 android:layout_weight=".05" />
 
             <Button
-                android:id="@+id/settingsloginbutton"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight=".4"
                 android:onClick="login"
-                android:text="Login" />
+                android:text="@string/login" />
 
             <Space
                 android:layout_width="0dp"
@@ -237,12 +204,11 @@
                 android:layout_weight=".05" />
 
             <Button
-                android:id="@+id/settingslogoutbutton"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight=".4"
                 android:onClick="logout"
-                android:text="Logout" />
+                android:text="@string/logout" />
 
             <Space
                 android:layout_width="0dp"

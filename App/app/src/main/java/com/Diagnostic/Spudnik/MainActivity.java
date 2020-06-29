@@ -2,7 +2,6 @@ package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
@@ -14,14 +13,10 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.preference.PreferenceManager;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
-import java.util.Objects;
 
 
 /**
@@ -36,8 +31,6 @@ public class MainActivity extends AppCompatActivity {
     private int progressStatus = 0;
     private Handler handler = new Handler();
     private FirebaseUser user;
-    private int currentMode = 0;
-    private SharedPreferences preferences;
     private vehicle myvehicle;
 
     /**
@@ -51,12 +44,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setTitle("Loading");
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
-        Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());  //setup shared preferences and firebase auth
         FirebaseAuth auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser(); //get the current user. if this is null, they aren't logged in
 
@@ -67,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
         textView.setText(BuildConfig.VERSION_NAME);
         textView = findViewById(R.id.loadingText);
         myvehicle = new vehicle(); //create the first vehicle object.
-        myvehicle.preBuildVehicleObject(this); //try and pre-build the list of acceptable ids and dealer names.
     }
 
     /**
@@ -79,12 +69,7 @@ public class MainActivity extends AppCompatActivity {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                boolean nightmode = preferences.getBoolean("nightmode",false);
-                int NIGHTMODE = 1; //this integer allows us to track the current mode, and therefore not re-call the nightmode method if unecessary.
-                if(nightmode && currentMode != NIGHTMODE){
-                    nightMode();
-                    currentMode = NIGHTMODE;
-                }
+                myvehicle.preBuildVehicleObject(getApplicationContext()); //try and pre-build the list of acceptable ids and dealer names.
                 ImageView image = findViewById(R.id.gifloadingscreen); //image reference
                 Glide.with(getApplicationContext()).load(R.drawable.heartbeatgiftransparent).into(image); //begin the gif animation
             }
@@ -114,6 +99,23 @@ public class MainActivity extends AppCompatActivity {
                             public void run() { //post the progress to the progress bar
                                 progressBar.setProgress(progressStatus); //1 - 100
                                 textView.setText("Loading " + progressStatus + "%");
+                                switch (progressStatus){
+                                    case 20:
+                                    case 50:
+                                    case 80:
+                                        setTitle("Loading.");
+                                        break;
+                                    case 30:
+                                    case 60:
+                                    case 90:
+                                        setTitle("Loading..");
+                                        break;
+                                    case 40:
+                                    case 70:
+                                    case 100:
+                                        setTitle("Loading...");
+                                        break;
+                                }
                             }
                         });
                         try {
@@ -134,23 +136,4 @@ public class MainActivity extends AppCompatActivity {
             });
         } catch (Exception ignored) {}
     }
-
-    /**
-     * Nightmode toggle.
-     */
-    public void nightMode(){
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                ConstraintLayout constraints = findViewById(R.id.mainactivityconstraintlayout);
-                constraints.setBackgroundColor(Color.parseColor("#333333"));
-                TextView textView = findViewById(R.id.textView2);
-                textView.setTextColor(Color.WHITE);
-                textView = findViewById(R.id.textView3);
-                textView.setTextColor(Color.WHITE);
-            }
-        });
-
-    }
-
 }

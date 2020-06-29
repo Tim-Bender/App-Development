@@ -245,12 +245,15 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
                             public void run() {
                                 try {
                                     buildVehicleIds(new InputStreamReader(new FileInputStream(      //create and pass inputstreamreaders to the appropriate methods
-                                            new File(context.getFilesDir(),"machineids"))));
+                                            new File(new File(context.getFilesDir(),"database"),"machineids"))));
                                 } catch (Exception ignored) {}
                             }
                         });
-                        buildDealers(new InputStreamReader(context.getResources().openRawResource(R.raw.dealerids))); //dealerids will come pre-packaged with the app...
-                    } catch (Exception ignored) {}
+                        buildDealers(new InputStreamReader(new FileInputStream(new File(new File(
+                                context.getFilesDir(),"database"),"dealerids"))));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             });
         }

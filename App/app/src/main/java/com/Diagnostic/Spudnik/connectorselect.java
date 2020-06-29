@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,15 +12,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
 import java.util.List;
@@ -40,9 +35,6 @@ public class connectorselect extends AppCompatActivity {
     private vehicle myvehicle;
     private EditText connectorSelectionEdittext;
     private SharedPreferences preferences;
-    private int currentMode = 0;
-    private Handler handler = new Handler();
-
     /**
      * Just your normal onCreate.
      * @param savedInstanceState Bundle
@@ -52,11 +44,10 @@ public class connectorselect extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_connectorselect);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
         setTitle("Connector Selection");
-        Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         myvehicle = getIntent().getParcelableExtra("myvehicle"); //get our vehicle object as a parcelable extra
         Objects.requireNonNull(this.myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections")); //get our list of connections as a parcelable extra
@@ -70,15 +61,12 @@ public class connectorselect extends AppCompatActivity {
     @Override
     protected void onStart(){
         super.onStart();
-        boolean nightMode = preferences.getBoolean("nightmode",false); //Determine whether or not we are in nightmode
+       // boolean nightMode = preferences.getBoolean("nightmode",false); //Determine whether or not we are in nightmode
         Spinner mySpinner = findViewById(R.id.myconnectorspinner); //get our spinner view
         try {
             List<String> connections = myvehicle.getUniqueConnections(); //unique connections is a list of all the unique connections on a machine. We will use it to populate the spinner
             ArrayAdapter<String> dataAdapter;
-            dataAdapter = (nightMode) ? new ArrayAdapter<>(this, R.layout.spinner_item_night, connections) :
-                    new ArrayAdapter<>(this, R.layout.spinner_item_day, connections); //This is quite complicated so here we go. There are two separate arrayadapter options we have depending on
-                                                                                             //whether or not we are in nightmode.. There are two separate spinner item layouts that we can choose from.
-                                                                                             //So we use a ternary operator to determine which item should be used.
+            dataAdapter = new ArrayAdapter<>(this, R.layout.spinner_item_night, connections);
             dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             mySpinner.setAdapter(dataAdapter);          //assign our new adapter to the spinner
             connectorSelectionEdittext = findViewById(R.id.connectorinput);
@@ -110,25 +98,6 @@ public class connectorselect extends AppCompatActivity {
 
 
     }
-
-    /**
-     * Just another day and nightmode toggle in onResume
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        boolean nightmode = preferences.getBoolean("nightmode",false);
-        int NIGHTMODE = 1, DAYMODE = 2;
-        if(nightmode && currentMode != NIGHTMODE){
-            nightMode();
-            currentMode = NIGHTMODE;
-        }
-        else if(!nightmode && currentMode != DAYMODE){
-            dayMode();
-            currentMode = DAYMODE;
-        }
-    }
-
     /**
      * Button redirect for the "down" button.
      * @param view View
@@ -206,55 +175,6 @@ public class connectorselect extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.toolbarbuttons,menu);
         return true;
-    }
-
-    /**
-     * Just another nightmode toggle
-     */
-    public void nightMode(){
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                ConstraintLayout constraintLayout = findViewById(R.id.connectorselectcontraintlayout);
-                constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
-                TextView textView = findViewById(R.id.connectorselecttextview1);
-                textView.setTextColor(Color.WHITE);
-                EditText editText = findViewById(R.id.connectorinput);
-                editText.setTextColor(Color.WHITE);
-                ImageButton imageButton = findViewById(R.id.connectorselectbutton1);
-                imageButton.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                imageButton = findViewById(R.id.connectorselectbutton2);
-                imageButton.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                Button button = findViewById(R.id.connectorselectbutton3);
-                button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                button.setTextColor(Color.WHITE);
-            }
-        });
-
-    }
-
-    /**
-     * Yet another daymode toggle
-     */
-    public void dayMode() {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                ConstraintLayout constraintLayout = findViewById(R.id.connectorselectcontraintlayout);
-                constraintLayout.setBackgroundColor(Color.WHITE);
-                TextView textView = findViewById(R.id.connectorselecttextview1);
-                textView.setTextColor(Color.BLACK);
-                EditText editText = findViewById(R.id.connectorinput);
-                editText.setTextColor(Color.BLACK);
-                ImageButton imageButton = findViewById(R.id.connectorselectbutton1);
-                imageButton.setBackgroundResource(R.drawable.daymodebuttonselector);
-                imageButton = findViewById(R.id.connectorselectbutton2);
-                imageButton.setBackgroundResource(R.drawable.daymodebuttonselector);
-                Button button = findViewById(R.id.connectorselectbutton3);
-                button.setBackgroundResource(R.drawable.daymodebuttonselector);
-                button.setTextColor(Color.BLACK);
-            }
-        });
     }
 
 }

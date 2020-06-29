@@ -5,6 +5,7 @@
     android:id="@+id/loginconstraintlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:backgroundTint="#FFFFFF"
     tools:context=".LoginActivity">
 
     <LinearLayout
@@ -28,14 +29,14 @@
             android:layout_weight=".25" />
 
         <TextView
-            android:id="@+id/logintextviewtop"
+            android:id="@+id/loginpleasejointextview"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight=".75"
             android:paddingStart="10dp"
-            android:text="Please login "
-            android:textColor="#000000"
-            android:textSize="24sp"
+            android:paddingEnd="10dp"
+            android:text="@string/please_login"
+            android:textSize="30sp"
             android:textStyle="bold" />
 
         <Space
@@ -44,31 +45,34 @@
             android:layout_weight=".25" />
 
         <TextView
-            android:id="@+id/logintextview1"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight=".5"
-            android:hint="(first.last@spudnik.com)"
+            android:hint="@string/first_last_spudnik_com"
             android:paddingStart="10dp"
-            android:text="Email:"
-            android:textColor="#000000"
+            android:paddingEnd="10dp"
+            android:text="@string/email"
             android:textSize="24sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight=".75"
+            android:layout_weight="1"
             android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/loginemailedittext"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
-                android:layout_gravity="left|center_vertical"
+                android:layout_gravity="start|center_vertical"
                 android:layout_weight=".85"
+                android:autofillHints=""
                 android:backgroundTint="#FF0000"
                 android:ems="10"
+                android:hint="@string/email"
                 android:inputType="textEmailAddress"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
                 android:selectAllOnFocus="true"
                 android:singleLine="true"
                 android:textColorHighlight="#FF0000"
@@ -87,31 +91,33 @@
             android:layout_weight=".25" />
 
         <TextView
-            android:id="@+id/logintextview2"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight=".5"
-            android:hint="password"
             android:paddingStart="10dp"
-            android:text="Password:"
-            android:textColor="#000000"
+            android:paddingEnd="10dp"
+            android:text="@string/password"
             android:textSize="24sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight=".75"
+            android:layout_weight="1"
             android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/loginpasswordedittext"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
-                android:layout_gravity="left|center_vertical"
+                android:layout_gravity="start|center_vertical"
                 android:layout_weight=".85"
+                android:autofillHints=""
                 android:backgroundTint="#FF0000"
                 android:ems="10"
+                android:hint="@string/password"
                 android:inputType="textPassword"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
                 android:selectAllOnFocus="true"
                 android:singleLine="true" />
 
@@ -134,12 +140,11 @@
                 android:layout_weight=".1" />
 
             <Button
-                android:id="@+id/loginbutton"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight=".35"
                 android:onClick="login"
-                android:text="Login" />
+                android:text="@string/login" />
 
             <Space
                 android:layout_width="0dp"
@@ -150,7 +155,7 @@
         <Space
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="3.25" />
+            android:layout_weight="2.75" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -164,10 +169,10 @@
                 android:layout_weight="1.5" />
 
             <ImageView
-                android:id="@+id/imageView2"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight="1.25"
+                android:contentDescription="@string/spudniklogo"
                 app:srcCompat="@drawable/spudniklogo" />
         </LinearLayout>
 

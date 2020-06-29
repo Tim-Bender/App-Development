@@ -19,7 +19,7 @@ public class warningscreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_warningscreen);
-        Toolbar myToolBar = findViewById(R.id.toolbar);
+        Toolbar myToolBar = findViewById(R.id.topAppBar);
         setSupportActionBar(myToolBar);
         Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
         setTitle("CAUTION");

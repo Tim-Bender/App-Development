@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/homeconstraintlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,7 +8,6 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <LinearLayout
-        android:id="@+id/homelinearlayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -21,7 +19,7 @@
         <include
             layout="@layout/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="0px"
+            android:layout_height="0dp"
             android:layout_weight=".75" />
 
         <Space
@@ -30,19 +28,15 @@
             android:layout_weight=".15" />
 
         <TextView
-            android:id="@+id/hometextview"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight=".8"
             android:gravity="center"
             android:text="@string/what_do_you_want_to_do"
-            android:textColor="#000000"
             android:textSize="24sp"
             android:textStyle="bold" />
 
         <Button
-            android:id="@+id/rundiagtoolbutton"
-            style="@style/Widget.AppCompat.Button"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="2"
@@ -57,13 +51,10 @@
             android:layout_weight=".1" />
 
         <Button
-            android:id="@+id/updatesoftwarebutton"
-            style="@style/Widget.AppCompat.Button"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="2"
             android:alpha=".5"
-            android:background="#737373"
             android:drawableLeft="@drawable/tinygreenarrowtransparent"
             android:onClick="update"
             android:text="@string/update_implement_software"
@@ -76,13 +67,10 @@
             android:layout_weight=".1" />
 
         <Button
-            android:id="@+id/logdatabutton"
-            style="@style/Widget.AppCompat.Button"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="2"
             android:alpha=".5"
-            android:background="#737373"
             android:drawableLeft="@drawable/binarytexttransparent"
             android:onClick="logData"
             android:text="@string/log_implement_io_data"
@@ -95,8 +83,6 @@
             android:layout_weight=".1" />
 
         <Button
-            android:id="@+id/settingshomebutton"
-            style="@style/Widget.AppCompat.Button"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="2"

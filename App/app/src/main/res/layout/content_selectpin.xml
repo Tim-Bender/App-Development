@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/selectpinconstraintlayout"
-    android:layout_width="match_parent"
+    android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:fitsSystemWindows="true"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -11,7 +9,6 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="0px"
-        android:layout_marginBottom="1dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -25,7 +22,6 @@
             android:layout_weight=".75" />
 
         <LinearLayout
-            android:id="@+id/selectpinhorizontallayout1"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="1.75"
@@ -36,83 +32,42 @@
                 android:id="@+id/connectorid"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
-                android:layout_marginStart="1dp"
                 android:layout_weight=".4"
                 android:background="@drawable/back"
                 android:gravity="center"
                 android:textAllCaps="false"
-                android:textColor="#000000"
-                android:textSize="35sp"
+                android:textSize="30sp"
                 android:textStyle="italic" />
 
-            <LinearLayout
-                android:layout_width="0px"
+            <TextView
+                android:id="@+id/numberofpinstextfield"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight=".60"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/numberofpinstextfield"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="p Analog Input Connector"
-                    android:textColor="#000000"
-                    android:textSize="18sp" />
-
-                <TextView
-                    android:id="@+id/selectpintextview3"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Connector Voltage"
-                    android:textColor="#000000"
-                    android:textSize="18sp" />
-
-                <TextView
-                    android:id="@+id/selectpinvoltage"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_horizontal"
-                    android:text="=12.5 VDC"
-                    android:textColor="#000000"
-                    android:textSize="18sp" />
-            </LinearLayout>
+                android:layout_weight=".6"
+                android:background="@drawable/back"
+                android:gravity="center"
+                android:text="@string/p_analog_input_connector"
+                android:textSize="20sp" />
 
         </LinearLayout>
 
         <TextView
-            android:id="@+id/selectpintextview5"
             android:layout_width="match_parent"
-            android:layout_height="0px"
+            android:layout_height="0dp"
             android:layout_weight=".85"
             android:gravity="center_horizontal|center_vertical"
-            android:text="Select Pin to view diagnostics for:"
-            android:textColor="#000000"
+            android:text="@string/select_pin_to_view_diagnostics_for"
             android:textSize="18sp" />
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="0px"
+            android:layout_height="0dp"
             android:layout_weight=".15" />
 
-        <Switch
-            android:layout_width="wrap_content"
-            android:layout_height="0px"
-            android:layout_marginStart="10dp"
-            android:layout_weight=".75"
-            android:text="Sort By Name"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:visibility="gone" />
-
         <ScrollView
-            style="@android:style/Widget.Holo.ScrollView"
+            style="@android:style/Widget.Material.Light.ScrollView"
             android:layout_width="match_parent"
-            android:layout_height="0px"
+            android:layout_height="0dp"
             android:layout_weight="6.5">
 
             <LinearLayout

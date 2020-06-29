@@ -19,16 +19,31 @@
     <string name="spudnikplate">spudnikplate</string>
     <string name="which_s4_input_or_output_connector_would_you_like_to_view_diagnostics_for">Which S4 Input or Output connector would you like to view diagnostics for?</string>
 
-    <!-- Preference Titles -->
-
-    <!-- Messages Preferences -->
-
-    <!-- Sync Preferences -->
-
-    <string name="settings">Settings</string>
     <string name="help">Help</string>
     <string name="entering_pin_test_mode_suspends_normal_machine_operations_and_may_override_machine_safety_features_incorrect_use_of_the_pin_test_mode_could_result_in_personal_injury_death_and_or_equipment_damage">Entering PIN TEST mode suspends normal machine operations and may override machine safety features. Incorrect use of the PIN TEST mode could result in personal injury, death, and or equipment damage</string>
     <string name="danger">DANGER</string>
     <string name="abort">Abort!</string>
     <string name="got_it">Got It!</string>
+    <string name="p_analog_input_connector">p Analog Input Connector</string>
+    <string name="select_pin_to_view_diagnostics_for">Select Pin to view diagnostics for:</string>
+    <string name="first_last_spudnik_com">(first.last@spudnik.com)</string>
+    <string name="please_login">Please Sign In</string>
+    <string name="email">Email:</string>
+    <string name="password">Password:</string>
+    <string name="loading_gif">Loading_gif</string>
+    <string name="update_database">Update DataBase</string>
+    <string name="bluetooth_test">Bluetooth Test</string>
+    <string name="send_feedback">Send Feedback</string>
+    <string name="report_bug">Report Bug</string>
+    <string name="login">Sign In</string>
+    <string name="logout">Sign Out</string>
+    <string name="settings">Settings</string>
+    <string name="where_s_my_serial_number">Where\'s My Serial Number?</string>
+    <string name="holder">Holder</string>
+    <string name="e_g_genag">(e.g. GENAG)</string>
+    <string name="the_implement_s_serial_number_can_be_found_on_the_front_of_the_machine_it_is_printed_on_an_aluminum_tag_similar_to_the_one_above">The implement\'s serial number can be found on the front of the machine. It is printed on an aluminum tag similar to the one above.</string>
+    <string name="remember">Remember</string>
+    <string name="decoration">Decoration</string>
+    <string name="enter_dealer_or_shop_id">Enter Dealer or Shop Id</string>
+    <string name="connector">Connector</string>
 </resources>

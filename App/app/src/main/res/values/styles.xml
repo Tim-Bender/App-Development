@@ -1,16 +1,37 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
+    My<style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+    <!--EDIT COLORS IN colors.xml NOT HERE UNLESS YOU PLAN ON CHANGING THE THEME DEFAULTS!! -->
+        <item name="colorPrimary">@color/white</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorButtonNormal">@color/colorAccent</item>
+        <item name="android:background">@color/colorPrimaryDark</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:checkboxStyle">@style/MyCheckBoxStyle</item>
+        <item name="android:editTextColor">@color/white</item>
+        <item name="switchStyle">@style/MySwitchStyle</item>
+        <item name="spinnerDropDownItemStyle">@style/MySpinnerdropDownItemStyle</item>
     </style>
 
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+    <style name="MySpinnerdropDownItemStyle">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:color">@color/colorAccent</item>
+    </style>
+
+    <style name="MySwitchStyle" parent="TextAppearance.AppCompat.Widget.Switch">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="MyToolbarStyle" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
+        <item name="android:background">@color/colorAccent</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="MyCheckBoxStyle" parent="@style/Widget.AppCompat.CompoundButton.CheckBox">
+        <item name="android:textColor">@color/white</item>
     </style>
 
 </resources>

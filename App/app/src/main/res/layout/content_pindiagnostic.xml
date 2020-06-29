@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/pindiagnosticconstraintlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -22,63 +20,29 @@
             android:layout_weight=".75" />
 
         <LinearLayout
-            android:id="@+id/pindiagnosticlayout1"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="1.75"
-            android:background="@drawable/back"
             android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/direction"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="In3"
-                android:textColor="#000000"
-                android:textSize="28sp" />
-
-            <LinearLayout
-                android:id="@+id/pindiagnosticlayout2"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="2"
+                android:layout_weight=".4"
                 android:background="@drawable/back"
-                android:orientation="vertical">
+                android:gravity="center"
+                android:textSize="30sp" />
 
-                <TextView
-                    android:id="@+id/connectorinformation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0px"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="TextView"
-                    android:textColor="#000000"
-                    android:textSize="22sp" />
-
-                <TextView
-                    android:id="@+id/pindiagnostictextview3"
-                    android:layout_width="match_parent"
-                    android:layout_height="0px"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Connector Voltage"
-                    android:textColor="#000000"
-                    android:textSize="18sp" />
-
-                <TextView
-                    android:id="@+id/pindiagnosticvoltage"
-                    android:layout_width="match_parent"
-                    android:layout_height="0px"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="TextView"
-                    android:textColor="#000000"
-                    android:textSize="22sp" />
-
-            </LinearLayout>
+            <TextView
+                android:id="@+id/connectorinformation"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight=".6"
+                android:background="@drawable/back"
+                android:gravity="center"
+                android:textSize="22sp" />
 
         </LinearLayout>
 
@@ -95,7 +59,6 @@
             android:layout_weight=".9"
             android:gravity="center"
             android:text="Pin 5"
-            android:textColor="#000000"
             android:textSize="24sp" />
 
         <Space
@@ -110,7 +73,6 @@
             android:layout_weight=".9"
             android:gravity="center"
             android:text="LH Digger Nose Pos."
-            android:textColor="#000000"
             android:textSize="24sp" />
 
         <Space
@@ -119,13 +81,11 @@
             android:layout_weight=".375" />
 
         <TextView
-            android:id="@+id/voltage"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight=".9"
             android:gravity="center"
             android:text="6.6 mA"
-            android:textColor="#000000"
             android:textSize="26sp"
             android:textStyle="bold" />
 
@@ -135,8 +95,6 @@
             android:layout_weight=".55" />
 
         <Button
-            android:id="@+id/pindiagnosticbutton1"
-            style="@style/Widget.AppCompat.Button"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="1.5"
@@ -151,7 +109,6 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/prevpin"
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -160,7 +117,6 @@
                 android:text="Prev Pin" />
 
             <Button
-                android:id="@+id/nextpin"
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"

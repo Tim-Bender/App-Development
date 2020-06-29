@@ -12,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -23,7 +22,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -53,7 +51,6 @@ public class inputserial extends AppCompatActivity {
     private SharedPreferences.Editor editor;
     private CheckBox checkBox;
     private FirebaseUser user;
-    private int currentMode = 0;
     private Handler handler = new Handler();
 
     /**
@@ -66,13 +63,10 @@ public class inputserial extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inputserial);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setIcon(R.mipmap.ic_launcher);
         setTitle("Input Serial Number");
-        getSupportActionBar().setIcon(R.mipmap.ic_launcher);
-        toolbar.setTitleTextColor(Color.WHITE);
-
+        toolbar.setTitleTextColor(Color.parseColor("#ffffff"));
         imageView = findViewById(R.id.helpimage);
         imageView.setVisibility(View.GONE);
         textView = findViewById(R.id.helptextview);
@@ -85,7 +79,6 @@ public class inputserial extends AppCompatActivity {
 
        //FINAL PRE-DATABASE CHECK ON THE VEHICLE OBJECT
         myvehicle = getIntent().getParcelableExtra("myvehicle");
-            System.out.println("Prebuilding this stupid thing");
             myvehicle.preBuildVehicleObject(this);
 
 
@@ -202,23 +195,6 @@ public class inputserial extends AppCompatActivity {
 
     }
 
-    /**
-     * Another check onResume for nightmode or daymode toggles
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        boolean nightmode = preferences.getBoolean("nightmode",false);
-        int NIGHTMODE = 1, DAYMODE = 2;
-        if(nightmode && currentMode != NIGHTMODE){
-            nightMode();
-            currentMode = NIGHTMODE;
-        }
-        else if(!nightmode && currentMode != DAYMODE){
-            dayMode();
-            currentMode = DAYMODE;
-        }
-    }
 
 
     /**
@@ -316,68 +292,6 @@ public class inputserial extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.toolbarbuttons,menu);
         return true;
-    }
-
-    /**
-     * Yet another nightmode toggle
-     */
-    public void nightMode(){
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
-                constraintLayout.setBackgroundColor(Color.parseColor("#333333"));
-                TextView view = findViewById(R.id.inputserialtextview1);
-                view.setTextColor(Color.WHITE);
-                view = findViewById(R.id.inputserialtextview2);
-                view.setTextColor(Color.WHITE);
-                view = findViewById(R.id.helptextview);
-                view.setTextColor(Color.WHITE);
-                EditText editText = findViewById(R.id.dealeridtextview);
-                editText.setTextColor(Color.WHITE);
-                editText = findViewById(R.id.inputid);
-                editText.setTextColor(Color.WHITE);
-                CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
-                checkBox.setTextColor(Color.WHITE);
-                Switch myswitch = findViewById(R.id.helptoggle);
-                myswitch.setTextColor(Color.WHITE);
-                Button button = findViewById(R.id.gobutton);
-                button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                button.setTextColor(Color.WHITE);
-            }
-        });
-    }
-
-    /**
-     * And yet another daymode toggle
-     */
-
-    public void dayMode() {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                ConstraintLayout constraintLayout = findViewById(R.id.inputserialconstraintlayout);
-                constraintLayout.setBackgroundColor(Color.WHITE);
-                TextView view = findViewById(R.id.inputserialtextview1);
-                view.setTextColor(Color.BLACK);
-                view = findViewById(R.id.inputserialtextview2);
-                view.setTextColor(Color.BLACK);
-                view = findViewById(R.id.helptextview);
-                view.setTextColor(Color.BLACK);
-                EditText editText = findViewById(R.id.dealeridtextview);
-                editText.setTextColor(Color.BLACK);
-                editText = findViewById(R.id.inputid);
-                editText.setTextColor(Color.BLACK);
-                CheckBox checkBox = findViewById(R.id.rememberdealeridcheckbox);
-                checkBox.setTextColor(Color.BLACK);
-                Switch myswitch = findViewById(R.id.helptoggle);
-                myswitch.setTextColor(Color.BLACK);
-                Button button = findViewById(R.id.gobutton);
-                button.setBackgroundResource(R.drawable.daymodebuttonselector);
-                button.setTextColor(Color.BLACK);
-            }
-        });
-
     }
 
 }

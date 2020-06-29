@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/inputserialconstraintlayout"
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -21,14 +20,11 @@
             android:layout_weight=".75" />
 
         <TextView
-            android:id="@+id/inputserialtextview1"
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_gravity="center"
             android:layout_weight="1"
             android:gravity="bottom|center"
-            android:text="Enter Dealer or Shop Id"
-            android:textColor="#000000"
+            android:text="@string/enter_dealer_or_shop_id"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -40,6 +36,7 @@
 
             <EditText
                 android:id="@+id/dealeridtextview"
+                style="@style/Widget.AppCompat.AutoCompleteTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:layout_gravity="center_vertical"
@@ -47,12 +44,8 @@
                 android:autofillHints=""
                 android:backgroundTint="#FF0000"
                 android:ems="10"
-                android:hint="(e.g. GENAG)"
-                android:inputType="textShortMessage"
-                android:textColorHighlight="#F40303"
-                android:textColorHint="#373535"
-                android:textColorLink="#FF0000"
-                android:textCursorDrawable="@color/design_default_color_error" />
+                android:hint="@string/e_g_genag"
+                android:inputType="textShortMessage" />
 
             <Button
                 style="@android:style/Widget.Button"
@@ -66,24 +59,21 @@
 
             <CheckBox
                 android:id="@+id/rememberdealeridcheckbox"
-                android:layout_width="160dp"
+                android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:layout_gravity="center"
-                android:layout_weight="1"
                 android:buttonTint="#FF0000"
                 android:checked="false"
-                android:text="Remember" />
+                android:text="@string/remember" />
         </LinearLayout>
 
         <TextView
-            android:id="@+id/inputserialtextview2"
             style="@android:style/Widget.DeviceDefault.Light.TextView"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="1"
             android:gravity="center"
             android:text="@string/enter_implement_serial_number"
-            android:textColor="#000000"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -94,7 +84,8 @@
             android:layout_weight=".5"
             android:gravity="center_vertical"
             android:paddingStart="10dp"
-            android:text="Holder"
+            android:paddingEnd="10dp"
+            android:text="@string/holder"
             android:textColor="#FF0000"
             android:textColorHint="#FFFFFF"
             android:textSize="14sp"
@@ -119,14 +110,9 @@
                 android:ems="10"
                 android:hint="@string/e_g_6640_55_150"
                 android:inputType="number|numberPassword"
-                android:textColorHighlight="#F40303"
-                android:textColorHint="#373535"
-                android:textColorLink="#FF0000"
                 android:textCursorDrawable="@color/design_default_color_error" />
 
             <Button
-                android:id="@+id/gobutton"
-                style="@style/Widget.AppCompat.Button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -134,19 +120,19 @@
                 android:layout_marginEnd="10dp"
                 android:onClick="go"
                 android:text="@string/next"
-                android:textColor="#000000"
                 android:textSize="18sp" />
         </LinearLayout>
 
         <Switch
             android:id="@+id/helptoggle"
+            style="@style/MySwitchStyle"
             android:layout_width="wrap_content"
             android:layout_height="0px"
             android:layout_marginStart="20dp"
             android:layout_weight="1"
             android:buttonTint="#FF0000"
             android:checked="false"
-            android:text="Where's My Serial Number?"
+            android:text="@string/where_s_my_serial_number"
             android:textSize="16sp" />
 
         <ImageView
@@ -160,7 +146,7 @@
             android:visibility="gone"
             app:srcCompat="@drawable/spudnikplate" />
 
-        <EditText
+        <TextView
             android:id="@+id/helptextview"
             android:layout_width="match_parent"
             android:layout_height="0px"
@@ -170,8 +156,7 @@
             android:ems="10"
             android:gravity="center"
             android:importantForAutofill="no"
-            android:inputType="textMultiLine"
-            android:text="The implement's serial number can be found on the front of the machine. It is printed on an aluminum tag similar to the one above."
+            android:text="@string/the_implement_s_serial_number_can_be_found_on_the_front_of_the_machine_it_is_printed_on_an_aluminum_tag_similar_to_the_one_above"
             android:textSize="16sp"
             android:visibility="gone" />
 
@@ -181,6 +166,7 @@
             android:layout_height="0px"
             android:layout_gravity="center"
             android:layout_weight="4.25"
+            android:contentDescription="@string/decoration"
             app:srcCompat="@drawable/circuittransparent" />
 
     </LinearLayout>

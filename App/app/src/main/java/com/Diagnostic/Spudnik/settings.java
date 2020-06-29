@@ -1,26 +1,19 @@
 package com.Diagnostic.Spudnik;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Display;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.LinearLayout;
-import android.widget.Switch;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.preference.PreferenceManager;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -39,13 +32,7 @@ import com.google.firebase.database.ValueEventListener;
  */
 public class settings extends AppCompatActivity {
 
-    private Switch aSwitch;
-    private boolean nightmode = false;
-    private SharedPreferences preferences;
-    private SharedPreferences.Editor editor;
     private FirebaseDatabase firebaseDatabase;
-    private int currentMode = 0;
-    private Handler handler = new Handler();
 
     /**
      * Only thing out of the ordinary here in onCreate would be the switch's OnCheckedChangeListener.
@@ -58,65 +45,15 @@ public class settings extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        Toolbar myToolBar = findViewById(R.id.toolbar);
+        Toolbar myToolBar = findViewById(R.id.topAppBar);
         setSupportActionBar(myToolBar);
-        getSupportActionBar().setIcon(R.mipmap.ic_launcher);
+        //getSupportActionBar().setIcon(R.mipmap.ic_launcher);
         setTitle("Settings");
         myToolBar.setTitleTextColor(Color.WHITE);
-
-        aSwitch = findViewById(R.id.settingsToggle);
-        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        editor = preferences.edit();
         firebaseDatabase = FirebaseDatabase.getInstance();
-        nightmode = preferences.getBoolean("nightmode",false);
-        //set a listener to the nightmode switch button.
-        aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked && !nightmode){
-                    nightmode = true;
-                    nightMode();
-                    editor.putBoolean("nightmode",true);
-                    editor.apply();
-                }
-                if(!isChecked && nightmode){
-                    nightmode = false;
-                    dayMode();
-                    editor.putBoolean("nightmode",false);
-                    editor.commit();
-                }
-            }
-        });
-        if(nightmode){
-            aSwitch.setChecked(true);
-        }
+
 
     }
-
-    /**
-     * Check if its in day or night mode.
-     */
-
-    @Override
-    public void onResume(){
-        super.onResume();
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                nightmode = preferences.getBoolean("nightmode",false);
-                int NIGHTMODE = 1, DAYMODE = 2;
-                if(nightmode && currentMode != NIGHTMODE){
-                    nightMode();
-                    currentMode = NIGHTMODE;
-                }
-                else if(!nightmode && currentMode != DAYMODE){
-                    dayMode();
-                    currentMode = DAYMODE;
-                }
-            }
-        });
-    }
-
     /**
      * Report a bug button redirect, create an email with auto-filled fields
      * @param view view
@@ -198,8 +135,10 @@ public class settings extends AppCompatActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user != null)
         new UpdateDatabase(this);
-        else
-            Toast.makeText(this, "Please LogIn", Toast.LENGTH_SHORT).show();
+        else {
+            ConstraintLayout layout = findViewById(R.id.settingsconstraintlayout);
+            Snackbar.make(layout, "Please Sign In", Snackbar.LENGTH_SHORT).show();
+        }
     }
 
 
@@ -217,7 +156,8 @@ public class settings extends AppCompatActivity {
         }
         //otherwise we assume it was a mistake
         else{
-            Toast.makeText(this, "Already Logged In", Toast.LENGTH_SHORT).show();
+            ConstraintLayout layout = findViewById(R.id.settingsconstraintlayout);
+            Snackbar.make(layout, "Already Signed In", Snackbar.LENGTH_SHORT).show();
         }
 
     }
@@ -229,15 +169,16 @@ public class settings extends AppCompatActivity {
     public void logout(View view){
         //log the user out.
        FirebaseAuth auth = FirebaseAuth.getInstance();
-       FirebaseUser user = auth.getCurrentUser();
+       FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        ConstraintLayout layout = findViewById(R.id.settingsconstraintlayout);
        //if logged in, log out
        if(user != null) {
            auth.signOut();
-           Toast.makeText(this, "Signed Out", Toast.LENGTH_SHORT).show();
+           Snackbar.make(layout, "Signed Out", Snackbar.LENGTH_SHORT).show();
        }
        //else we assume it was a mistake.
        else{
-           Toast.makeText(this, "Already Signed Out", Toast.LENGTH_SHORT).show();
+           Snackbar.make(layout, "Already Signed In", Snackbar.LENGTH_SHORT).show();
        }
     }
 
@@ -251,78 +192,6 @@ public class settings extends AppCompatActivity {
             startActivity(i);
         }catch(Exception ignored){}
     }
-
-    /**
-     * NightMode Toggle
-     */
-    public void nightMode(){
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                LinearLayout layout = findViewById(R.id.settingsbackground);
-                layout.setBackgroundColor(Color.parseColor("#333333"));
-                TextView textView = findViewById(R.id.welcometosettingstextview);
-                textView.setTextColor(Color.WHITE);
-                Button button = findViewById(R.id.updatedatabasebutton);
-                button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                button.setTextColor(Color.WHITE);
-                button = findViewById(R.id.reportbugbutton);
-                button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                button.setTextColor(Color.WHITE);
-                button = findViewById(R.id.reportfeedback);
-                button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                button.setTextColor(Color.WHITE);
-                button = findViewById(R.id.settingsbluetoothtestbutton);
-                button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                button.setTextColor(Color.WHITE);
-                button = findViewById(R.id.settingsloginbutton);
-                button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                button.setTextColor(Color.WHITE);
-                button = findViewById(R.id.settingslogoutbutton);
-                button.setBackgroundResource(R.drawable.nightmodebuttonselector);
-                button.setTextColor(Color.WHITE);
-                aSwitch.setTextColor(Color.WHITE);
-            }
-        });
-
-    }
-
-    /**
-     * DayMode Toggle
-     */
-
-    public void dayMode(){
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                LinearLayout layout = findViewById(R.id.settingsbackground);
-                layout.setBackgroundColor(Color.WHITE);
-                TextView textView = findViewById(R.id.welcometosettingstextview);
-                textView.setTextColor(Color.BLACK);
-                Button button = findViewById(R.id.updatedatabasebutton);
-                button.setBackgroundResource(R.drawable.daymodebuttonselector);
-                button.setTextColor(Color.BLACK);
-                button = findViewById(R.id.reportbugbutton);
-                button.setBackgroundResource(R.drawable.daymodebuttonselector);
-                button.setTextColor(Color.BLACK);
-                button = findViewById(R.id.reportfeedback);
-                button.setBackgroundResource(R.drawable.daymodebuttonselector);
-                button.setTextColor(Color.BLACK);
-                button = findViewById(R.id.settingsbluetoothtestbutton);
-                button.setBackgroundResource(R.drawable.daymodebuttonselector);
-                button.setTextColor(Color.BLACK);
-                button = findViewById(R.id.settingsloginbutton);
-                button.setBackgroundResource(R.drawable.daymodebuttonselector);
-                button.setTextColor(Color.BLACK);
-                button = findViewById(R.id.settingslogoutbutton);
-                button.setBackgroundResource(R.drawable.daymodebuttonselector);
-                button.setTextColor(Color.BLACK);
-                aSwitch.setTextColor(Color.BLACK);
-            }
-        });
-
-    }
-
 
 
 }

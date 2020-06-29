@@ -64,7 +64,7 @@ class UpdateDatabase{
 
                     if (!rootpath.exists())  //if the rootpath doesn't exist, we create the folder. This is necessary on first boot
                         rootpath.mkdirs();
-                    new File(context.getFilesDir(),"machineids").delete();    //delete the current list of machine id's.
+                    new File(rootpath,"machineids").delete();    //delete the current list of machine id's.
 
                     reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() { //get all the items in at the firebase reference location
                         @Override
@@ -79,17 +79,17 @@ class UpdateDatabase{
                                             item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() { //download the file
                                                 @Override
                                                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                                    if(!item.getName().equals("dealerids"))
                                                     writeMachineIdFile(item); //At this point the file is downloaded, and now we just need to update the machineids data file
                                                 }
                                             });
-                                        } else if (localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()) { //If we don't need to download the file, we do still need to
+                                        } else if (localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()) {
+                                            if(!item.getName().equals("dealerids"))//If we don't need to download the file, we do still need to
                                             writeMachineIdFile(item);                                             //add it to the list
                                         }
                                     }
                                 });
                             }
-                            //editor.putBoolean("databaseupdated", true);
-                            //editor.commit();
                         }
                     }).addOnFailureListener(new OnFailureListener() { //If it fails, oh well.
                         @Override
@@ -109,7 +109,7 @@ class UpdateDatabase{
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                File toEdit = new File(context.getFilesDir(), "machineids"); //reference to the machineids data file
+                File toEdit = new File(new File(context.getFilesDir(),"database"), "machineids"); //reference to the machineids data file
                 try {
                     String line = (toEdit.exists()) ? new BufferedReader(new InputStreamReader(new FileInputStream(toEdit))).readLine() : null; //read the line, ternary operator
                     String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("_", "") + ","; //format the item's name. Strip the .csv, and _ off
