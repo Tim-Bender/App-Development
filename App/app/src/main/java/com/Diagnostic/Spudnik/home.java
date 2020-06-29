@@ -10,7 +10,6 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,8 +36,7 @@ public class home extends AppCompatActivity {
         setSupportActionBar(myToolBar);
         setTitle("Home");
         myToolBar.setTitleTextColor(Color.WHITE);
-        ConstraintLayout layout = findViewById(R.id.homeconstraintlayout);
-        Snackbar.make(layout,"Welcome!",Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(findViewById(R.id.homeconstraintlayout),"Welcome",Snackbar.LENGTH_SHORT).show();
         myvehicle = getIntent().getParcelableExtra("myvehicle"); //get out parcelabled vehicle object
         if(myvehicle.getVehicleIds().isEmpty()) {
             myvehicle.preBuildVehicleObject(this); //try again to prebuild the vehicle ids and dealer names.
@@ -58,8 +56,7 @@ public class home extends AppCompatActivity {
                 startActivity(i);
             }
             else{
-                ConstraintLayout layout = findViewById(R.id.homeconstraintlayout);
-                Snackbar.make(layout, "Please Sign In", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(findViewById(R.id.homeconstraintlayout), "Please Sign In", Snackbar.LENGTH_SHORT).show();
             }
         } catch (Exception ignored) {}
 
@@ -71,8 +68,7 @@ public class home extends AppCompatActivity {
      */
     public void update(View view){
         try {
-            ConstraintLayout layout = findViewById(R.id.homeconstraintlayout);
-            Snackbar.make(layout, "Function Not Supported", Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(findViewById(R.id.homeconstraintlayout), "Function Not Supported", Snackbar.LENGTH_SHORT).show();
             //Intent i = new Intent(getBaseContext(), inputserial.class);
             //startActivity(i);
         } catch (Exception ignored) {}
@@ -86,8 +82,7 @@ public class home extends AppCompatActivity {
 
     public void logData(View view){
         try {
-            ConstraintLayout layout = findViewById(R.id.homeconstraintlayout);
-            Snackbar.make(layout, "Function Not Supported", Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(findViewById(R.id.homeconstraintlayout), "Function Not Supported", Snackbar.LENGTH_SHORT).show();
             //Intent i = new Intent(getBaseContext(), inputserial.class);
             //startActivity(i);
         } catch (Exception ignored) {}

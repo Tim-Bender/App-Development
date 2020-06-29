@@ -2,7 +2,6 @@ package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -12,12 +11,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.preference.PreferenceManager;
+
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
 import java.util.Objects;
@@ -33,8 +32,8 @@ import java.util.Objects;
  */
 public class connectorselect extends AppCompatActivity {
     private vehicle myvehicle;
-    private EditText connectorSelectionEdittext;
-    private SharedPreferences preferences;
+    private TextInputEditText connectorSelectionEdittext;
+
     /**
      * Just your normal onCreate.
      * @param savedInstanceState Bundle
@@ -48,7 +47,6 @@ public class connectorselect extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
         setTitle("Connector Selection");
-        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         myvehicle = getIntent().getParcelableExtra("myvehicle"); //get our vehicle object as a parcelable extra
         Objects.requireNonNull(this.myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections")); //get our list of connections as a parcelable extra
     }

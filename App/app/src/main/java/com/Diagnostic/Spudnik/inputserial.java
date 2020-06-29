@@ -14,7 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -24,6 +23,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
 
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -42,7 +43,7 @@ import java.nio.charset.StandardCharsets;
 public class inputserial extends AppCompatActivity {
     public vehicle myvehicle;
     boolean empty = true;
-    private EditText serialNumberText,dealerText;
+    private TextInputEditText serialNumberText,dealerText;
     public ImageView imageView;
     public TextView textView;
     public Switch toggle;
@@ -206,34 +207,31 @@ public class inputserial extends AppCompatActivity {
     public void go(View view) {
         try {
             empty = true;
-            if (!(serialNumberText.getText().length() < 3)) {  //If the contents of the inputserial edittext have a length less than three we will not accept it.
-                if (myvehicle.getConnections().isEmpty()) {    //If our vehicle object's connection database has not been built, we do it now
-                    myvehicle.preBuildVehicleObject(getApplicationContext()); //Just in case the prebuilding failed, we try it again
-                    myvehicle.setIs(is); //set the inputstream for building the database
-                    myvehicle.buildDataBase(); //build it
+            if (!(serialNumberText.getText().length() < 3)) {
+                if(myvehicle.checkDealer(dealerText.getText().toString().toLowerCase().trim())) {//If the contents of the inputserial edittext have a length less than three we will not accept it.
+                    if (myvehicle.getConnections().isEmpty()) {    //If our vehicle object's connection database has not been built, we do it now
+                        myvehicle.preBuildVehicleObject(getApplicationContext()); //Just in case the prebuilding failed, we try it again
+                        myvehicle.setIs(is); //set the inputstream for building the database
+                        myvehicle.buildDataBase(); //build it
+                    }
+                    if (!myvehicle.getConnections().isEmpty()) { //final check that connections exist and checks if dealer id is valid
+                        if (checkBox.isChecked()) {                                                                    //if "Remember" toggle is enabled then we save the dealer id into sharedpreferences
+                            editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());   //Important to lowercase it and trim whitespace...
+                        }
+                        Intent i = new Intent(getBaseContext(), connectorselect.class);
+                        i.putExtra("myvehicle", myvehicle);                            //add our vehicle object as a parcelable extra.
+                        i.putParcelableArrayListExtra("connections", myvehicle.getConnections()); //add the list of connections as a parcelable extra
+                        startActivity(i); //go to connectorselect.class
+                    } else {
+                       Snackbar.make(findViewById(R.id.inputserialconstraintlayout), "Error", Snackbar.LENGTH_SHORT).setTextColor(Color.RED);
+
+                    }
                 }
-                if (!myvehicle.getConnections().isEmpty() && myvehicle.checkDealer(dealerText.getText().toString().toLowerCase().trim())) { //final check that connections exist and checks if dealer id is valid
-                    if (checkBox.isChecked()) {                                                                    //if "Remember" toggle is enabled then we save the dealer id into sharedpreferences
-                        editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());   //Important to lowercase it and trim whitespace...
-                    }
-                    TextView errorMessage = findViewById(R.id.inputserialerrorserialtextview);   //Hides the errormessage if it has been displayed.
-                    if(errorMessage.getVisibility() == View.VISIBLE) {  //This if statement is actually necessary to avoid a ui glitch.
-                        errorMessage.setVisibility(View.INVISIBLE);
-                    }
-                    Intent i = new Intent(getBaseContext(), connectorselect.class);
-                    i.putExtra("myvehicle", myvehicle);                            //add our vehicle object as a parcelable extra.
-                    i.putParcelableArrayListExtra("connections", myvehicle.getConnections()); //add the list of connections as a parcelable extra
-                    startActivity(i); //go to connectorselect.class
-                } else {
-                    Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
+                else{
+                    dealerText.setError("Invalid");
                 }
             } else {
-                if(!serialNumberText.getText().toString().isEmpty()) {  //If necessary display the error message, but don't display it on an empty field error
-                    TextView errorMessage = findViewById(R.id.inputserialerrorserialtextview);
-                    errorMessage.setVisibility(View.VISIBLE);
-                    errorMessage.setText("Not a valid serial number. Try Updating the Database");
-                }
-                Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
+                serialNumberText.setError("Invalid");
             }
         } catch (Exception ignored) {}    //this method is fairly error prone due to the massive amount of multithreading, so we will just catch everything.
     }

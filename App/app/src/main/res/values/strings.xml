@@ -46,4 +46,8 @@
     <string name="decoration">Decoration</string>
     <string name="enter_dealer_or_shop_id">Enter Dealer or Shop Id</string>
     <string name="connector">Connector</string>
+    <string name="username">Username</string>
+    <string name="dealer_id">Dealer Id</string>
+    <string name="serialnumber">Serialnumber</string>
+    <string name="in1">In1</string>
 </resources>

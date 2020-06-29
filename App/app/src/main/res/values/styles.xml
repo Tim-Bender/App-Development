@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    My<style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
     <!--EDIT COLORS IN colors.xml NOT HERE UNLESS YOU PLAN ON CHANGING THE THEME DEFAULTS!! -->
         <item name="colorPrimary">@color/white</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -16,7 +16,7 @@
         <item name="spinnerDropDownItemStyle">@style/MySpinnerdropDownItemStyle</item>
     </style>
 
-    <style name="MySpinnerdropDownItemStyle">
+    <style name="MySpinnerdropDownItemStyle" parent="Widget.AppCompat.Light.ListView.DropDown">
         <item name="android:textColor">@color/white</item>
         <item name="android:color">@color/colorAccent</item>
     </style>
@@ -33,5 +33,7 @@
     <style name="MyCheckBoxStyle" parent="@style/Widget.AppCompat.CompoundButton.CheckBox">
         <item name="android:textColor">@color/white</item>
     </style>
+
+
 
 </resources>

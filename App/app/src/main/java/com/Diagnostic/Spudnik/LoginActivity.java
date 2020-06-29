@@ -4,21 +4,17 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.text.SpannableString;
-import android.text.style.UnderlineSpan;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -35,8 +31,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private FirebaseUser user;
-    private EditText emailEditText;
-    private EditText passwordEditText;
+    private TextInputEditText emailEditText;
+    private TextInputEditText passwordEditText;
     private vehicle myvehicle;
     private boolean fromSettings;
 
@@ -64,10 +60,6 @@ public class LoginActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.loginemailedittext);
         passwordEditText = findViewById(R.id.loginpasswordedittext);
         fromSettings = getIntent().getBooleanExtra("fromsettings",false);//a boolean value is used to determine where the user came from
-        TextView textView = findViewById(R.id.loginpleasejointextview);
-        SpannableString content = new SpannableString(textView.getText().toString());
-        content.setSpan(new UnderlineSpan(),0,content.length(),0);
-        textView.setText(content);
     }
 
 
@@ -82,8 +74,6 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){ //if the task is successful, we welcome the user, assign the user variable, then update the database
-                            ConstraintLayout layout = findViewById(R.id.loginconstraintlayout);
-                            Snackbar.make(layout, "Signed In", Snackbar.LENGTH_SHORT).show();
                             user = FirebaseAuth.getInstance().getCurrentUser();
                             if(fromSettings){
                                 finish(); //if they logged in from the settings page we will just close this page and send them back there
@@ -97,15 +87,13 @@ public class LoginActivity extends AppCompatActivity {
                         }
                         else{
                             //otherwise we inform them that authentication has failed.
-                            ConstraintLayout layout = findViewById(R.id.loginconstraintlayout);
-                            Snackbar.make(layout, "Sign In Failed", Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(findViewById(R.id.loginconstraintlayout), "Sign In Failed", Snackbar.LENGTH_SHORT).show();
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                ConstraintLayout layout = findViewById(R.id.loginconstraintlayout);
-                Snackbar.make(layout, "Sign In Failed", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(findViewById(R.id.loginconstraintlayout), "Sign In Failed", Snackbar.LENGTH_SHORT).show();
             }
         });
     }
