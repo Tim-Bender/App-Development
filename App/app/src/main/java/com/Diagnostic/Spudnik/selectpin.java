@@ -9,25 +9,22 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.Space;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 /**
  * @author timothy.bender
  * @version dev1.0.0
@@ -38,34 +35,60 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class selectpin extends AppCompatActivity {
     private vehicle myvehicle;
     private TextView  textView;
-    private CopyOnWriteArrayList<connection> connections = new CopyOnWriteArrayList<>();
+    private ArrayList<connection> connections = new ArrayList<>();
     private Handler handler = new Handler();
-
-    @SuppressLint("SetTextI18n")
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-        try {
-            unregisterReceiver(mReceiver2);
-        } catch (Exception ignored) {}
-
-    }
+    private ConnectionAdapter myAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.content_selectpin);
-        Toolbar toolbar = findViewById(R.id.topAppBar);
-        setSupportActionBar(toolbar);
-        setTitle("Pin Selection");
-        toolbar.setTitleTextColor(Color.WHITE);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver2,new IntentFilter("incomingboolean"));
-        myvehicle = getIntent().getParcelableExtra("myvehicle");
-        Objects.requireNonNull(myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
-        textView = findViewById(R.id.connectorid);
+        try {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.content_selectpin);
+            Toolbar toolbar = findViewById(R.id.topAppBar);
+            setSupportActionBar(toolbar);
+            setTitle("Pin Selection");
+            toolbar.setTitleTextColor(Color.WHITE);
+            LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver2,new IntentFilter("incomingboolean"));
+            myvehicle = getIntent().getParcelableExtra("myvehicle");
+            Objects.requireNonNull(myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
+            textView = findViewById(R.id.connectorid);
+            RecyclerView recyclerView = findViewById(R.id.selectpinrecyclerview);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            myAdapter = new ConnectionAdapter(this,connections,myvehicle);
+            recyclerView.setAdapter(myAdapter);
+            ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+                @Override
+                public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                    return false;
+                }
 
+                @Override
+                public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                    if(direction == ItemTouchHelper.LEFT){
+                        connections.remove(viewHolder.getAdapterPosition());
+                        myAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
+                    }
+                    else if(direction == ItemTouchHelper.RIGHT){
+                        Intent i = new Intent(getApplicationContext(), Pindiagnostic.class);
+                        i.putExtra("myvehicle", myvehicle);
+                        i.putParcelableArrayListExtra("connections",connections);
+                        i.putExtra("loc",viewHolder.getAdapterPosition());
+                        i.putParcelableArrayListExtra("uniqueconnections",new ArrayList<>(connections));
+                       startActivity(i);
+                    }
+                }
+            });
+            helper.attachToRecyclerView(recyclerView);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        myAdapter.notifyDataSetChanged();
+    }
     @Override
     public void onStart(){
         super.onStart();
@@ -81,6 +104,15 @@ public class selectpin extends AppCompatActivity {
             });
         } catch (Exception ignored) {}
     }
+    @SuppressLint("SetTextI18n")
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            unregisterReceiver(mReceiver2);
+        } catch (Exception ignored) {
+        }
+    }
 
     BroadcastReceiver mReceiver2 = new BroadcastReceiver() {
         @Override
@@ -91,7 +123,9 @@ public class selectpin extends AppCompatActivity {
                     sortConnections();
                     updatevalues();
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     };
 
@@ -116,8 +150,11 @@ public class selectpin extends AppCompatActivity {
                         }
                     }
                 }
+                myAdapter.notifyDataSetChanged();
             }
-        }catch (Exception ignored){}
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 
@@ -131,16 +168,6 @@ public class selectpin extends AppCompatActivity {
                     String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc());
                     String s1 = temp.substring(0, 1).toUpperCase();
                     textView.setText(s1 + temp.substring(1));
-                    LinearLayout layout = findViewById(R.id.pins);
-                    layout.removeAllViews();
-                    int counter = 0;
-                    for(connection c : connections){
-                        layout.addView(buildButton(c,counter));
-                        Space space = new Space(getApplicationContext());
-                        space.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, .1f));
-                        layout.addView(space);
-                        counter++;
-                    }
                     textView = findViewById(R.id.numberofpinstextfield);
                     textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections().get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector\n Connector Voltage\n=12.5VDC");
                 } catch (Exception e) {
@@ -150,29 +177,6 @@ public class selectpin extends AppCompatActivity {
         });
     }
 
-    @SuppressLint("SetTextI18n")
-    public Button buildButton(connection c,int id){
-        Button btn = new Button(getApplicationContext());
-        LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1.5f);
-        textParams.setMarginStart(10);
-        textParams.setMarginEnd(10);
-        btn.setLayoutParams(textParams);
-        btn.setTextSize(14);
-        btn.setTextColor(Color.WHITE);
-        btn.setBackgroundResource(R.drawable.nightmodebuttonselector);
-        btn.setGravity(Gravity.START);
-        btn.setGravity(Gravity.CENTER_VERTICAL);
-        btn.setPadding(20,0,0,0);
-        btn.setTag(id);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pinSelected((Integer) v.getTag());
-            }
-        });
-        btn.setText("Pin" + c.getS4() +" " +  c.getName());
-        return btn;
-    }
 
     public void sortConnections(){
         AsyncTask.execute(new Runnable() {
@@ -180,21 +184,13 @@ public class selectpin extends AppCompatActivity {
             public void run() {
                 try{
                    Collections.sort(connections);
-                }catch(Exception ignored){}
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
             }
         });
     }
 
-    public void pinSelected(int loc){
-        Intent i = new Intent(getBaseContext(), Pindiagnostic.class);
-        i.putExtra("myvehicle", myvehicle);
-        i.putParcelableArrayListExtra("connections",myvehicle.getConnections());
-        i.putExtra("loc",loc);
-        i.putParcelableArrayListExtra("uniqueconnections",new ArrayList<>(connections));
-        startActivity(i);
-
-
-    }
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item){

@@ -92,7 +92,9 @@ public class connectorselect extends AppCompatActivity {
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {}
             });
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 
     }
@@ -112,7 +114,9 @@ public class connectorselect extends AppCompatActivity {
                 String s1 = temp.substring(0, 1).toUpperCase();
                 connectorSelectionEdittext.setText(s1 + temp.substring(1)); //update the edittext field
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -131,7 +135,9 @@ public class connectorselect extends AppCompatActivity {
                 String s1 = temp.substring(0, 1).toUpperCase();
                 connectorSelectionEdittext.setText(s1 + temp.substring(1)); //update the edittext
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -149,7 +155,9 @@ public class connectorselect extends AppCompatActivity {
                     startActivity(i);
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 

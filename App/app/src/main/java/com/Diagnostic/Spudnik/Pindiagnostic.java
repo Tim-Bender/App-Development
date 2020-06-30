@@ -13,16 +13,22 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SnapHelper;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class Pindiagnostic extends AppCompatActivity {
     private vehicle myvehicle;
-    private TextView direction,pinnumber,pinname,connectorinformation;
+    private TextView direction,connectorinformation;
     private connection myConnection;
     private ArrayList<connection> uniqueConnections;
     private int loc;
+    private ConnectionAdapterHorizontal myAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,30 +44,20 @@ public class Pindiagnostic extends AppCompatActivity {
             setSupportActionBar(toolbar);
             toolbar.setTitleTextColor(Color.WHITE);
             direction = findViewById(R.id.direction);
-            pinnumber = findViewById(R.id.pinnumber);
-            pinname = findViewById(R.id.pinname);
             connectorinformation = findViewById(R.id.connectorinformation);
+            RecyclerView recyclerView = findViewById(R.id.horizontalrecyclerview);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            myAdapter = new ConnectionAdapterHorizontal(this,uniqueConnections,myvehicle);
+            LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(Pindiagnostic.this, LinearLayoutManager.HORIZONTAL, false);
+            recyclerView.setLayoutManager(horizontalLayoutManager);
+            SnapHelper snapHelper = new PagerSnapHelper();
+            snapHelper.attachToRecyclerView(recyclerView);
+            recyclerView.setAdapter(myAdapter);
             updateValues();
         }catch (Exception e){
             e.printStackTrace();
         }
     }
-
-    /*
-    @Override
-    protected void onResume() {
-        super.onResume();
-        boolean nightmode = preferences.getBoolean("nightmode",false);
-        int NIGHTMODE = 1, DAYMODE = 2;
-        if(nightmode && currentMode != NIGHTMODE){
-            nightMode();
-            currentMode = NIGHTMODE;
-        }
-       else if(!nightmode && currentMode != DAYMODE){
-           dayMode();
-           currentMode = DAYMODE;
-        }
-    }*/
 
     @SuppressLint("SetTextI18n")
     public void updateValues(){
@@ -70,16 +66,22 @@ public class Pindiagnostic extends AppCompatActivity {
             String temp = myConnection.getDirection();
             String s1 = temp.substring(0, 1).toUpperCase();
             direction.setText(s1 + temp.substring(1));
-            pinnumber.setText("Pin:" + myConnection.getS4());
-            temp = myConnection.getName();
-            s1 = temp.substring(0,1).toUpperCase();
-            pinname.setText(s1 + temp.substring(1));
             connectorinformation.setText(myvehicle.getMap(myConnection.getDirection().toLowerCase()) + " " + myConnection.inout() + " Connector\nConnectorVoltage\nVoltage");
             setTitle("Viewing Pin:" + myConnection.getS4());
+            myAdapter.notifyDataSetChanged();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    public void viewpinloc(View view){
+        Intent i = new Intent(getBaseContext(), pinlocation.class);
+        i.putExtra("myvehicle", this.myvehicle);
+        i.putParcelableArrayListExtra("connections",this.myvehicle.getConnections());
+        i.putExtra("myConnection",this.myConnection);
+        startActivity(i);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         if(item.getItemId() == R.id.action_settings){
@@ -95,37 +97,4 @@ public class Pindiagnostic extends AppCompatActivity {
         inflater.inflate(R.menu.toolbarbuttons,menu);
         return true;
     }
-
-    public void nextPin(View view){
-        try {
-            this.loc++;
-            if (this.loc == this.uniqueConnections.size()) {
-                this.loc = 0;
-            }
-            updateValues();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void prevPin(View view){
-        try {
-            this.loc--;
-            if (this.loc < 0) {
-                this.loc = this.uniqueConnections.size() - 1;
-            }
-            updateValues();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void viewpinloc(View view){
-        Intent i = new Intent(getBaseContext(), pinlocation.class);
-        i.putExtra("myvehicle", this.myvehicle);
-        i.putParcelableArrayListExtra("connections",this.myvehicle.getConnections());
-        i.putExtra("myConnection",this.myConnection);
-        startActivity(i);
-    }
-
 }

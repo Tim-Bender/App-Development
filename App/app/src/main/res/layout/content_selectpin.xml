@@ -35,6 +35,10 @@
                 android:layout_weight=".4"
                 android:background="@drawable/back"
                 android:gravity="center"
+                android:shadowColor="#000000"
+                android:shadowDx="2"
+                android:shadowDy="1"
+                android:shadowRadius="2"
                 android:textAllCaps="false"
                 android:textSize="30sp"
                 android:textStyle="italic" />
@@ -64,18 +68,11 @@
             android:layout_height="0dp"
             android:layout_weight=".15" />
 
-        <ScrollView
-            style="@android:style/Widget.Material.Light.ScrollView"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/selectpinrecyclerview"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="6.5">
-
-            <LinearLayout
-                android:id="@+id/pins"
-                android:layout_width="match_parent"
-                android:layout_height="0px"
-                android:orientation="vertical" />
-        </ScrollView>
+            android:layout_weight="6.5" />
 
     </LinearLayout>
 

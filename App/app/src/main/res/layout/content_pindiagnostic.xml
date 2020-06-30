@@ -22,7 +22,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="1.75"
+            android:layout_weight="2.25"
             android:orientation="horizontal">
 
             <TextView
@@ -46,53 +46,13 @@
 
         </LinearLayout>
 
-        <Space
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/horizontalrecyclerview"
             android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight="1" />
-
-        <TextView
-            android:id="@+id/pinnumber"
-            android:layout_width="wrap_content"
-            android:layout_height="0px"
+            android:layout_height="8dp"
             android:layout_gravity="center"
-            android:layout_weight=".9"
-            android:gravity="center"
-            android:text="Pin 5"
-            android:textSize="24sp" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight=".375" />
-
-        <TextView
-            android:id="@+id/pinname"
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight=".9"
-            android:gravity="center"
-            android:text="LH Digger Nose Pos."
-            android:textSize="24sp" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight=".375" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight=".9"
-            android:gravity="center"
-            android:text="6.6 mA"
-            android:textSize="26sp"
-            android:textStyle="bold" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight=".55" />
+            android:layout_weight="7"
+            android:scrollbars="horizontal" />
 
         <Button
             android:layout_width="match_parent"
@@ -102,28 +62,6 @@
             android:text="View Pin Location"
             android:textSize="20sp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-
-            <Button
-                android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:onClick="prevPin"
-                android:text="Prev Pin" />
-
-            <Button
-                android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:onClick="nextPin"
-                android:text="Next Pin" />
-        </LinearLayout>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

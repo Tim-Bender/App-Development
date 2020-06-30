@@ -50,4 +50,6 @@
     <string name="dealer_id">Dealer Id</string>
     <string name="serialnumber">Serialnumber</string>
     <string name="in1">In1</string>
+    <string name="title_placeholder">title_placeholder</string>
+    <string name="subtitle_holder">subtitle_holder</string>
 </resources>

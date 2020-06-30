@@ -25,13 +25,12 @@ import androidx.preference.PreferenceManager;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+
 /**
  * @author timothy.bender
  * @version dev1.0.0
@@ -51,7 +50,6 @@ public class inputserial extends AppCompatActivity {
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
     private CheckBox checkBox;
-    private FirebaseUser user;
     private Handler handler = new Handler();
 
     /**
@@ -76,8 +74,6 @@ public class inputserial extends AppCompatActivity {
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = preferences.edit();
-        user = FirebaseAuth.getInstance().getCurrentUser();
-
        //FINAL PRE-DATABASE CHECK ON THE VEHICLE OBJECT
         myvehicle = getIntent().getParcelableExtra("myvehicle");
             myvehicle.preBuildVehicleObject(this);
@@ -209,11 +205,6 @@ public class inputserial extends AppCompatActivity {
             empty = true;
             if (!(serialNumberText.getText().length() < 3)) {
                 if(myvehicle.checkDealer(dealerText.getText().toString().toLowerCase().trim())) {//If the contents of the inputserial edittext have a length less than three we will not accept it.
-                    if (myvehicle.getConnections().isEmpty()) {    //If our vehicle object's connection database has not been built, we do it now
-                        myvehicle.preBuildVehicleObject(getApplicationContext()); //Just in case the prebuilding failed, we try it again
-                        myvehicle.setIs(is); //set the inputstream for building the database
-                        myvehicle.buildDataBase(); //build it
-                    }
                     if (!myvehicle.getConnections().isEmpty()) { //final check that connections exist and checks if dealer id is valid
                         if (checkBox.isChecked()) {                                                                    //if "Remember" toggle is enabled then we save the dealer id into sharedpreferences
                             editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());   //Important to lowercase it and trim whitespace...
@@ -223,8 +214,7 @@ public class inputserial extends AppCompatActivity {
                         i.putParcelableArrayListExtra("connections", myvehicle.getConnections()); //add the list of connections as a parcelable extra
                         startActivity(i); //go to connectorselect.class
                     } else {
-                       Snackbar.make(findViewById(R.id.inputserialconstraintlayout), "Error", Snackbar.LENGTH_SHORT).setTextColor(Color.RED);
-
+                        Snackbar.make(findViewById(R.id.inputserialconstraintlayout), "Error", Snackbar.LENGTH_SHORT).setTextColor(Color.RED);
                     }
                 }
                 else{
@@ -242,29 +232,23 @@ public class inputserial extends AppCompatActivity {
      */
     public void tryBuildDataBaseObject(){
         AsyncTask.execute(new Runnable() { //Begin a new thread
-                @Override
-                public void run() {
-                    try {
-                        final String vehicleId = serialNumberText.getText().toString().toLowerCase().trim(); //get their inputted vehicle id
-                        if (vehicleId.length() > 2) {          //It has to be at least 3 long for us to accept it
-                            final String determined = myvehicle.determineComparison(vehicleId); //Determine the most likely vehicle id to match with. See myvehicle's documentation for this function.
-                            if (myvehicle.getVehicleIds().contains(determined)) { //If the returned vehicleid from determineComparison() is valid, then we proceed
-                                if (user != null) { //user must be authenticated
-                                    final File rootpath = new File(getFilesDir(), "database"); //rootpath to the database folder
-                                    File localFile = new File(rootpath, "_" + determined + ".csv"); //We need to re-add the _ and .csv to the name of the file. Pointer to file we will reading from
-                                    FileInputStream fis2 = new FileInputStream(localFile);//our fileinputstream
-                                    is = new InputStreamReader(fis2, StandardCharsets.UTF_8); //new inputstreamreader
-
-                                    myvehicle.setIs(is);        //give the inputstreamreader to our vehicle object
-                                    myvehicle.setVehicleId(vehicleId.toLowerCase().trim());     //set the vehicle id
-                                    myvehicle.buildDataBase();      //initiate database construction
-                                }
-                            }
+            @Override
+            public void run() {
+                try {
+                    final String vehicleId = serialNumberText.getText().toString().toLowerCase().trim(); //get their inputted vehicle id
+                    if (vehicleId.length() > 2) {          //It has to be at least 3 long for us to accept it
+                        final String determined = myvehicle.determineComparison(vehicleId); //Determine the most likely vehicle id to match with. See myvehicle's documentation for this function.
+                            File localFile = new File(new File(getFilesDir(),"database"), "_" + determined + ".csv"); //We need to re-add the _ and .csv to the name of the file. Pointer to file we will reading from
+                            FileInputStream fis2 = new FileInputStream(localFile);//our fileinputstream
+                            is = new InputStreamReader(fis2, StandardCharsets.UTF_8); //new inputstreamreader
+                            myvehicle.setIs(is);        //give the inputstreamreader to our vehicle object
+                            myvehicle.setVehicleId(vehicleId.toLowerCase().trim());     //set the vehicle id
+                            myvehicle.buildDataBase();      //initiate database construction
                         }
-                    } catch (Exception ignored) {}
-                }
-            });
-        }
+                } catch (Exception ignored) {}
+            }
+        });
+    }
 
     /**
      * This method is called whenever a menuitem is selected from the toolbar menu.
