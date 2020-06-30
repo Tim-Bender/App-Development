@@ -52,4 +52,14 @@
     <string name="in1">In1</string>
     <string name="title_placeholder">title_placeholder</string>
     <string name="subtitle_holder">subtitle_holder</string>
+    <string name="warninglabel">warningLabel</string>
+    <string name="prev_pin">Prev Pin</string>
+    <string name="next_pin">Next Pin</string>
+    <string name="togglebutton">ToggleButton</string>
+    <string name="_5">+5</string>
+    <string name="_1">+1</string>
+    <string name="_1plus">-1</string>
+    <string name="_5minus">-5</string>
+    <string name="pin_6_testholder">PIN 6 TEST</string>
+    <string name="PWM_holder">75 PWM</string>
 </resources>

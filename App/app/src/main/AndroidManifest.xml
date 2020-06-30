@@ -22,22 +22,22 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar"
         tools:ignore="AllowBackup">
-        <activity android:name=".warningscreen"/>
+        <activity android:name=".pintest"></activity>
+        <activity android:name=".warningscreen" />
         <activity
             android:name=".LoginActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".BluetoothTestActivity"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait" />
 
         <service android:name=".BluetoothLeService" />
+
         <activity
             android:name="com.google.firebase.auth.internal.FederatedSignInActivity"
-            tools:replace="android:launchMode"
-            android:launchMode="standard" />
-
+            android:launchMode="standard"
+            tools:replace="android:launchMode" />
         <activity
             android:name=".settings"
             android:screenOrientation="portrait"
@@ -65,7 +65,7 @@
         <activity
             android:name=".home"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait"

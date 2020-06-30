@@ -18,7 +18,8 @@ public class warningscreen extends AppCompatActivity {
 
 
     public void accepted(View view){
-        //TODO Go to test mode
+       Intent i = new Intent(getApplicationContext(),pintest.class);
+       startActivity(i);
     }
 
     public void denied(View view){
