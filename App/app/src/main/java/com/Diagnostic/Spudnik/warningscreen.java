@@ -1,7 +1,6 @@
 package com.Diagnostic.Spudnik;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -9,21 +8,12 @@ import android.view.MenuItem;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
-import java.util.Objects;
-
 public class warningscreen extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_warningscreen);
-        Toolbar myToolBar = findViewById(R.id.topAppBar);
-        setSupportActionBar(myToolBar);
-        Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
-        setTitle("CAUTION");
-        myToolBar.setTitleTextColor(Color.WHITE);
     }
 
 

@@ -62,7 +62,6 @@ class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolde
 
         @Override
         public void onClick(View v) {
-            connection connection = connections.get(getAdapterPosition());
             Intent i = new Intent(mContext.getApplicationContext(), Pindiagnostic.class);
             i.putExtra("myvehicle", myvehicle);
             i.putParcelableArrayListExtra("connections",myvehicle.getConnections());

@@ -30,6 +30,7 @@ public class Pindiagnostic extends AppCompatActivity {
     private int loc;
     private ConnectionAdapterHorizontal myAdapter;
     private SnapHelper snapHelper;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +48,7 @@ public class Pindiagnostic extends AppCompatActivity {
             toolbar.setTitleTextColor(Color.WHITE);
             direction = findViewById(R.id.direction);
             connectorinformation = findViewById(R.id.connectorinformation);
-            RecyclerView recyclerView = findViewById(R.id.horizontalrecyclerview);
+            recyclerView = findViewById(R.id.horizontalrecyclerview);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             myAdapter = new ConnectionAdapterHorizontal(this,uniqueConnections,myvehicle);
             LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(Pindiagnostic.this, LinearLayoutManager.HORIZONTAL, false);
@@ -66,6 +67,12 @@ public class Pindiagnostic extends AppCompatActivity {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        recyclerView.scrollToPosition(loc);
     }
 
     @SuppressLint("SetTextI18n")
@@ -95,14 +102,22 @@ public class Pindiagnostic extends AppCompatActivity {
 
     public void viewpinloc(View view){
         Intent i = new Intent(getBaseContext(), pinlocation.class);
-        i.putExtra("myvehicle", this.myvehicle);
-        i.putParcelableArrayListExtra("connections",this.myvehicle.getConnections());
-        i.putExtra("myConnection",this.myConnection);
+        i.putExtra("myvehicle", myvehicle);
+        i.putParcelableArrayListExtra("connections",myvehicle.getConnections());
+        i.putExtra("myConnection",myConnection);
         startActivity(i);
     }
 
     public void testMode(View view){
-
+        try {
+            Intent i = new Intent(getApplicationContext(), warningscreen.class);
+            i.putExtra("myvehicle", myvehicle);
+            i.putParcelableArrayListExtra("connections",myvehicle.getConnections());
+            i.putExtra("myConnection",myConnection);
+            startActivity(i);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

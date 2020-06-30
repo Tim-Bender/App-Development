@@ -59,6 +59,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight=".85"
+            android:background="@drawable/back"
             android:gravity="center_horizontal|center_vertical"
             android:text="@string/select_pin_to_view_diagnostics_for"
             android:textSize="18sp" />

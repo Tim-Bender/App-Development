@@ -36,7 +36,6 @@ public class selectpin extends AppCompatActivity {
     private vehicle myvehicle;
     private TextView  textView;
     private ArrayList<connection> connections = new ArrayList<>();
-    private ArrayList<connection> originalConnections;
     private Handler handler = new Handler();
     private ConnectionAdapter myAdapter;
 
@@ -52,7 +51,6 @@ public class selectpin extends AppCompatActivity {
             LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver2,new IntentFilter("incomingboolean"));
             myvehicle = getIntent().getParcelableExtra("myvehicle");
             Objects.requireNonNull(myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
-            originalConnections = connections;
             textView = findViewById(R.id.connectorid);
             RecyclerView recyclerView = findViewById(R.id.selectpinrecyclerview);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -66,21 +64,15 @@ public class selectpin extends AppCompatActivity {
 
                 @Override
                 public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                    if(direction == ItemTouchHelper.LEFT){
+                    if(direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.RIGHT){
                         connections.remove(viewHolder.getAdapterPosition());
                         myAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
                     }
-                    else if(direction == ItemTouchHelper.RIGHT){
-                        Intent i = new Intent(getApplicationContext(), Pindiagnostic.class);
-                        i.putExtra("myvehicle", myvehicle);
-                        i.putParcelableArrayListExtra("connections",connections);
-                        i.putExtra("loc",viewHolder.getAdapterPosition());
-                        i.putParcelableArrayListExtra("uniqueconnections",new ArrayList<>(connections));
-                       startActivity(i);
-                    }
+
                 }
             });
             helper.attachToRecyclerView(recyclerView);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -158,6 +150,7 @@ public class selectpin extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
 
 
 

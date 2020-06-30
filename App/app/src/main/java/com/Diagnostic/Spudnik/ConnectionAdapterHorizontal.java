@@ -2,6 +2,7 @@ package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,7 +64,11 @@ class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapter
 
         @Override
         public void onClick(View v) {
-
+            Intent i = new Intent(mContext, pinlocation.class);
+            i.putExtra("myvehicle", myvehicle);
+            i.putParcelableArrayListExtra("connections",myvehicle.getConnections());
+            i.putExtra("myConnection",connections.get(getAdapterPosition()));
+            mContext.startActivity(i);
         }
     }
 }
