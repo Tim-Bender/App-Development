@@ -36,6 +36,7 @@ public class selectpin extends AppCompatActivity {
     private vehicle myvehicle;
     private TextView  textView;
     private ArrayList<connection> connections = new ArrayList<>();
+    private ArrayList<connection> originalConnections;
     private Handler handler = new Handler();
     private ConnectionAdapter myAdapter;
 
@@ -51,6 +52,7 @@ public class selectpin extends AppCompatActivity {
             LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver2,new IntentFilter("incomingboolean"));
             myvehicle = getIntent().getParcelableExtra("myvehicle");
             Objects.requireNonNull(myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
+            originalConnections = connections;
             textView = findViewById(R.id.connectorid);
             RecyclerView recyclerView = findViewById(R.id.selectpinrecyclerview);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));

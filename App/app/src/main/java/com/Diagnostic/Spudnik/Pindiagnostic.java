@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -28,6 +29,7 @@ public class Pindiagnostic extends AppCompatActivity {
     private ArrayList<connection> uniqueConnections;
     private int loc;
     private ConnectionAdapterHorizontal myAdapter;
+    private SnapHelper snapHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +52,15 @@ public class Pindiagnostic extends AppCompatActivity {
             myAdapter = new ConnectionAdapterHorizontal(this,uniqueConnections,myvehicle);
             LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(Pindiagnostic.this, LinearLayoutManager.HORIZONTAL, false);
             recyclerView.setLayoutManager(horizontalLayoutManager);
-            SnapHelper snapHelper = new PagerSnapHelper();
+            snapHelper = new PagerSnapHelper();
             snapHelper.attachToRecyclerView(recyclerView);
+            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    updateSnapPosition(recyclerView,dx,dy);
+                }
+            });
             recyclerView.setAdapter(myAdapter);
             updateValues();
         }catch (Exception e){
@@ -74,12 +83,26 @@ public class Pindiagnostic extends AppCompatActivity {
         }
     }
 
+    public void updateSnapPosition(RecyclerView recyclerView,int dx, int dy){
+        int newsnapPosition = snapHelper.findTargetSnapPosition(recyclerView.getLayoutManager(),dx,dy);
+        if(newsnapPosition != loc && newsnapPosition >-1){
+            loc = newsnapPosition;
+            updateValues();
+        }
+
+
+    }
+
     public void viewpinloc(View view){
         Intent i = new Intent(getBaseContext(), pinlocation.class);
         i.putExtra("myvehicle", this.myvehicle);
         i.putParcelableArrayListExtra("connections",this.myvehicle.getConnections());
         i.putExtra("myConnection",this.myConnection);
         startActivity(i);
+    }
+
+    public void testMode(View view){
+
     }
 
     @Override

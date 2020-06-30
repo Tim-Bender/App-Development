@@ -52,15 +52,33 @@
             android:layout_height="8dp"
             android:layout_gravity="center"
             android:layout_weight="7"
-            android:scrollbars="horizontal" />
+            android:scrollbars="horizontal" >
 
-        <Button
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0px"
+            android:layout_height="0dp"
             android:layout_weight="1.5"
-            android:onClick="viewpinloc"
-            android:text="View Pin Location"
-            android:textSize="20sp" />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="testMode"
+                android:text="Pin Test Mode"
+                android:textSize="20sp" />
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="viewpinloc"
+                android:text="Pin Location"
+                android:textSize="20sp" />
+        </LinearLayout>
 
     </LinearLayout>
 
