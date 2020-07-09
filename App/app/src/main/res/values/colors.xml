@@ -5,7 +5,6 @@
     <color name="colorAccent">#DA0303</color>
     <color name="white">#FFFFFF</color>
     <color name="ic_launcher_background">@color/white</color>
-    <color name="black">#000000</color>
     <color name="inputhintcolor">#656565</color>
     <color name="offblack">#222222</color> <!--Used for cardview-->
 </resources>

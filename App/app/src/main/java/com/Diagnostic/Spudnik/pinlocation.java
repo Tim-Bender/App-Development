@@ -141,11 +141,9 @@ public class pinlocation extends AppCompatActivity {
                             }
                             else{
                                 for(int i = 1; i <= pinnumber/2; i++){
-                                    System.out.println("ADDING TEXTVIEW");
                                     innerlayout2.addView(getTextView(i));
                                 }
                                 for(int i = pinnumber/2+1; i <= pinnumber; i++){
-                                    System.out.println("ADDING TEXTVIEW");
                                     innerlayout1.addView(getTextView(i));
                                 }
                             }
@@ -229,7 +227,6 @@ public class pinlocation extends AppCompatActivity {
             if (loc == textViews.size()+1) {
                 loc = 1;
             }
-            System.out.println("Past: " + pastPos + " Current " + loc);
             removeHighlight(pastPos);
             addHighlight(loc);
             updateValues();
@@ -245,7 +242,6 @@ public class pinlocation extends AppCompatActivity {
             if (loc < 1) {
                 loc = textViews.size();
             }
-            System.out.println("Past: " + pastPos + " Current " + loc);
             removeHighlight(pastPos);
             addHighlight(loc);
             updateValues();
@@ -275,8 +271,6 @@ public class pinlocation extends AppCompatActivity {
     }
 
     public void fillHashMap(){
-        //vertical orientation = true
-        //horizontal orientation = false
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {

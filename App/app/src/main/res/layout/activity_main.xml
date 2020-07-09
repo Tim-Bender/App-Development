@@ -19,7 +19,7 @@
             layout="@layout/toolbar"
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight=".75" />
+            android:layout_weight="1" />
 
         <Space
             android:layout_width="match_parent"
@@ -36,7 +36,7 @@
         <Space
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="1.35" />
+            android:layout_weight="1.1" />
 
         <ImageView
             android:layout_width="match_parent"

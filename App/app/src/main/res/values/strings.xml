@@ -26,7 +26,6 @@
     <string name="got_it">Got It!</string>
     <string name="p_analog_input_connector">p Analog Input Connector</string>
     <string name="select_pin_to_view_diagnostics_for">Select Pin to view diagnostics for:</string>
-    <string name="first_last_spudnik_com">(first.last@spudnik.com)</string>
     <string name="please_login">Please Sign In</string>
     <string name="email">Email:</string>
     <string name="password">Password:</string>
@@ -39,17 +38,12 @@
     <string name="logout">Sign Out</string>
     <string name="settings">Settings</string>
     <string name="where_s_my_serial_number">Where\'s My Serial Number?</string>
-    <string name="holder">Holder</string>
-    <string name="e_g_genag">(e.g. GENAG)</string>
     <string name="the_implement_s_serial_number_can_be_found_on_the_front_of_the_machine_it_is_printed_on_an_aluminum_tag_similar_to_the_one_above">The implement\'s serial number can be found on the front of the machine. It is printed on an aluminum tag similar to the one above.</string>
     <string name="remember">Remember</string>
     <string name="decoration">Decoration</string>
     <string name="enter_dealer_or_shop_id">Enter Dealer or Shop Id</string>
     <string name="connector">Connector</string>
-    <string name="username">Username</string>
     <string name="dealer_id">Dealer Id</string>
-    <string name="serialnumber">Serialnumber</string>
-    <string name="in1">In1</string>
     <string name="title_placeholder">title_placeholder</string>
     <string name="subtitle_holder">subtitle_holder</string>
     <string name="warninglabel">warningLabel</string>

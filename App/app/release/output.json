@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.example.Spudnik",
+  "applicationId": "com.Diagnostic.Spudnik",
   "variantName": "release",
   "elements": [
     {
