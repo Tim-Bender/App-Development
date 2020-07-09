@@ -7,4 +7,5 @@
     <color name="ic_launcher_background">@color/white</color>
     <color name="inputhintcolor">#656565</color>
     <color name="offblack">#222222</color> <!--Used for cardview-->
+    <color name="offgreen">#0cb33e</color>
 </resources>

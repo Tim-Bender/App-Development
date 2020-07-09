@@ -8,18 +8,33 @@ import android.view.MenuItem;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.ArrayList;
+
 public class warningscreen extends AppCompatActivity {
+    private vehicle myvehicle;
+    private ArrayList<connection> connections;
+    private connection myconnection;
+    private int loc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_warningscreen);
+        myvehicle = getIntent().getParcelableExtra("myvehicle");
+        connections = getIntent().getParcelableArrayListExtra("connections");
+        myconnection = getIntent().getParcelableExtra("myConnection");
+        loc = getIntent().getIntExtra("loc",0);
     }
 
 
     public void accepted(View view){
-       Intent i = new Intent(getApplicationContext(),pintest.class);
-       startActivity(i);
+        Intent i = new Intent(getApplicationContext(),pintest.class);
+        i.putExtra("myvehicle", myvehicle);
+        i.putParcelableArrayListExtra("connections",myvehicle.getConnections());
+        i.putExtra("myConnection",myconnection);
+        i.putExtra("loc",loc);
+        startActivity(i);
     }
 
     public void denied(View view){

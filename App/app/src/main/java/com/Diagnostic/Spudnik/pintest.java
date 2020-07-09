@@ -1,13 +1,29 @@
 package com.Diagnostic.Spudnik;
 
+import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.ToggleButton;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.graphics.Color;
-import android.os.Bundle;
+import java.util.ArrayList;
 
 public class pintest extends AppCompatActivity {
+    private SeekBar seekBar;
+    private TextView pwmTextview;
+    private vehicle myvehicle;
+    private ArrayList<connection> connections;
+    private connection myconnection;
+    private int pwm = 0,loc;
 
+
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -16,5 +32,134 @@ public class pintest extends AppCompatActivity {
         setSupportActionBar(toolbar);
         setTitle("Input Serial Number");
         toolbar.setTitleTextColor(Color.parseColor("#ffffff"));
+        myvehicle = getIntent().getParcelableExtra("myvehicle");
+        connections = getIntent().getParcelableArrayListExtra("connections");
+        myconnection = getIntent().getParcelableExtra("myConnection");
+        loc = getIntent().getIntExtra("loc",0);
+        pwmTextview = findViewById(R.id.pintestpwmdisplay);
+        seekBar = findViewById(R.id.pintestseekbar);
+    }
+
+    @SuppressLint("SetTextI18n")
+    @Override
+    protected void onStart(){
+        super.onStart();
+        try {
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @SuppressLint("SetTextI18n")
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    pwm = progress;
+                    updatePwmStatus();
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
+            TextView pinnumber = findViewById(R.id.pintestpinnumber);
+            pinnumber.setText("Pin " + myconnection.getS4() + " Test");
+
+            Button button = findViewById(R.id.buttonminus5);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pwm = (pwm > 4) ? pwm -5 : 0;
+                    updatePwmStatus();
+                }
+            });
+            button = findViewById(R.id.buttonminus1);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pwm = (pwm > 0) ? --pwm : 0;
+                    updatePwmStatus();
+                }
+            });
+            button = findViewById(R.id.buttonplus1);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pwm = (pwm < 100) ? ++pwm : 100;
+                    updatePwmStatus();
+                }
+            });
+            button = findViewById(R.id.buttonplus5);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pwm = (pwm < 96) ? pwm + 5 : 100;
+                    updatePwmStatus();
+                }
+            });
+           updateTextFields();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updatePwmStatus(){
+        pwmTextview.setText(pwm + " PWM");
+        seekBar.setProgress(pwm);
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateTextFields(){
+        try {
+            String temp = myconnection.getDirection();
+            String s1 = temp.substring(0, 1).toUpperCase();
+            TextView direction = findViewById(R.id.connectorid);
+            direction.setText(s1 + temp.substring(1));
+            TextView pinDescription = findViewById(R.id.pintestpindescription);
+            pinDescription.setText(myvehicle.getMap(myconnection.getDirection()) + "p Analog\n" + myvehicle.inout() +" Connector");
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void onOff(View view){
+        try {
+            ToggleButton button = findViewById(R.id.toggleButton);
+            if(button.isChecked()){
+                button.setBackgroundColor(getColor(R.color.offgreen));
+            }
+            else{
+                button.setBackgroundColor(getColor(R.color.colorAccent));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void nextPin(View view){
+        try {
+            if(loc != connections.size()-1) {
+                loc++;
+                myconnection = connections.get(loc);
+                updateTextFields();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void prevPin(View view){
+        try {
+            if(loc != 0){
+                loc --;
+                myconnection = connections.get(loc);
+                updateTextFields();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
