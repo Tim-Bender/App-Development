@@ -31,7 +31,8 @@
             <Space
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
-                android:layout_weight=".05" />
+                android:layout_weight=".05"
+                tools:ignore="NestedWeights" />
 
             <TextView
                 android:layout_width="0px"
@@ -53,7 +54,8 @@
             <Space
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight=".05" />
+                android:layout_weight=".05"
+                tools:ignore="NestedWeights" />
 
             <Button
                 android:layout_width="0px"
@@ -91,7 +93,8 @@
             <Space
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight=".05" />
+                android:layout_weight=".05"
+                tools:ignore="NestedWeights" />
 
             <Button
                 android:layout_width="0px"
@@ -121,14 +124,15 @@
             <Space
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight=".05" />
+                android:layout_weight=".05"
+                tools:ignore="NestedWeights" />
 
             <Button
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight=".4"
-                android:onClick="submitFeedback"
-                android:text="@string/send_feedback" />
+                android:onClick="terms"
+                android:text="@string/terms_and_conditions" />
 
             <Space
                 android:layout_width="0dp"
@@ -151,7 +155,8 @@
             <Space
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight=".05" />
+                android:layout_weight=".05"
+                tools:ignore="NestedWeights" />
 
             <Button
                 android:layout_width="0px"
@@ -180,7 +185,8 @@
             <Space
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight=".05" />
+                android:layout_weight=".05"
+                tools:ignore="NestedWeights" />
 
             <Button
                 android:layout_width="0px"
@@ -210,7 +216,8 @@
             <Space
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight=".05" />
+                android:layout_weight=".05"
+                tools:ignore="NestedWeights" />
 
             <Button
                 android:layout_width="0px"

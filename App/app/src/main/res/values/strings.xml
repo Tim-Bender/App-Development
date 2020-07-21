@@ -13,7 +13,6 @@
     <string name="update_implement_software">Update Implement Software</string>
     <string name="log_implement_io_data">Log Implement Io Data</string>
     <string name="view_tool_settings">View Tool Settings</string>
-    <string name="loading_0">Loading 0%</string>
     <string name="enter_implement_serial_number">Enter Implement Serial Number</string>
     <string name="e_g_6640_55_150">(e.g. 6640–55–150)</string>
     <string name="spudnikplate">spudnikplate</string>
@@ -32,7 +31,6 @@
     <string name="loading_gif">Loading_gif</string>
     <string name="update_database">Update DataBase</string>
     <string name="bluetooth_test">Bluetooth Test</string>
-    <string name="send_feedback">Send Feedback</string>
     <string name="report_bug">Report Bug</string>
     <string name="login">Sign In</string>
     <string name="logout">Sign Out</string>
@@ -58,10 +56,6 @@
     <string name="PWM_holder">75 PWM</string>
     <string name="title_activity_termsofservice">termsofservice</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="previous">Previous</string>
 
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="terms_and_conditions">Terms and Conditions</string>
 </resources>

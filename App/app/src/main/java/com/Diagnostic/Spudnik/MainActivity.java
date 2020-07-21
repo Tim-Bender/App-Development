@@ -89,35 +89,41 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 new UpdateDatabase(getApplicationContext());
             }
-        },2000);
+        },2000); //we will delay it so the loading screen isn't skipped entirely
     }
 
+    /**
+     * Unregister the broadcast receiver on destroy to avoid memory leak
+     */
     @Override
     protected void onDestroy(){
         unregisterReceiver(broadcastReceiver);
         super.onDestroy();
     }
 
-    public void go(){
+    /**
+     * Move to the next activity
+     */
+    private void go(){
         Intent i;
         if(user != null){ //if the user is already logged in, then we send them to the home screen
             i = new Intent(getBaseContext(), home.class);
             i.putExtra("myvehicle",myvehicle);
         }
-        else{ //otherwise they get passed over to login
+        else //otherwise they get passed over to login
             i = new Intent(getBaseContext(),LoginActivity.class);
-        }
-        System.out.println("GO METHOD");
         startActivity(i);
         finish();
     }
 
-    public class UpdateDatabaseBroadcastReceiver extends BroadcastReceiver {
+    /**
+     * Here's our broadcast receiver to receive updates from Updatedatabase.java
+     */
+    private class UpdateDatabaseBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getAction().equals(UpdateDatabase.action)){
+            if(intent.getAction().equals(UpdateDatabase.action))
                go();
-            }
         }
     }
 

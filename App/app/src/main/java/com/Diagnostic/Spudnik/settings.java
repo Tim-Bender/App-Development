@@ -82,14 +82,12 @@ public class settings extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     String email = dataSnapshot.getValue(String.class);
-                    //get screen size
-                    Display display = getWindowManager().getDefaultDisplay();
+                    Display display = getWindowManager().getDefaultDisplay();  //get screen size
                     Point size = new Point();
                     display.getSize(size);
                     int width = size.x;
                     int height = size.y;
-                    //create an email intent and fill in necessary information
-                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                    Intent emailIntent = new Intent(Intent.ACTION_SEND);  //create an email intent and fill in necessary information
                     emailIntent.setType("message/rfc822");
                     emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
                     emailIntent.putExtra(Intent.EXTRA_SUBJECT,"Bug report Diagnostic Tool");
@@ -105,29 +103,12 @@ public class settings extends AppCompatActivity {
     }
 
     /**
-     * Its literally the same function as above. With a different email subject...
-     * @param view view
+     * Button redirect to the terms and conditons page
+     * @param view View
      */
-
-    public void submitFeedback(View view){
-        try{
-            DatabaseReference reference = firebaseDatabase.getReference("settings").child("reportemail");
-            reference.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    String email = dataSnapshot.getValue(String.class);
-                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
-                    emailIntent.setType("message/rfc822");
-                    emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
-                    emailIntent.putExtra(Intent.EXTRA_SUBJECT,"Feedback Diagnostic Tool");
-                    emailIntent.putExtra(Intent.EXTRA_TEXT, "Device: " + Build.DEVICE + "\nAndroid Version: " +
-                            Build.VERSION.CODENAME + " " + Build.VERSION.RELEASE + "\n\nComments: \n");
-                    startActivity(Intent.createChooser(emailIntent,"Send mail..."));
-                }
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {}
-            });
-        } catch (Exception ignored) {}
+    public void terms(View view){
+        Intent toTermsAndConditons = new Intent(getBaseContext(),termsofservice.class);
+        startActivity(toTermsAndConditons);
     }
 
     /**
@@ -187,7 +168,7 @@ public class settings extends AppCompatActivity {
        }
     }
 
-    public class UpdateDatabaseBroadcastReceiver extends BroadcastReceiver{
+    private class UpdateDatabaseBroadcastReceiver extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(UpdateDatabase.action)){

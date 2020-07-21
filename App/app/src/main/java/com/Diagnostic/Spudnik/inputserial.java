@@ -76,7 +76,7 @@ public class inputserial extends AppCompatActivity {
         editor = preferences.edit();
        //FINAL PRE-DATABASE CHECK ON THE VEHICLE OBJECT
         myvehicle = getIntent().getParcelableExtra("myvehicle");
-            myvehicle.preBuildVehicleObject(this);
+        myvehicle.preBuildVehicleObject(this);
 
 
     }
@@ -221,7 +221,9 @@ public class inputserial extends AppCompatActivity {
             } else {
                 serialNumberText.setError("Invalid");
             }
-        } catch (Exception ignored) {}    //this method is fairly error prone due to the massive amount of multithreading, so we will just catch everything.
+        } catch (Exception e) {
+            new UpdateDatabase(this,UpdateDatabase.DISABLE_BROADCASTS);
+        }    //this method is fairly error prone due to the massive amount of multithreading, so we will just catch everything.
     }
 
     /**
@@ -243,7 +245,9 @@ public class inputserial extends AppCompatActivity {
                             myvehicle.setVehicleId(vehicleId.toLowerCase().trim());     //set the vehicle id
                             myvehicle.buildDataBase();      //initiate database construction
                         }
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    new UpdateDatabase(inputserial.this,UpdateDatabase.DISABLE_BROADCASTS);
+                }
             }
         });
     }

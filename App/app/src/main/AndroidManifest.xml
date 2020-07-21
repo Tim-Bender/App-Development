@@ -26,7 +26,8 @@
         <activity
             android:name=".termsofservice"
             android:label="@string/title_activity_termsofservice"
-            android:theme="@style/AppTheme.NoActionBar.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar.NoActionBar"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".pintest"
             android:screenOrientation="portrait" />

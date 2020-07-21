@@ -2,6 +2,9 @@ package com.Diagnostic.Spudnik;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
+
 /**
  * @author timothy.bender
  * @version dev1.0.0
@@ -12,11 +15,18 @@ import android.os.Parcelable;
  */
 
 public class connection implements Parcelable,Comparable<connection> {
-
+    /**Each string will hold an aspect of a connection*/
     private String id,direction,name,units,plug,s4,type;
-    private static final int SORT_BY_NAME = 2;
-    private static int SORT_BY = 0;
 
+    /**
+     * Constructor
+     * @param id Vehicle id
+     * @param dir Connector direction
+     * @param s s4
+     * @param nm name
+     * @param un units
+     * @param type type
+     */
     connection(String id,String dir, String s, String nm, String un, String type){
         this.id = id;
         this.direction = dir;
@@ -75,26 +85,8 @@ public class connection implements Parcelable,Comparable<connection> {
      * @return int
      */
     @Override
-    public int compareTo(connection o){
-        int comparison = 0;
-        try{
-            if(o != null){
-                if (SORT_BY == SORT_BY_NAME) {
-                    int counter = 0;
-                    char[] lArray, oArray;
-                    lArray = name.toCharArray();
-                    oArray = o.name.toCharArray();
-                    while (comparison == 0 && counter < lArray.length && counter < oArray.length) {
-                        comparison = Character.compare(lArray[counter], oArray[counter]);
-                        counter++;
-                    }
-                    return comparison;
-                }
-                return Integer.compare(Integer.parseInt(s4), Integer.parseInt(o.s4));
-            }
-        } catch (Exception ignored) {}
-        return comparison;
-
+    public int compareTo(@NonNull connection o){
+        return Integer.compare(Integer.parseInt(s4), Integer.parseInt(o.s4));
     }
 
     /**
@@ -102,15 +94,10 @@ public class connection implements Parcelable,Comparable<connection> {
      * @return String
      */
     String inout(){
-        String temp = direction,toReturn = "";
+        String temp = direction,toReturn;
         toReturn = (temp.contains("in") || temp.contains("In")) ? "Input" : "Output";
         return toReturn;
     }
-    //set methods
-    static void setSortBy(int sortBy) {
-        SORT_BY = sortBy;
-    }
-
 
     //set methods
     public void setId(String id) {
@@ -121,7 +108,6 @@ public class connection implements Parcelable,Comparable<connection> {
     public void setName(String name) {
         this.name = name;
     }
-
 
     //get methods
     public String getId() {

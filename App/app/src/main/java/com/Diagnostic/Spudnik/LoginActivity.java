@@ -1,9 +1,14 @@
 package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -44,7 +49,8 @@ public class LoginActivity extends AppCompatActivity {
     private boolean fromSettings;
     private boolean pressed = false, termsAgreed = false;
     private final static int LOGGING_IN_BEGUN = 0, LOGGING_IN_COMPLETE = 1, LOGGING_IN_FAILURE = 2;
-
+    private UpdateDatabaseBroadcastReceiver broadcastReceiver;
+    private Handler handler;
 
     /**
      * Nothing special in the onCreate, just assigning instance fields and setting up the toolbar.
@@ -64,7 +70,6 @@ public class LoginActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
         setTitle("Sign In");
-        //Objects.requireNonNull(getSupportActionBar()).setIcon(R.mipmap.ic_launcher);
         toolbar.setTitleTextColor(Color.WHITE);
         emailEditText = findViewById(R.id.loginemailedittext);
         passwordEditText = findViewById(R.id.loginpasswordedittext);
@@ -74,6 +79,11 @@ public class LoginActivity extends AppCompatActivity {
         Spannable spannable = new SpannableString(textView.getText().toString());
         spannable.setSpan(new ForegroundColorSpan(Color.BLUE),22,textView.getText().length(),Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         textView.setText(spannable);
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(UpdateDatabase.action);
+        broadcastReceiver = new LoginActivity.UpdateDatabaseBroadcastReceiver();
+        this.registerReceiver(broadcastReceiver,filter);
+        handler = new Handler();
     }
 
     @Override
@@ -99,6 +109,12 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onDestroy(){
+        unregisterReceiver(broadcastReceiver);
+        super.onDestroy();
+    }
+
 
     /**
      * Pass the contents of the two edittext fields into a firebase authentication request.
@@ -115,15 +131,7 @@ public class LoginActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) { //if the task is successful, we welcome the user, assign the user variable, then update the database
-                                    user = FirebaseAuth.getInstance().getCurrentUser();
-                                    updateLoadingView(LOGGING_IN_COMPLETE);
-                                    if (fromSettings)
-                                        finish(); //if they logged in from the settings page we will just close this page and send them back there
-                                    //otherwise they came from the loading screen.
-                                    myvehicle = new vehicle(); //create a new vehicle, since it couldn't have been done on loading
-                                    new UpdateDatabase(getApplicationContext()); //update the database
-                                    myvehicle.preBuildVehicleObject(getApplicationContext()); //prebuild the vehicle
-                                    goToHome(); //go to the home activity
+                                   new UpdateDatabase(LoginActivity.this);
                                 } else {
                                     //otherwise we inform them that authentication has failed.
                                     updateLoadingView(LOGGING_IN_FAILURE);
@@ -133,6 +141,7 @@ public class LoginActivity extends AppCompatActivity {
                         }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        pressed = false;
                         Snackbar.make(findViewById(R.id.loginconstraintlayout), "Sign In Failed", Snackbar.LENGTH_SHORT).show();
                         updateLoadingView(LOGGING_IN_FAILURE);
                     }
@@ -153,7 +162,7 @@ public class LoginActivity extends AppCompatActivity {
             i.putExtra("myvehicle",myvehicle); //put the vehicle as a parcelable extra
             pressed = false;
             startActivity(i); //go to home
-            finish(); //close the activity
+            finish();
         }
     }
     public void updateLoadingView(int code){
@@ -163,6 +172,7 @@ public class LoginActivity extends AppCompatActivity {
                 findViewById(R.id.loginprogressbar).setVisibility(View.GONE);
                 break;
             case LOGGING_IN_FAILURE:
+                pressed = false;
                 findViewById(R.id.loginprogressbar).setVisibility(View.GONE);
                 findViewById(R.id.loginspace).setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, .55f));
                 break;
@@ -170,6 +180,29 @@ public class LoginActivity extends AppCompatActivity {
                 findViewById(R.id.loginprogressbar).setVisibility(View.VISIBLE);
                 findViewById(R.id.loginspace).setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, .45f));
         }
+    }
+
+    private class UpdateDatabaseBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(UpdateDatabase.action)) {
+                if (intent.getIntExtra("data", 2) == UpdateDatabase.UPDATE_COMPLETE) {
+                    user = FirebaseAuth.getInstance().getCurrentUser();
+                    if (fromSettings)
+                        finish(); //if they logged in from the settings page we will just close this page and send them back there
+                    //otherwise they came from the loading screen.
+                    myvehicle = new vehicle(); //create a new vehicle, since it couldn't have been done on loading
+                    myvehicle.preBuildVehicleObject(getApplicationContext()); //prebuild the vehicle
+                    updateLoadingView(LOGGING_IN_COMPLETE);
+                    goToHome(); //go to the home activity
+                } else if (intent.getIntExtra("data", 2) == UpdateDatabase.UPDATE_FAILED) {
+                    updateLoadingView(LOGGING_IN_FAILURE);
+                } else if (intent.getIntExtra("data", 2) == UpdateDatabase.UPDATE_BEGUN) {
+                    updateLoadingView(LOGGING_IN_BEGUN);
+                }
+            }
+        }
+
     }
 
 
