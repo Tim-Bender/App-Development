@@ -44,9 +44,7 @@
                 android:layout_weight=".6"
                 android:background="@drawable/back"
                 android:gravity="center"
-                android:paddingStart="5dp"
-                android:paddingEnd="5dp"
-                android:textSize="20sp" />
+                android:textSize="18sp" />
 
         </LinearLayout>
 

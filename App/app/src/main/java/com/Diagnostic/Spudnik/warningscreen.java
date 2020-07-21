@@ -25,21 +25,24 @@ public class warningscreen extends AppCompatActivity {
         connections = getIntent().getParcelableArrayListExtra("connections");
         myconnection = getIntent().getParcelableExtra("myConnection");
         loc = getIntent().getIntExtra("loc",0);
+        findViewById(R.id.warningscreenabortbutton).setOnClickListener(new View.OnClickListener() { //add onclick listener to the abort button.
+            @Override
+            public void onClick(View v) {
+                finish(); //close the activity
+            }
+        });
     }
 
 
     public void accepted(View view){
         Intent i = new Intent(getApplicationContext(),pintest.class);
         i.putExtra("myvehicle", myvehicle);
-        i.putParcelableArrayListExtra("connections",myvehicle.getConnections());
+        i.putParcelableArrayListExtra("connections",connections);
         i.putExtra("myConnection",myconnection);
         i.putExtra("loc",loc);
         startActivity(i);
     }
 
-    public void denied(View view){
-        finish();
-    }
     /**
      * The next two methods will create the toolbar menu item on the top right, this will be on every
      * activity that contains this shortcut.

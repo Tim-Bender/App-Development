@@ -188,8 +188,6 @@ public class inputserial extends AppCompatActivity {
                 }catch(Exception ignored){}
             }
         });
-
-
     }
 
 

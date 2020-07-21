@@ -77,9 +77,7 @@ public class pinlocation extends AppCompatActivity {
                     textView.setText(s1 + temp.substring(1));
                     textView = findViewById(R.id.pinlocationconnectorinformation);
                     textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections().get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector\nConnectorVoltage\nVoltage");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                } catch (Exception ignored) {}
             }
         });
 
@@ -90,11 +88,9 @@ public class pinlocation extends AppCompatActivity {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-
                         int pinnumber = myvehicle.getMap(myConnection.getDirection());
                         orientation = orientations.get(myConnection.getDirection());
 

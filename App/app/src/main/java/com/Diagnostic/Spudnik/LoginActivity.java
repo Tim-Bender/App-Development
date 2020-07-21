@@ -4,10 +4,20 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -32,6 +42,8 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText passwordEditText;
     private vehicle myvehicle;
     private boolean fromSettings;
+    private boolean pressed = false, termsAgreed = false;
+    private final static int LOGGING_IN_BEGUN = 0, LOGGING_IN_COMPLETE = 1, LOGGING_IN_FAILURE = 2;
 
 
     /**
@@ -46,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         auth = FirebaseAuth.getInstance();  //setup firebase user and auth
         user = auth.getCurrentUser();
-        if(user != null){   //If they are already logged in, send them to the home activity
+        if(user != null){   //If they are already logged in, send them to the home activity. redundancy check
             finish();
         }
         Toolbar toolbar = findViewById(R.id.topAppBar);
@@ -57,6 +69,34 @@ public class LoginActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.loginemailedittext);
         passwordEditText = findViewById(R.id.loginpasswordedittext);
         fromSettings = getIntent().getBooleanExtra("fromsettings",false);//a boolean value is used to determine where the user came from
+        findViewById(R.id.loginprogressbar).setVisibility(View.GONE);
+        TextView textView = findViewById(R.id.logintermsoftersivetextview);
+        Spannable spannable = new SpannableString(textView.getText().toString());
+        spannable.setSpan(new ForegroundColorSpan(Color.BLUE),22,textView.getText().length(),Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        textView.setText(spannable);
+    }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        final CheckBox acceptTermsCheckbox = findViewById(R.id.logincheckbox);
+        acceptTermsCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(!pressed)
+                    termsAgreed = isChecked;
+                else
+                    acceptTermsCheckbox.setChecked(true);
+            }
+        });
+        TextView termsOfServiceTextView = findViewById(R.id.logintermsoftersivetextview);
+        termsOfServiceTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent toTermsOfServiceIntent = new Intent(getBaseContext(),termsofservice.class);
+                startActivity(toTermsOfServiceIntent);
+            }
+        });
     }
 
 
@@ -66,35 +106,43 @@ public class LoginActivity extends AppCompatActivity {
      * @param view view
      */
     public void login(View view){
-        auth.signInWithEmailAndPassword(emailEditText.getText().toString().trim(),passwordEditText.getText().toString().trim()) //pass the information into an authentication request
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){ //if the task is successful, we welcome the user, assign the user variable, then update the database
-                            user = FirebaseAuth.getInstance().getCurrentUser();
-                            if(fromSettings){
-                                finish(); //if they logged in from the settings page we will just close this page and send them back there
+        if(!pressed) {
+            if(termsAgreed) {
+                pressed = true;
+                updateLoadingView(LOGGING_IN_BEGUN);
+                auth.signInWithEmailAndPassword(emailEditText.getText().toString().trim(), passwordEditText.getText().toString().trim()) //pass the information into an authentication request
+                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) { //if the task is successful, we welcome the user, assign the user variable, then update the database
+                                    user = FirebaseAuth.getInstance().getCurrentUser();
+                                    updateLoadingView(LOGGING_IN_COMPLETE);
+                                    if (fromSettings)
+                                        finish(); //if they logged in from the settings page we will just close this page and send them back there
+                                    //otherwise they came from the loading screen.
+                                    myvehicle = new vehicle(); //create a new vehicle, since it couldn't have been done on loading
+                                    new UpdateDatabase(getApplicationContext()); //update the database
+                                    myvehicle.preBuildVehicleObject(getApplicationContext()); //prebuild the vehicle
+                                    goToHome(); //go to the home activity
+                                } else {
+                                    //otherwise we inform them that authentication has failed.
+                                    updateLoadingView(LOGGING_IN_FAILURE);
+                                    Snackbar.make(findViewById(R.id.loginconstraintlayout), "Sign In Failed", Snackbar.LENGTH_SHORT).show();
+                                }
                             }
-                            //otherwise they came from the loading screen.
-                            myvehicle = new vehicle(); //create a new vehicle, since it couldn't have been done on loading
-                            new UpdateDatabase(getApplicationContext()); //update the database
-                            myvehicle.preBuildVehicleObject(getApplicationContext()); //prebuild the vehicle
-                            goToHome(); //go to the home activity
-
-                        }
-                        else{
-                            //otherwise we inform them that authentication has failed.
-                            Snackbar.make(findViewById(R.id.loginconstraintlayout), "Sign In Failed", Snackbar.LENGTH_SHORT).show();
-                        }
+                        }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Snackbar.make(findViewById(R.id.loginconstraintlayout), "Sign In Failed", Snackbar.LENGTH_SHORT).show();
+                        updateLoadingView(LOGGING_IN_FAILURE);
                     }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Snackbar.make(findViewById(R.id.loginconstraintlayout), "Sign In Failed", Snackbar.LENGTH_SHORT).show();
+                });
             }
-        });
+            else{
+                Snackbar.make(findViewById(R.id.loginconstraintlayout),"Please Accept the Terms and Conditions",Snackbar.LENGTH_SHORT).show();
+            }
+        }
     }
-
 
     /**
      * This function will be used to send the user to the home activity.
@@ -103,8 +151,27 @@ public class LoginActivity extends AppCompatActivity {
         if(user != null) { //redundancy check
             Intent i = new Intent(getBaseContext(), home.class);
             i.putExtra("myvehicle",myvehicle); //put the vehicle as a parcelable extra
+            pressed = false;
             startActivity(i); //go to home
+            finish(); //close the activity
         }
     }
+    public void updateLoadingView(int code){
+        switch(code) {
+            case LOGGING_IN_COMPLETE:
+                findViewById(R.id.loginspace).setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, .55f));
+                findViewById(R.id.loginprogressbar).setVisibility(View.GONE);
+                break;
+            case LOGGING_IN_FAILURE:
+                findViewById(R.id.loginprogressbar).setVisibility(View.GONE);
+                findViewById(R.id.loginspace).setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, .55f));
+                break;
+            case LOGGING_IN_BEGUN:
+                findViewById(R.id.loginprogressbar).setVisibility(View.VISIBLE);
+                findViewById(R.id.loginspace).setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, .45f));
+        }
+    }
+
+
 
 }

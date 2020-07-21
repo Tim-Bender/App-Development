@@ -2,6 +2,7 @@ package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.os.AsyncTask;
@@ -35,7 +36,9 @@ import java.io.InputStreamReader;
 class UpdateDatabase{
 
     private final Context context;
-
+    public static final int UPDATE_BEGUN = 0, UPDATE_COMPLETE = 1, UPDATE_FAILED = 2;
+    public static final String action = "com.Diagnostic.Spudnik.UpdateDatabase.Update";
+    private int numberOfFilesUpdated = 0;
     /**
      * Constructor, a context is required to be passed from the parent activity. This context allows us to locate file directories...
      * @param c Context
@@ -55,46 +58,67 @@ class UpdateDatabase{
         AsyncTask.execute(new Runnable() { //Everything will be done asynchronously
             @Override
             public void run() {
-                final ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE); //Check if a network is active
-                Network activeNetwork = cm.getActiveNetwork();
-                if(activeNetwork != null && FirebaseAuth.getInstance().getCurrentUser() != null) {   //If we are connected go ahead and try updating. Also must be logged in...
-                    StorageReference reference = FirebaseStorage.getInstance().getReference().getRoot().child("DataBase"); //Storage reference to firebase bucket, at its child "Database"
+                if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                    final ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE); //Check if a network is active
+                    Network activeNetwork = cm.getActiveNetwork();
+                    if (activeNetwork != null && FirebaseAuth.getInstance().getCurrentUser() != null) {   //If we are connected go ahead and try updating. Also must be logged in...
+                        StorageReference reference = FirebaseStorage.getInstance().getReference().getRoot().child("DataBase"); //Storage reference to firebase bucket, at its child "Database"
+                        broadcastUpdate(UPDATE_BEGUN);
+                        final File rootpath = new File(context.getFilesDir(), "database"); //Rootpath to local database folder
 
-                    final File rootpath = new File(context.getFilesDir(), "database"); //Rootpath to local database folder
-
-                    if (!rootpath.exists())  //if the rootpath doesn't exist, we create the folder. This is necessary on first boot
-                        rootpath.mkdirs();
-                    new File(rootpath,"machineids").delete();    //delete the current list of machine id's.
-
-                    reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() { //get all the items in at the firebase reference location
-                        @Override
-                        public void onSuccess(ListResult listResult) {
-                            for (final StorageReference item : listResult.getItems()) {
-                                final File localFile = new File(rootpath, item.getName().toLowerCase()); //get the local version of the file for comparison
-                                item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() { //Get the metadata of the item.
-                                    @Override
-                                    public void onSuccess(StorageMetadata storageMetadata) {
-                                        if (localFile.lastModified() < storageMetadata.getUpdatedTimeMillis()) {    //if the file either doesn't exist locally, or is outdated.. we download
-                                            localFile.delete(); //delete the old version
-                                            item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() { //download the file
-                                                @Override
-                                                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                                                    if(!item.getName().equals("dealerids"))
-                                                    writeMachineIdFile(item); //At this point the file is downloaded, and now we just need to update the machineids data file
-                                                }
-                                            });
-                                        } else if (localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()) {
-                                            if(!item.getName().equals("dealerids"))//If we don't need to download the file, we do still need to
-                                            writeMachineIdFile(item);                                             //add it to the list
+                        if (!rootpath.exists())  //if the rootpath doesn't exist, we create the folder. This is necessary on first boot
+                            rootpath.mkdirs();
+                        new File(rootpath, "machineids").delete();    //delete the current list of machine id's.
+                        final int[] fileTotalNumber = new int[1];
+                        final int[] fileNumber = new int[]{0};
+                        reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() { //get all the items in at the firebase reference location
+                            @Override
+                            public void onSuccess(ListResult listResult) {
+                                fileTotalNumber[0] = listResult.getItems().size();
+                                for (final StorageReference item : listResult.getItems()) {
+                                    final File localFile = new File(rootpath, item.getName().toLowerCase()); //get the local version of the file for comparison
+                                    item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() { //Get the metadata of the item.
+                                        @Override
+                                        public void onSuccess(StorageMetadata storageMetadata) {
+                                            if (localFile.lastModified() < storageMetadata.getUpdatedTimeMillis()) {    //if the file either doesn't exist locally, or is outdated.. we download
+                                                localFile.delete(); //delete the old version
+                                                item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() { //download the file
+                                                    @Override
+                                                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                                        if (!item.getName().equals("dealerids"))
+                                                            writeMachineIdFile(item);
+                                                        fileNumber[0]++;
+                                                        numberOfFilesUpdated++;
+                                                        System.out.println("FILE NUMBER: " + fileNumber[0]);
+                                                        if (fileNumber[0] == fileTotalNumber[0] - 1) {
+                                                            broadcastUpdate(UPDATE_COMPLETE);
+                                                        }//At this point the file is downloaded, and now we just need to update the machineids data file
+                                                    }
+                                                });
+                                            } else if (localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()) {
+                                                if (!item.getName().equals("dealerids"))//If we don't need to download the file, we do still need to
+                                                    writeMachineIdFile(item);
+                                                fileNumber[0]++;
+                                                System.out.println("FILE NUMBER: " + fileNumber[0]);
+                                                if (fileNumber[0] == fileTotalNumber[0] - 1) {
+                                                    broadcastUpdate(UPDATE_COMPLETE);
+                                                }//add it to the list
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                }
                             }
-                        }
-                    }).addOnFailureListener(new OnFailureListener() { //If it fails, oh well.
-                        @Override
-                        public void onFailure(@NonNull Exception e) {}
-                    });
+                        }).addOnFailureListener(new OnFailureListener() { //If it fails, oh well.
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                broadcastUpdate(UPDATE_FAILED);
+                            }
+                        });
+                    } else
+                        broadcastUpdate(UPDATE_FAILED);
+                }
+                else{
+                    broadcastUpdate(UPDATE_FAILED);
                 }
             }
         });
@@ -120,6 +144,15 @@ class UpdateDatabase{
                 } catch (IOException ignored) {}
             }
         });
+    }
+
+    private void broadcastUpdate(int result){
+        Intent intent = new Intent();
+        intent.setAction(action);
+        intent.putExtra("data",result);
+        if(result == UPDATE_COMPLETE)
+            intent.putExtra("updatedfiles",numberOfFilesUpdated);
+        context.sendBroadcast(intent);
     }
 }
 

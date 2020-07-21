@@ -20,7 +20,7 @@
     <string name="which_s4_input_or_output_connector_would_you_like_to_view_diagnostics_for">Which S4 Input or Output connector would you like to view diagnostics for?</string>
 
     <string name="help">Help</string>
-    <string name="entering_pin_test_mode_suspends_normal_machine_operations_and_may_override_machine_safety_features_incorrect_use_of_the_pin_test_mode_could_result_in_personal_injury_death_and_or_equipment_damage">Entering PIN TEST mode suspends normal machine operations and may override machine safety features. Incorrect use of the PIN TEST mode could result in personal injury, death, and or equipment damage</string>
+    <string name="entering_pin_test_mode_suspends_normal_machine_operations_and_may_override_machine_safety_features_incorrect_use_of_the_pin_test_mode_could_result_in_personal_injury_death_and_or_equipment_damage">Entering PIN TEST mode suspends normal machine operation and may override machine safety features. Incorrect use of the PIN TEST mode could result in personal injury, death, and or equipment damage</string>
     <string name="danger">DANGER</string>
     <string name="abort">Abort!</string>
     <string name="got_it">Got It!</string>
@@ -56,4 +56,12 @@
     <string name="_5minus">-5</string>
     <string name="pin_6_testholder">PIN 6 TEST</string>
     <string name="PWM_holder">75 PWM</string>
+    <string name="title_activity_termsofservice">termsofservice</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 </resources>

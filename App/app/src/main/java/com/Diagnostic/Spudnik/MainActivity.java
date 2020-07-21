@@ -1,14 +1,15 @@
 package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.os.AsyncTask;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,12 +27,10 @@ import com.google.firebase.auth.FirebaseUser;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private ProgressBar progressBar;
-    private TextView textView;
-    private int progressStatus = 0;
     private Handler handler = new Handler();
     private FirebaseUser user;
     private vehicle myvehicle;
+    private UpdateDatabaseBroadcastReceiver broadcastReceiver;
 
     /**
      * Setup the toolbar, this will be the same across all activities, and will thus only be mentioned here.
@@ -51,12 +50,13 @@ public class MainActivity extends AppCompatActivity {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser(); //get the current user. if this is null, they aren't logged in
 
-        progressBar = findViewById(R.id.loadingbar);
-        progressBar.getProgressDrawable().setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN);
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(UpdateDatabase.action);
+        broadcastReceiver = new UpdateDatabaseBroadcastReceiver();
+        this.registerReceiver(broadcastReceiver,filter);
 
-        textView = findViewById(R.id.textView3); //set the version name dynamically. This will be the version_name that is packaged during apk building.
+        TextView textView = findViewById(R.id.textView3); //set the version name dynamically. This will be the version_name that is packaged during apk building.
         textView.setText(BuildConfig.VERSION_NAME);
-        textView = findViewById(R.id.loadingText);
         myvehicle = new vehicle(); //create the first vehicle object.
     }
 
@@ -83,57 +83,42 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        super.onStart();
-        if(user != null){ //if user is null, they are not logged in
-           new UpdateDatabase(this); //attempt the database update
-        }
-        try{
-            AsyncTask.execute(new Runnable() { //onto another thread we go
-                @Override
-                public void run() {
-                    while (progressStatus < 100) { //lets loop until the progress bar is completely filled
-                        progressStatus += 1;
-                        handler.post(new Runnable() {//a handler is required to modify ui elements.
-                            @SuppressLint("SetTextI18n")
-                            @Override
-                            public void run() { //post the progress to the progress bar
-                                progressBar.setProgress(progressStatus); //1 - 100
-                                textView.setText("Loading " + progressStatus + "%");
-                                switch (progressStatus){
-                                    case 20:
-                                    case 50:
-                                    case 80:
-                                        setTitle("Loading.");
-                                        break;
-                                    case 30:
-                                    case 60:
-                                    case 90:
-                                        setTitle("Loading..");
-                                        break;
-                                    case 40:
-                                    case 70:
-                                    case 100:
-                                        setTitle("Loading...");
-                                        break;
-                                }
-                            }
-                        });
-                        try {
-                            Thread.sleep(30); //Adjust this to give more time during loading. 30 = 3 seconds.. 40 = 4 seconds ect. Milliseconds divided by 100 above...
-                        } catch (InterruptedException ignored) {}
-                    }
-                    Intent i;
-                    if(user != null){ //if the user is already logged in, then we send them to the home screen
-                        i = new Intent(getBaseContext(), home.class);
-                        i.putExtra("myvehicle",myvehicle);
-                    }
-                    else{ //otherwise they get passed over to login
-                        i = new Intent(getBaseContext(),LoginActivity.class);
-                    }
-                    startActivity(i);
-                    finish();
-                }
-            });
-        } catch (Exception ignored) {}
+        super.onStart();//if user is null, they are not logged in//attempt the database update
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                new UpdateDatabase(getApplicationContext());
+            }
+        },2000);
     }
+
+    @Override
+    protected void onDestroy(){
+        unregisterReceiver(broadcastReceiver);
+        super.onDestroy();
+    }
+
+    public void go(){
+        Intent i;
+        if(user != null){ //if the user is already logged in, then we send them to the home screen
+            i = new Intent(getBaseContext(), home.class);
+            i.putExtra("myvehicle",myvehicle);
+        }
+        else{ //otherwise they get passed over to login
+            i = new Intent(getBaseContext(),LoginActivity.class);
+        }
+        System.out.println("GO METHOD");
+        startActivity(i);
+        finish();
+    }
+
+    public class UpdateDatabaseBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(UpdateDatabase.action)){
+               go();
+            }
+        }
+    }
+
 }

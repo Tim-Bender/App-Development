@@ -124,14 +124,11 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
                         String[] tokens = line.toLowerCase().split(","); //split the line at commas, and lowercase everything
                         addConnection(new connection(vehicleId, tokens[0], tokens[1],
                                 tokens[2], tokens[3], tokens[4])); //build the new connection
-                        if(!getUniqueConnections().contains(tokens[0])){
+                        if(!getUniqueConnections().contains(tokens[0]))
                             addUniqueconnection(tokens[0]);
-                        }
                     }
-
                 } catch (Exception ignored) {}
             }
-
         });
     }
 
@@ -149,9 +146,8 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
                     String line;
                     while((line = reader.readLine()) != null) {
                         line = line.toLowerCase();
-                        if (!dealers.contains(line)) {
+                        if (!dealers.contains(line)) 
                             dealers.add(line);
-                        }
                     }
                 } catch (Exception ignored) {}
             }
@@ -172,9 +168,8 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
                     String line = new BufferedReader(i).readLine();
                     String[] holder = line.toLowerCase().split(",");
                     for(String s : holder) {
-                        if (!vehicleIds.contains(s)) {
+                        if (!vehicleIds.contains(s)) 
                             vehicleIds.add(s);
-                        }
                     }
                 } catch (Exception ignored) {}
             }
@@ -196,7 +191,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * @param machineid MachineId
      * @return String
      */
-    public String determineComparison(String machineid){
+    protected String determineComparison(String machineid){
         int maximum = - 16;
         String toReturn = "null";
         if(machineid.length() > 0 && !vehicleIds.isEmpty()) {
@@ -204,14 +199,13 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
                 char[] storage = machineid.toCharArray(), //cast the two into char arrays
                         idCharArray = id.toCharArray();
                 int points = 0; //higher points of comparison the better for the id
-                if (idCharArray[0] != storage[0] || storage.length != idCharArray.length) { //if the first letters are not the same, or they aren't the same length. Skip it
+                if (idCharArray[0] != storage[0] || storage.length != idCharArray.length) //if the first letters are not the same, or they aren't the same length. Skip it
                     continue;
-                }
                 for (int i = 0; i < idCharArray.length; i++) { //iterate through every character
                     if (i < storage.length) {
-                        if (storage[i] == idCharArray[i]) { //if theres a character match the id earns a point
+                        if (storage[i] == idCharArray[i]) //if theres a character match the id earns a point
                             points++;
-                        } else {
+                         else {
                             if (idCharArray[i] != 'x' && idCharArray[i] != 'X') //if they dont match, but we are comparing against an x or an X then they don't lose a point
                                 points--; //take a point away.
                         }
@@ -222,9 +216,8 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
                     toReturn = id;
                 }
             }
-            if(maximum <= 0){ //if we have 0 or fewer comparison points, then there was no match
-                return "null";
-            }
+            if(maximum <= 0) //if we have 0 or fewer comparison points, then there was no match
+                return toReturn;
         }
         return toReturn;
     }
@@ -251,9 +244,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
                         });
                         buildDealers(new InputStreamReader(new FileInputStream(new File(new File(
                                 context.getFilesDir(),"database"),"dealerids"))));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    } catch (Exception ignored){}
                 }
             });
         }
@@ -264,7 +255,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * @return String
      */
     String inout(){
-        String temp = this.uniqueConnections.get(this.loc),toReturn;
+        String temp = uniqueConnections.get(loc),toReturn;
         toReturn = (temp.contains("in") || temp.contains("In")) ? "Input" : "Output"; //ternary operator
         return toReturn;
     }
@@ -344,26 +335,26 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
     }
 
 
-    private void setPinnumbers(){
-        this.pinnumbers.put("in1",14);
-        this.pinnumbers.put("in2",14);
-        this.pinnumbers.put("in3",22);
-        this.pinnumbers.put("in4",22);
-        this.pinnumbers.put("out1",24);
-        this.pinnumbers.put("out2",24);
-        this.pinnumbers.put("out3",24);
-        this.pinnumbers.put("out4",2);
-        this.pinnumbers.put("out5",2);
-        this.pinnumbers.put("out6",2);
-        this.pinnumbers.put("out7",2);
-        this.pinnumbers.put("out8",2);
-        this.pinnumbers.put("out9",2);
-        this.pinnumbers.put("exp11_out",24);
-        this.pinnumbers.put("exp11_in",22);
+    private void setPinnumbers() {
+        pinnumbers.put("in1", 14);
+        pinnumbers.put("in2", 14);
+        pinnumbers.put("in3", 22);
+        pinnumbers.put("in4", 22);
+        pinnumbers.put("out1", 24);
+        pinnumbers.put("out2", 24);
+        pinnumbers.put("out3", 24);
+        pinnumbers.put("out4", 2);
+        pinnumbers.put("out5", 2);
+        pinnumbers.put("out6", 2);
+        pinnumbers.put("out7", 2);
+        pinnumbers.put("out8", 2);
+        pinnumbers.put("out9", 2);
+        pinnumbers.put("exp11_out", 24);
+        pinnumbers.put("exp11_in", 22);
     }
 
     public String toString(){
-        return ("Id: "+ this.vehicleId + "\n Connections: " + this.connections.size() + "\n Unique Connections: " + this.uniqueConnections.size());
+        return ("Id: "+ vehicleId + "\n Connections: " + connections.size() + "\n Unique Connections: " + uniqueConnections.size());
     }
 
     ArrayList<String> getUniquePins() {

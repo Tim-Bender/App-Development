@@ -92,9 +92,7 @@ public class connection implements Parcelable,Comparable<connection> {
                 }
                 return Integer.compare(Integer.parseInt(s4), Integer.parseInt(o.s4));
             }
-        } catch (Exception ignored) {
-
-        }
+        } catch (Exception ignored) {}
         return comparison;
 
     }
@@ -104,10 +102,8 @@ public class connection implements Parcelable,Comparable<connection> {
      * @return String
      */
     String inout(){
-        String temp = this.direction,toReturn = "";
-        try {
-            toReturn = (temp.contains("in") || temp.contains("In")) ? "Input" : "Output";
-        } catch (Exception ignored){}
+        String temp = direction,toReturn = "";
+        toReturn = (temp.contains("in") || temp.contains("In")) ? "Input" : "Output";
         return toReturn;
     }
     //set methods
@@ -144,7 +140,7 @@ public class connection implements Parcelable,Comparable<connection> {
         return s4;
     }
     public String toString(){
-        return (this.id+" " + this.direction + " " + this.name + " " + this.units + " " + this.units + " " + this.type);
+        return (id+" " + direction + " " + name + " " + units + " " + units + " " + type);
     }
 
 }

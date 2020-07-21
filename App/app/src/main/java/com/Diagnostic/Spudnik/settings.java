@@ -1,12 +1,18 @@
 package com.Diagnostic.Spudnik;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,7 +39,7 @@ import com.google.firebase.database.ValueEventListener;
 public class settings extends AppCompatActivity {
 
     private FirebaseDatabase firebaseDatabase;
-
+    private UpdateDatabaseBroadcastReceiver broadcastReceiver;
     /**
      * Only thing out of the ordinary here in onCreate would be the switch's OnCheckedChangeListener.
      * This will toggle night and day mode for the entire app by pushing a boolean value into permanent storage via
@@ -51,9 +57,19 @@ public class settings extends AppCompatActivity {
         setTitle("Settings");
         myToolBar.setTitleTextColor(Color.WHITE);
         firebaseDatabase = FirebaseDatabase.getInstance();
-
-
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(UpdateDatabase.action);
+        broadcastReceiver = new UpdateDatabaseBroadcastReceiver();
+        this.registerReceiver(broadcastReceiver,filter);
+        findViewById(R.id.settingsprogressbar).setVisibility(View.GONE);
     }
+
+    @Override
+    protected void onDestroy(){
+        unregisterReceiver(broadcastReceiver);
+        super.onDestroy();
+    }
+
     /**
      * Report a bug button redirect, create an email with auto-filled fields
      * @param view view
@@ -81,18 +97,11 @@ public class settings extends AppCompatActivity {
                             Build.VERSION.CODENAME + " " + Build.VERSION.RELEASE + "\n\nPlease describe the bug in detail:\n");
                     //start the intent and start an email
                     startActivity(Intent.createChooser(emailIntent,"Send mail..."));
-
                 }
-
                 @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
+                public void onCancelled(@NonNull DatabaseError databaseError) {}
             });
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception ignored) {}
     }
 
     /**
@@ -109,36 +118,31 @@ public class settings extends AppCompatActivity {
                     String email = dataSnapshot.getValue(String.class);
                     Intent emailIntent = new Intent(Intent.ACTION_SEND);
                     emailIntent.setType("message/rfc822");
-
                     emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
                     emailIntent.putExtra(Intent.EXTRA_SUBJECT,"Feedback Diagnostic Tool");
                     emailIntent.putExtra(Intent.EXTRA_TEXT, "Device: " + Build.DEVICE + "\nAndroid Version: " +
                             Build.VERSION.CODENAME + " " + Build.VERSION.RELEASE + "\n\nComments: \n");
                     startActivity(Intent.createChooser(emailIntent,"Send mail..."));
                 }
-
                 @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
+                public void onCancelled(@NonNull DatabaseError databaseError) {}
             });
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
     }
 
     /**
-     * Update DataBase button redirect, for a description see MainActivity's comments, its the exact same function.
+     * Update DataBase button redirect, see UpdateDatabase.java
       * @param view view
      */
-
     public void updateDataBase(View view){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user != null)
-        new UpdateDatabase(this);
+        if (user != null)
+            new UpdateDatabase(this);
         else {
             ConstraintLayout layout = findViewById(R.id.settingsconstraintlayout);
             Snackbar.make(layout, "Please Sign In", Snackbar.LENGTH_SHORT).show();
         }
+
     }
 
 
@@ -153,6 +157,7 @@ public class settings extends AppCompatActivity {
             Intent i = new Intent(getBaseContext(), LoginActivity.class);
             i.putExtra("fromsettings", true);
             startActivity(i);
+            finish();
         }
         //otherwise we assume it was a mistake
         else{
@@ -178,19 +183,39 @@ public class settings extends AppCompatActivity {
        }
        //else we assume it was a mistake.
        else{
-           Snackbar.make(layout, "Already Signed In", Snackbar.LENGTH_SHORT).show();
+           Snackbar.make(layout, "Already Signed Out", Snackbar.LENGTH_SHORT).show();
        }
     }
 
+    public class UpdateDatabaseBroadcastReceiver extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(UpdateDatabase.action)){
+                if(intent.getIntExtra("data",2) == UpdateDatabase.UPDATE_COMPLETE) {
+                    findViewById(R.id.settingsspace).setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,.5f));
+                    findViewById(R.id.settingsprogressbar).setVisibility(View.GONE);
+                    Snackbar.make(findViewById(R.id.settingsconstraintlayout), "Update Complete: "
+                            + intent.getIntExtra("updatedfiles",0) + " Files Updated", Snackbar.LENGTH_SHORT).show();
+                }
+                else if(intent.getIntExtra("data",2) == UpdateDatabase.UPDATE_FAILED) {
+                    findViewById(R.id.settingsprogressbar).setVisibility(View.GONE);
+                    findViewById(R.id.settingsspace).setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,.5f));
+                    Snackbar.make(findViewById(R.id.settingsconstraintlayout), "Update Failed", Snackbar.LENGTH_SHORT).show();
+                }
+                else if(intent.getIntExtra("data",2) == UpdateDatabase.UPDATE_BEGUN){
+                    findViewById(R.id.settingsprogressbar).setVisibility(View.VISIBLE);
+                    findViewById(R.id.settingsspace).setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,.4f));
+                }
+            }
+        }
+    }
     /**
      * DEV MODE FEATURE, WILL BE REMOVED LATER
      * @param view view
      */
     public void testBluetooth(View view){
-        try{
-            Intent i = new Intent(getBaseContext(), BluetoothTestActivity.class);
-            startActivity(i);
-        }catch(Exception ignored){}
+        Intent i = new Intent(getBaseContext(), BluetoothTestActivity.class);
+        startActivity(i);
     }
 
 

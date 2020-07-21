@@ -32,25 +32,17 @@
             android:text="data"
             android:textSize="30sp" />
 
-        <Space
+        <Button
+            android:id="@+id/bluetoothteststartscanbutton"
             android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight=".25" />
+            android:layout_height="wrap_content"
+            android:text="Start Scan" />
 
-        <TextView
+        <Button
+            android:id="@+id/bluetoothteststopscanbutton"
             android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:text="Device Name" />
+            android:layout_height="wrap_content"
+            android:text="Stop Scan" />
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight="4.5">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-        </ScrollView>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
