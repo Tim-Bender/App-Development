@@ -36,68 +36,60 @@ public class Pindiagnostic extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_pindiagnostic);
-        try {
-            myvehicle = getIntent().getParcelableExtra("myvehicle");
-            Objects.requireNonNull(this.myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
-            loc = getIntent().getIntExtra("loc", 0);
-            uniqueConnections = getIntent().getParcelableArrayListExtra("uniqueconnections");
+        myvehicle = getIntent().getParcelableExtra("myvehicle");
+        Objects.requireNonNull(this.myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
+        loc = getIntent().getIntExtra("loc", 0);
+        uniqueConnections = getIntent().getParcelableArrayListExtra("uniqueconnections");
 
-            myConnection = uniqueConnections.get(this.loc);
-            Toolbar toolbar = findViewById(R.id.topAppBar);
-            setSupportActionBar(toolbar);
-            toolbar.setTitleTextColor(Color.WHITE);
-            direction = findViewById(R.id.direction);
-            connectorinformation = findViewById(R.id.connectorinformation);
-            recyclerView = findViewById(R.id.horizontalrecyclerview);
-            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            myAdapter = new ConnectionAdapterHorizontal(this,uniqueConnections,myvehicle);
-            LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(Pindiagnostic.this, LinearLayoutManager.HORIZONTAL, false);
-            recyclerView.setLayoutManager(horizontalLayoutManager);
-            snapHelper = new PagerSnapHelper();
-            snapHelper.attachToRecyclerView(recyclerView);
-            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                @Override
-                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                    super.onScrolled(recyclerView, dx, dy);
-                    updateSnapPosition(recyclerView,dx,dy);
-                }
-            });
-            recyclerView.setAdapter(myAdapter);
-            updateValues();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        myConnection = uniqueConnections.get(this.loc);
+        Toolbar toolbar = findViewById(R.id.topAppBar);
+        setSupportActionBar(toolbar);
+        toolbar.setTitleTextColor(Color.WHITE);
+
+        direction = findViewById(R.id.direction);
+        connectorinformation = findViewById(R.id.connectorinformation);
+
+        recyclerView = findViewById(R.id.horizontalrecyclerview);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        myAdapter = new ConnectionAdapterHorizontal(this,uniqueConnections,myvehicle);
+        LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(Pindiagnostic.this, LinearLayoutManager.HORIZONTAL, false);
+        recyclerView.setLayoutManager(horizontalLayoutManager);
+        snapHelper = new PagerSnapHelper();
+        snapHelper.attachToRecyclerView(recyclerView);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                updateSnapPosition(recyclerView,dx,dy);
+            }
+        });
+        recyclerView.setAdapter(myAdapter);
+        updateValues();
     }
 
     @Override
-    public void onStart(){
+    protected void onStart(){
         super.onStart();
         recyclerView.scrollToPosition(loc);
     }
 
     @SuppressLint("SetTextI18n")
-    public void updateValues(){
-        try {
-            myConnection = uniqueConnections.get(loc);
-            String temp = myConnection.getDirection();
-            String s1 = temp.substring(0, 1).toUpperCase();
-            direction.setText(s1 + temp.substring(1));
-            connectorinformation.setText(myvehicle.getMap(myConnection.getDirection().toLowerCase()) + " " + myConnection.inout() + " Connector\nConnectorVoltage\nVoltage");
-            setTitle("Viewing Pin:" + myConnection.getS4());
-            myAdapter.notifyDataSetChanged();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void updateValues(){
+        myConnection = uniqueConnections.get(loc);
+        String temp = myConnection.getDirection();
+        String s1 = temp.substring(0, 1).toUpperCase();
+        direction.setText(s1 + temp.substring(1));
+        connectorinformation.setText(myvehicle.getMap(myConnection.getDirection().toLowerCase()) + " " + myConnection.inout() + " Connector\nConnectorVoltage\nVoltage");
+        setTitle("Viewing Pin:" + myConnection.getS4());
+        myAdapter.notifyDataSetChanged();
     }
 
-    public void updateSnapPosition(RecyclerView recyclerView,int dx, int dy){
+    private void updateSnapPosition(RecyclerView recyclerView,int dx, int dy){
         int newsnapPosition = snapHelper.findTargetSnapPosition(recyclerView.getLayoutManager(),dx,dy);
         if(newsnapPosition != loc && newsnapPosition >-1){
             loc = newsnapPosition;
             updateValues();
         }
-
-
     }
 
     public void viewpinloc(View view){
@@ -109,15 +101,11 @@ public class Pindiagnostic extends AppCompatActivity {
     }
 
     public void testMode(View view){
-        try {
-            Intent i = new Intent(getApplicationContext(), warningscreen.class);
-            i.putExtra("myvehicle", myvehicle);
-            i.putParcelableArrayListExtra("connections",myvehicle.getConnections());
-            i.putExtra("myConnection",myConnection);
-            startActivity(i);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Intent i = new Intent(getApplicationContext(), warningscreen.class);
+        i.putExtra("myvehicle", myvehicle);
+        i.putParcelableArrayListExtra("connections",myvehicle.getConnections());
+        i.putExtra("myConnection",myConnection);
+        startActivity(i);
     }
 
     @Override

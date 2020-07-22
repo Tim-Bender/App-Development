@@ -59,64 +59,56 @@ public class connectorselect extends AppCompatActivity {
     @Override
     protected void onStart(){
         super.onStart();
-       // boolean nightMode = preferences.getBoolean("nightmode",false); //Determine whether or not we are in nightmode
+        // boolean nightMode = preferences.getBoolean("nightmode",false); //Determine whether or not we are in nightmode
         Spinner mySpinner = findViewById(R.id.myconnectorspinner); //get our spinner view
-        try {
-            List<String> connections = myvehicle.getUniqueConnections(); //unique connections is a list of all the unique connections on a machine. We will use it to populate the spinner
-            ArrayAdapter<String> dataAdapter;
-            dataAdapter = new ArrayAdapter<>(this, R.layout.spinner_item_night, connections);
-            dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            mySpinner.setAdapter(dataAdapter);          //assign our new adapter to the spinner
-            connectorSelectionEdittext = findViewById(R.id.connectorinput);
-            connectorSelectionEdittext.setOnKeyListener(new View.OnKeyListener() { //set an onkeylistener in our connectiorselect edittext. If we detect a down+enter then we move the current focus
-                @Override
-                public boolean onKey(View v, int keyCode, KeyEvent event) {
-                    if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                        next(getCurrentFocus());
-                        return true;
-                    }
+        List<String> connections = myvehicle.getUniqueConnections(); //unique connections is a list of all the unique connections on a machine. We will use it to populate the spinner
+        ArrayAdapter<String> dataAdapter;
+        dataAdapter = new ArrayAdapter<>(this, R.layout.spinner_item_night, connections);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mySpinner.setAdapter(dataAdapter);          //assign our new adapter to the spinner
 
-                    return false;
+        connectorSelectionEdittext = findViewById(R.id.connectorinput);
+        connectorSelectionEdittext.setOnKeyListener(new View.OnKeyListener() { //set an onkeylistener in our connectiorselect edittext. If we detect a down+enter then we move the current focus
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    next(getCurrentFocus());
+                    return true;
                 }
-            });
 
-            mySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() { //Set the item selected listener on the spinner.
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    Object item = parent.getItemAtPosition(position);
-                    String temp = item.toString();
-                    String s1 = temp.substring(0, 1).toUpperCase();
-                    connectorSelectionEdittext.setText(s1 + temp.substring(1)); //update the connectorselect edittext field with the selected item
-                    myvehicle.setLoc(position);     //This will be used to track which one we are looking at.
-                }
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {}
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                return false;
+            }
+        });
 
-
+        mySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() { //Set the item selected listener on the spinner.
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Object item = parent.getItemAtPosition(position);
+                String temp = item.toString();
+                String s1 = temp.substring(0, 1).toUpperCase();
+                connectorSelectionEdittext.setText(s1 + temp.substring(1)); //update the connectorselect edittext field with the selected item
+                myvehicle.setLoc(position);     //This will be used to track which one we are looking at.
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
     }
+
     /**
      * Button redirect for the "down" button.
      * @param view View
      */
     @SuppressLint("SetTextI18n")
     public void down(View view) {
-        try {
-            if (!myvehicle.getUniqueConnections().isEmpty()) { //Check that unique connections is not empty
-                myvehicle.setLoc(myvehicle.getLoc() + 1);   //add one to the location tracking variable
-                if (myvehicle.getLoc() == myvehicle.getUniqueConnections().size()) { //if we've reached the end of the list, go to the front
-                    myvehicle.setLoc(0);
-                }
-                String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc()); //capitalize the new connection's name
-                String s1 = temp.substring(0, 1).toUpperCase();
-                connectorSelectionEdittext.setText(s1 + temp.substring(1)); //update the edittext field
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (!myvehicle.getUniqueConnections().isEmpty()) { //Check that unique connections is not empty
+            myvehicle.setLoc(myvehicle.getLoc() + 1);   //add one to the location tracking variable
+            if (myvehicle.getLoc() == myvehicle.getUniqueConnections().size()) //if we've reached the end of the list, go to the front
+                myvehicle.setLoc(0);
+            String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc()); //capitalize the new connection's name
+            String s1 = temp.substring(0, 1).toUpperCase();
+            connectorSelectionEdittext.setText(s1 + temp.substring(1)); //update the edittext field
         }
+
     }
 
     /**
@@ -125,18 +117,13 @@ public class connectorselect extends AppCompatActivity {
      */
     @SuppressLint("SetTextI18n")
     public void up(View view){
-        try {
-            if (!myvehicle.getUniqueConnections().isEmpty()) { //check that unique connections is not empty
-                myvehicle.setLoc(myvehicle.getLoc() - 1); //subtract one from the location tracking variable
-                if (myvehicle.getLoc() < 0) { //if we have gone past the front of the list, go to the end
-                    myvehicle.setLoc(myvehicle.getUniqueConnections().size() - 1);
-                }
-                String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc()); //capitalize the new connection
-                String s1 = temp.substring(0, 1).toUpperCase();
-                connectorSelectionEdittext.setText(s1 + temp.substring(1)); //update the edittext
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (!myvehicle.getUniqueConnections().isEmpty()) { //check that unique connections is not empty
+            myvehicle.setLoc(myvehicle.getLoc() - 1); //subtract one from the location tracking variable
+            if (myvehicle.getLoc() < 0) //if we have gone past the front of the list, go to the end
+                myvehicle.setLoc(myvehicle.getUniqueConnections().size() - 1);
+            String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc()); //capitalize the new connection
+            String s1 = temp.substring(0, 1).toUpperCase();
+            connectorSelectionEdittext.setText(s1 + temp.substring(1)); //update the edittext
         }
     }
 
@@ -145,20 +132,15 @@ public class connectorselect extends AppCompatActivity {
      * @param view View
      */
     public void next(View view){
-        try {
-            String connector = connectorSelectionEdittext.getText().toString();
-            if (!connector.isEmpty()) {
-                if (myvehicle.getUniqueConnections().contains(connector.toLowerCase())) {
-                    Intent i = new Intent(getBaseContext(), selectpin.class);
-                    i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
-                    i.putExtra("myvehicle", myvehicle);
-                    startActivity(i);
-                }
+        String connector = connectorSelectionEdittext.getText().toString();
+        if (!connector.isEmpty()) {
+            if (myvehicle.getUniqueConnections().contains(connector.toLowerCase())) {
+                Intent i = new Intent(getBaseContext(), selectpin.class);
+                i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
+                i.putExtra("myvehicle", myvehicle);
+                startActivity(i);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
     }
 
     /**

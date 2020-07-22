@@ -104,7 +104,6 @@ public class connection implements Parcelable,Comparable<connection> {
         this.id = id;
     }
 
-
     public void setName(String name) {
         this.name = name;
     }

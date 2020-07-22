@@ -18,11 +18,13 @@ import com.google.firebase.auth.FirebaseUser;
 /**
  * @author timothy.bender
  * @version dev1.0.0
- *
+ * @since dev 1.0.0
  * Welcome to the homescreen activity. This activity's primary job is to direct the user where they want to go.
+ * The middle two functions are not currently supported. Support will likely be added at a later date... maybe.
  */
 
 public class home extends AppCompatActivity {
+    /**Vehicle object. Initialized in mainactivity, and usually pre-build there as well. */
     private vehicle myvehicle;
     /**
      * Nothing special in this onCreate. There is a check whether or not the vehicle object's id's have been constructed or not
@@ -32,15 +34,14 @@ public class home extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_home);
-        Toolbar myToolBar = findViewById(R.id.topAppBar);
+        Toolbar myToolBar = findViewById(R.id.topAppBar); //typical toolbar setup
         setSupportActionBar(myToolBar);
         setTitle("Home");
         myToolBar.setTitleTextColor(Color.WHITE);
         Snackbar.make(findViewById(R.id.homeconstraintlayout),"Welcome",Snackbar.LENGTH_SHORT).show();
         myvehicle = getIntent().getParcelableExtra("myvehicle"); //get out parcelabled vehicle object
-        if(myvehicle.getVehicleIds().isEmpty()) {
+        if(myvehicle.getVehicleIds().isEmpty())
             myvehicle.preBuildVehicleObject(this); //try again to prebuild the vehicle ids and dealer names.
-        }
     }
 
     /**

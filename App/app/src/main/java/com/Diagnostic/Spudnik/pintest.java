@@ -44,64 +44,56 @@ public class pintest extends AppCompatActivity {
     @Override
     protected void onStart(){
         super.onStart();
-        try {
-            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @SuppressLint("SetTextI18n")
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    pwm = progress;
-                    updatePwmStatus();
-                }
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                pwm = progress;
+                updatePwmStatus();
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+        TextView pinnumber = findViewById(R.id.pintestpinnumber);
+        pinnumber.setText("Pin " + myconnection.getS4() + " Test");
 
-                }
+        Button button = findViewById(R.id.buttonminus5);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pwm = (pwm > 4) ? pwm -5 : 0;
+                updatePwmStatus();
+            }
+        });
+        button = findViewById(R.id.buttonminus1);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pwm = (pwm > 0) ? --pwm : 0;
+                updatePwmStatus();
+            }
+        });
+        button = findViewById(R.id.buttonplus1);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pwm = (pwm < 100) ? ++pwm : 100;
+                updatePwmStatus();
+            }
+        });
+        button = findViewById(R.id.buttonplus5);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pwm = (pwm < 96) ? pwm + 5 : 100;
+                updatePwmStatus();
+            }
+        });
+        updateTextFields();
 
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-
-                }
-            });
-            TextView pinnumber = findViewById(R.id.pintestpinnumber);
-            pinnumber.setText("Pin " + myconnection.getS4() + " Test");
-
-            Button button = findViewById(R.id.buttonminus5);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    pwm = (pwm > 4) ? pwm -5 : 0;
-                    updatePwmStatus();
-                }
-            });
-            button = findViewById(R.id.buttonminus1);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    pwm = (pwm > 0) ? --pwm : 0;
-                    updatePwmStatus();
-                }
-            });
-            button = findViewById(R.id.buttonplus1);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    pwm = (pwm < 100) ? ++pwm : 100;
-                    updatePwmStatus();
-                }
-            });
-            button = findViewById(R.id.buttonplus5);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    pwm = (pwm < 96) ? pwm + 5 : 100;
-                    updatePwmStatus();
-                }
-            });
-           updateTextFields();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -112,54 +104,35 @@ public class pintest extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void updateTextFields(){
-        try {
-            String temp = myconnection.getDirection();
-            String s1 = temp.substring(0, 1).toUpperCase();
-            TextView direction = findViewById(R.id.connectorid);
-            direction.setText(s1 + temp.substring(1));
-            TextView pinDescription = findViewById(R.id.pintestpindescription);
-            pinDescription.setText(myvehicle.getMap(myconnection.getDirection()) + "p Analog\n" + myvehicle.inout() +" Connector");
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
+        String temp = myconnection.getDirection();
+        String s1 = temp.substring(0, 1).toUpperCase();
+        TextView direction = findViewById(R.id.connectorid);
+        direction.setText(s1 + temp.substring(1));
+        TextView pinDescription = findViewById(R.id.pintestpindescription);
+        pinDescription.setText(myvehicle.getMap(myconnection.getDirection()) + "p Analog\n" + myvehicle.inout() +" Connector");
     }
 
     public void onOff(View view){
-        try {
-            ToggleButton button = findViewById(R.id.toggleButton);
-            if(button.isChecked()){
-                button.setBackgroundColor(getColor(R.color.offgreen));
-            }
-            else{
-                button.setBackgroundColor(getColor(R.color.colorAccent));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        ToggleButton button = findViewById(R.id.toggleButton);
+        if(button.isChecked())
+            button.setBackgroundColor(getColor(R.color.offgreen));
+        else
+            button.setBackgroundColor(getColor(R.color.colorAccent));
     }
 
     public void nextPin(View view){
-        try {
-            if(loc != connections.size()-1) {
-                loc++;
-                myconnection = connections.get(loc);
-                updateTextFields();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(loc != connections.size()-1) {
+            loc++;
+            myconnection = connections.get(loc);
+            updateTextFields();
         }
-
     }
 
     public void prevPin(View view){
-        try {
-            if(loc != 0){
-                loc --;
-                myconnection = connections.get(loc);
-                updateTextFields();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(loc != 0){
+            loc --;
+            myconnection = connections.get(loc);
+            updateTextFields();
         }
     }
 }

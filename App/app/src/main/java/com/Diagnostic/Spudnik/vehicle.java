@@ -1,13 +1,11 @@
 package com.Diagnostic.Spudnik;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -67,7 +65,6 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * @param in Parcel in
      */
 
-    //parcelable constructor to rebuild object
     private vehicle(Parcel in) {
         vehicleId = in.readString();
         uniqueConnections = in.createStringArrayList();
@@ -125,7 +122,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * @since dev 1.0.0
      */
     void buildDataBase(){
-        connections.clear(); //clear the old connections and uniqueconnections arraylist to avoid overlap
+        connections.clear(); //clear the old connections and uniqueconnections arraylists to avoid overlap
         uniqueConnections.clear();
         AsyncTask.execute(new Runnable() { //Asynchronous of course
             @Override
@@ -220,10 +217,8 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
                     if (i < storage.length) {
                         if (storage[i] == idCharArray[i]) //if theres a character match the id earns a point
                             points++;
-                         else {
-                            if (idCharArray[i] != 'x' && idCharArray[i] != 'X') //if they dont match, but we are comparing against an x or an X then they don't lose a point
+                        else if (idCharArray[i] != 'x' && idCharArray[i] != 'X') //if they dont match, but we are comparing against an x or an X then they don't lose a point
                                 points--; //take a point away.
-                        }
                     }
                 }
                 if (maximum < points) { //if we have a new maximum match set the variables
@@ -275,30 +270,38 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * Sorting implementation using default Mergesort. Time complexity of Olog(n).
      * Users are allowed to sort the pins by either pin number or by name.
      * This is implemented using a switch and final constants.
-     * Finally, since sorting is relegated to an asyc thread, an Intent is passed to the parent Activity by a broadcast manager
-     * This is caught by a broadcast manager in the parent activity, and allows for the UI to be updated.
-     * @param mycontext Application Context
      */
-    void sortConnections(@NonNull final Context mycontext){
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                Collections.sort(connections); //sort them
-                Intent incomingMessageIntent = new Intent("incomingboolean"); //create an intent to send in a broadcast
-                incomingMessageIntent.putExtra("boolean",true);
-                LocalBroadcastManager.getInstance(mycontext).sendBroadcast(incomingMessageIntent); //broadcast that we have completed the sort
-            }
-        });
+    void sortConnections(){
+        Collections.sort(connections); //sort them
+    }
 
+    /**
+     * This method will fill the pinnumbers hashmap. This map is used to map connectors to their total pin numbers.
+     */
+    private void setPinnumbers() {
+        pinnumbers.put("in1", 14);
+        pinnumbers.put("in2", 14);
+        pinnumbers.put("in3", 22);
+        pinnumbers.put("in4", 22);
+        pinnumbers.put("out1", 24);
+        pinnumbers.put("out2", 24);
+        pinnumbers.put("out3", 24);
+        pinnumbers.put("out4", 2);
+        pinnumbers.put("out5", 2);
+        pinnumbers.put("out6", 2);
+        pinnumbers.put("out7", 2);
+        pinnumbers.put("out8", 2);
+        pinnumbers.put("out9", 2);
+        pinnumbers.put("exp11_out", 24);
+        pinnumbers.put("exp11_in", 22);
     }
 
     /**
      * The rest of the methods here are support methods
      * Primarily get set and add methods.
      */
-    int getMap(String direction) throws NullPointerException{
+    int getMap(String direction) throws NullPointerException {
         return pinnumbers.get(direction);
-
     }
 
     void setVehicleId(String vehicleId) {
@@ -325,11 +328,11 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
         return this.uniqueConnections;
     }
 
-    ArrayList<connection> getConnections(){return this.connections;}
+    ArrayList<connection> getConnections(){return connections;}
 
-    void setConnections(ArrayList<connection> c){ this.connections = c;}
+    void setConnections(ArrayList<connection> c){connections = c;}
 
-    void addUniquePin(String s){this.uniquePins.add(s.toLowerCase().trim());}
+    void addUniquePin(String s){uniquePins.add(s.toLowerCase().trim());}
 
     int getLoc() {
         return loc;
@@ -341,25 +344,6 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
 
     void setIs(InputStreamReader s){
         this.isr = s;
-    }
-
-
-    private void setPinnumbers() {
-        pinnumbers.put("in1", 14);
-        pinnumbers.put("in2", 14);
-        pinnumbers.put("in3", 22);
-        pinnumbers.put("in4", 22);
-        pinnumbers.put("out1", 24);
-        pinnumbers.put("out2", 24);
-        pinnumbers.put("out3", 24);
-        pinnumbers.put("out4", 2);
-        pinnumbers.put("out5", 2);
-        pinnumbers.put("out6", 2);
-        pinnumbers.put("out7", 2);
-        pinnumbers.put("out8", 2);
-        pinnumbers.put("out9", 2);
-        pinnumbers.put("exp11_out", 24);
-        pinnumbers.put("exp11_in", 22);
     }
 
     public String toString(){

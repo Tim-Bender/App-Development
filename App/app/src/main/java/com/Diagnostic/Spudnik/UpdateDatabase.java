@@ -75,7 +75,7 @@ class UpdateDatabase{
     UpdateDatabase(@NonNull Context context, @NonNull int broadcasts){
         this.context = context;
         broadcastToggle = broadcasts;
-        updateDataBase();
+        updateDataBase(); //will automatically trigger an update upon object creation
     }
 
     /**
@@ -157,7 +157,6 @@ class UpdateDatabase{
                 } else //failure in network connectivity or user is null
                     broadcastUpdate(UPDATE_FAILED); //update failure
             }
-
         });
     }
 
@@ -166,7 +165,6 @@ class UpdateDatabase{
      * <p>This method will update the machineids data file. It will take its current contents, and then append the new item's name onto the end.
      * It is done Asynchronously so that our download file threads above may not be interrupted.</p>
      * @param item StorageReference
-     *
      */
     private void writeMachineIdFile(@NonNull final StorageReference item) {
         AsyncTask.execute(new Runnable() { //Asynchronous of course
@@ -180,7 +178,7 @@ class UpdateDatabase{
                     FileWriter fw = new FileWriter(toEdit); //create the new FileWriter
                     fw.append(editedItemName).flush(); //append the new name on.
                     fw.close();//close the file
-                } catch (IOException ignored) {
+                } catch (IOException e) {
                     broadcastUpdate(UPDATE_FAILED); //update failure
                 }
             }
