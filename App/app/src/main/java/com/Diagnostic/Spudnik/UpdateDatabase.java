@@ -27,46 +27,56 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
- * Welcome to the UpdateDataBase class, this class is used to synchronize the files stored within the Spudnik Diagnostic Firebase Storage Bucket
- * with the phone's local copies.
- *
+ * Synchronize firebase storage bucket files with locally-kept files.
+ * <p>
  * The simplest way to initiate a database update is just: "new UpdateDataBase()".
+ *
  * @author timothy.bender
  * @version dev 1.0.0
- * @since dev 1.0.0
  * @see <a href="https://firebase.google.com/docs/storage">FireBase Storage Documentation</a>
  * @see com.google.firebase.storage
  * @see com.google.firebase.auth.FirebaseUser
  * @see AsyncTask
  * @see BufferedReader
+ * @since dev 1.0.0
  */
-class UpdateDatabase{
-    /**Context of the app's current activity. Used to send broadcasts and communicate with the main UI thread*/
+class UpdateDatabase {
+    /**
+     * Context of the app's current activity. Used to send broadcasts and communicate with the main UI thread
+     */
     private final Context context;
-    /**Constants used for control flow and broadcast filtering*/
+    /**
+     * Constants used for control flow and broadcast filtering
+     */
     public static final int UPDATE_BEGUN = 0, UPDATE_COMPLETE = 1, UPDATE_FAILED = 2, TERMS_OF_SERVICE_UPDATED = 3;
-    /**Action String used to filter by broadcast receivers on the main UI thread.*/
+    /**
+     * Action String used to filter by broadcast receivers on the main UI thread.
+     */
     public static final String action = "com.Diagnostic.Spudnik.UpdateDatabase.Update"; //this can really be anything but must be unique
-    /**Used to keep track of the number of files that were updated.*/
+    /**
+     * Used to keep track of the number of files that were updated.
+     */
     private int numberOfFilesUpdated = 0;
 
     /**
      * <p>Constructor, a context is required to be passed from the parent activity. This context allows us to locate file directories...
      * Update will be triggered automatically from object creation</p>
+     *
      * @param context Context of the current Activity on main UI thread
      * @since dev 1.0.0
      */
     @SuppressLint("CommitPrefEdits")
-    UpdateDatabase(@NonNull final Context context){
+    UpdateDatabase(@NonNull final Context context) {
         this.context = context;
         updateDataBase(); //will automatically trigger an update upon object creation
     }
 
     /**
-     * @since dev 1.0.0
      * <p>Asynchronously check's the firebase database bucket for updated files, downloads them and updates the machine id's data file.
      * First we use ConnectivityManager to determine whether or not we are connected to a network, if we are then we attempt the update.
      * All event listeners are asynchronous and thus must be nested within one another for correct runtime execution.</p>
+     *
+     * @since dev 1.0.0
      */
     private void updateDataBase() {
         AsyncTask.execute(new Runnable() { //Everything will be done asynchronously
@@ -87,7 +97,7 @@ class UpdateDatabase{
                     reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() { //get all the items in at the firebase reference location
                         @Override
                         public void onSuccess(ListResult listResult) {
-                            fileTotalNumber[0] = listResult.getItems().size()-1; //get the number of items in the firebase storage bucket
+                            fileTotalNumber[0] = listResult.getItems().size() - 1; //get the number of items in the firebase storage bucket
                             for (final StorageReference item : listResult.getItems()) { //begin iterating through each storage item
                                 final File localFile = new File(rootpath, item.getName().toLowerCase()); //get the local version of the file for comparison
                                 item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() { //Get the metadata of the item.
@@ -100,7 +110,7 @@ class UpdateDatabase{
                                                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                                                     if (!item.getName().equals("dealerids") && !item.getName().equals("termsofservice.pdf")) //we dont want to add "dealerids and termsofservice.pdf to the list of machine ids
                                                         writeMachineIdFile(item);  //write the name of the file to the list of acceptable machine ids
-                                                    if(item.getName().equals("termsofservice.pdf"))
+                                                    if (item.getName().equals("termsofservice.pdf"))
                                                         broadcastUpdate(TERMS_OF_SERVICE_UPDATED);
                                                     fileNumber[0]++; //iterate up to the next file
                                                     numberOfFilesUpdated++; //iterate up
@@ -164,6 +174,7 @@ class UpdateDatabase{
     /**
      * <p>This method will update the machineids data file. It will take its current contents, and then append the new item's name onto the end.
      * It is done Asynchronously so that our download file threads above may not be interrupted.</p>
+     *
      * @param item StorageReference
      * @since dev 1.0.0
      */
@@ -171,7 +182,7 @@ class UpdateDatabase{
         AsyncTask.execute(new Runnable() { //Asynchronous of course
             @Override
             public void run() {
-                File toEdit = new File(new File(context.getFilesDir(),"database"), "machineids"); //reference to the machineids data file
+                File toEdit = new File(new File(context.getFilesDir(), "database"), "machineids"); //reference to the machineids data file
                 try {
                     String line = (toEdit.exists()) ? new BufferedReader(new InputStreamReader(new FileInputStream(toEdit))).readLine() : null; //read the line, ternary operator
                     String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("_", "") + ","; //format the item's name. Strip the .csv, and _ off
@@ -187,12 +198,13 @@ class UpdateDatabase{
     }
 
     /**
-     * @since dev 1.0.0
      * <p>This method is used to broadcast beginning, completion, and error messages to the activities.
      * The action is used by broadcast receivers to perform filtering.</p>
+     *
      * @param result Result code
+     * @since dev 1.0.0
      */
-    private void broadcastUpdate(@NonNull final int result){
+    private void broadcastUpdate(@NonNull final int result) {
         Intent intent = new Intent(); //an intent will be broadcasted
         intent.setAction(action); //set the action for later filtering
         intent.putExtra("data", result); //attach the result of the update

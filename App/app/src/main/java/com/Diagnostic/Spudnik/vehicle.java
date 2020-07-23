@@ -18,54 +18,76 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This is vehicle super class. It will serve as a Parcelable container of all information partaining to a machine.
- * It also contains numerous methods for database construction.
+ * Parcelable container of all information partaining to a machine.
+ * Contains numerous methods for database construction.
  * On app startup, ArrayLists containing the valid vehicleIDs and dealerID's are created on an Async Thread
  * During inputserial activity, it will construct the most important data structure, the ArrayList of connections.
  * During Parcelable implementation, the object is essentially reset, and thus the HashMap of pinnumbers must be re-input when every new object is created.
- *
+ * <p>
  * Another primary method is the sortconnections class described below
  *
  * @author timothy.bender
  * @version dev 1.0.0
- * @since dev 1.0.0
  * @see android.os.Parcelable
  * @see UpdateDatabase
  * @see connection
+ * @since dev 1.0.0
  */
 public class vehicle implements Parcelable { //Parcelable implementation allows cross Activity passing of this object
-    /**Vehicle id string*/
+    /**
+     * Vehicle id string
+     */
     private String vehicleId;
-    /**Stores all connections. Is build inside of buildDataBase() method*/
+    /**
+     * Stores all connections. Is build inside of buildDataBase() method
+     */
     private ArrayList<connection> connections = new ArrayList<>();
-    /**Contains the unique "directions" I.E. In1, out2 etc*/
+    /**
+     * Contains the unique "directions" I.E. In1, out2 etc
+     */
     private ArrayList<String> uniqueConnections = new ArrayList<>();
-    /**This contains all of the unique pins. Used to filter out duplicate pin entries*/
+    /**
+     * This contains all of the unique pins. Used to filter out duplicate pin entries
+     */
     private ArrayList<String> uniquePins = new ArrayList<>();
-    /**List of acceptable dealer id's*/
+    /**
+     * List of acceptable dealer id's
+     */
     private ArrayList<String> dealers = new ArrayList<>(); //this stores the dealerids
-    /**List of acceptable vehicle id numbers*/
+    /**
+     * List of acceptable vehicle id numbers
+     */
     private ArrayList<String> vehicleIds = new ArrayList<>(); //this stores the vehicle ids
-    /**Used to store which connection the user is currently viewing*/
+    /**
+     * Used to store which connection the user is currently viewing
+     */
     private int loc = 0;
-    /**Stores the total number of pins*/
+    /**
+     * Stores the total number of pins
+     */
     private int pinCount = 0;
-    /**Inputstreamreader holder*/
+    /**
+     * Inputstreamreader holder
+     */
     private InputStreamReader isr;
-    /**Map used to match connections with their pin arrangement number. I.E. Out1 is a 24pin connector....*/
-    private Map<String,Integer> pinnumbers = new HashMap<>();
+    /**
+     * Map used to match connections with their pin arrangement number. I.E. Out1 is a 24pin connector....
+     */
+    private Map<String, Integer> pinnumbers = new HashMap<>();
 
     /**
      * Constructor, not very interesting. The pinnumber map must be filled, so we call the method which completes that.
-     *  @since dev 1.0.0
+     *
+     * @since dev 1.0.0
      */
-    vehicle(){
+    vehicle() {
         setPinnumbers(); //this must be done every time we create a new object
     }
 
 
     /**
      * The following methods are all part of the Parcelable implementation.
+     *
      * @param in Parcel in
      */
 
@@ -79,9 +101,11 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
         vehicleIds = in.createStringArrayList();
         setPinnumbers(); //pinnumbers map must be refilled each time
     }
+
     /**
      * Writes values to parcel
-     * @param dest Parcel
+     *
+     * @param dest  Parcel
      * @param flags flags
      */
     @Override
@@ -103,6 +127,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
         public vehicle createFromParcel(Parcel in) {
             return new vehicle(in);
         }
+
         @Override
         public vehicle[] newArray(int size) {
             return new vehicle[size];
@@ -111,6 +136,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
 
     /**
      * Don't touch this either... Just leave it as the defaults.
+     *
      * @return int
      */
     @Override
@@ -119,98 +145,105 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
     }
 
 
-
     /**
      * Primary database builder. This will fill the instance field ArrayList connections with connection objects. This should only run once
      * It will run on an async thread in the background to avoid UI thread blocking
+     *
      * @since dev 1.0.0
      */
-    void buildDataBase(){
+    void buildDataBase() {
         connections.clear(); //clear the old connections and uniqueconnections arraylists to avoid overlap
         uniqueConnections.clear();
         AsyncTask.execute(new Runnable() { //Asynchronous of course
             @Override
             public void run() {
-                try{
+                try {
                     BufferedReader reader = new BufferedReader(isr); //Reader
                     String line;  //string to the store the line read by buffered reader
-                    while((line = reader.readLine()) != null) { //Until we run out of lines, read lines.
+                    while ((line = reader.readLine()) != null) { //Until we run out of lines, read lines.
                         String[] tokens = line.toLowerCase().split(","); //split the line at commas, and lowercase everything
                         addConnection(new connection(vehicleId, tokens[0], tokens[1],
                                 tokens[2], tokens[3], tokens[4])); //build the new connection
-                        if(!getUniqueConnections().contains(tokens[0])) //if we have a unique connection, then we add it to the list.
+                        if (!getUniqueConnections().contains(tokens[0])) //if we have a unique connection, then we add it to the list.
                             addUniqueconnection(tokens[0]);
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
         });
     }
 
     /**
      * Here is our database builder for the dealer id's. This is a small database but it is useful to keep it as a csv file to allow for update-ability. It runs similarly to the one above
+     *
      * @param i InputStream
      * @since dev 1.0.0
      */
-    private void buildDealers(@NonNull final InputStreamReader i){
+    private void buildDealers(@NonNull final InputStreamReader i) {
         dealers.clear(); //clear the dealer's arraylist so we dont have memory overlap
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                try{
+                try {
                     BufferedReader reader = new BufferedReader(i); //build our new bufferedreader
                     String line; //string to store each line
-                    while((line = reader.readLine()) != null) { //read each line
+                    while ((line = reader.readLine()) != null) { //read each line
                         line = line.toLowerCase(); //cast it to lowercase
                         if (!dealers.contains(line))  //if it is a unique id we add it to the list
                             dealers.add(line);
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
         });
     }
 
     /**
      * This is the database builder of acceptable vehicle id numbers. Like the others above it is relegated to a background thread.
+     *
      * @param i Inputstream
      * @since dev 1.0.0
      */
-    private void buildVehicleIds(@NonNull final InputStreamReader i){
+    private void buildVehicleIds(@NonNull final InputStreamReader i) {
         vehicleIds.clear(); //wipe the old vehicle ids just to be sure
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                try{
+                try {
                     String line = new BufferedReader(i).readLine(); //initiate bufferedreader readline and grab the first line
                     String[] holder = line.toLowerCase().split(","); //split items on comma's and cast into string array
-                    for(String s : holder) { //iterate through each string within the array
+                    for (String s : holder) { //iterate through each string within the array
                         if (!vehicleIds.contains(s))  //if the vehicleid is unique we add it to the list
                             vehicleIds.add(s);
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
         });
     }
 
     /**
      * This will check if a passed dealerid is in the list of acceptable ids
+     *
      * @param dealerid String
      * @return boolean
      * @since dev 1.0.0
      */
-    boolean checkDealer(@NonNull String dealerid){
+    boolean checkDealer(@NonNull String dealerid) {
         return dealers.contains(dealerid);
     }
 
     /**
      * This method will determine the closest match vehicle id from the id that was entered. It will then return that id.
+     *
      * @param machineid MachineId
      * @return String
      * @since dev 1.0.0
      */
-    protected String determineComparison(@NonNull String machineid){
+    protected String determineComparison(@NonNull String machineid) {
         int maximum = Integer.MIN_VALUE;
         String toReturn = "null"; //default return if we dont match with anything
-        if(machineid.length() > 0 && !vehicleIds.isEmpty()) {
+        if (machineid.length() > 0 && !vehicleIds.isEmpty()) {
             for (String id : vehicleIds) { //we will iterate through the ids
                 char[] storage = machineid.toCharArray(), //cast the two into char arrays
                         idCharArray = id.toCharArray();
@@ -222,7 +255,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
                         if (storage[i] == idCharArray[i]) //if theres a character match the id earns a point
                             points++;
                         else if (idCharArray[i] != 'x' && idCharArray[i] != 'X') //if they dont match, but we are comparing against an x or an X then they don't lose a point
-                                points--; //take a point away.
+                            points--; //take a point away.
                     }
                 }
                 if (maximum < points) { //if we have a new maximum match set the variables
@@ -230,7 +263,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
                     toReturn = id;
                 }
             }
-            if(maximum <= 0) //if we have 0 or fewer comparison points, then there was no match
+            if (maximum <= 0) //if we have 0 or fewer comparison points, then there was no match
                 return toReturn;
         }
         return toReturn;
@@ -239,6 +272,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
     /**
      * This method will pre-build the vehicle object by constructing the preliminary lists of acceptable
      * vehicleids and dealerids. This should be completed before inputserial.class is ever started.
+     *
      * @param context Context
      * @since dev 1.0.0
      */
@@ -248,16 +282,18 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
                     context.getFilesDir(), "database"), "machineids"))));
             buildDealers(new InputStreamReader(new FileInputStream(new File(new File( //build the dealers, create a new fileinputstream
                     context.getFilesDir(), "database"), "dealerids"))));
-        } catch (IOException ignored){}
+        } catch (IOException ignored) {
+        }
     }
 
     /**
      * Will return a string depending on whether or not the connection is input or output
+     *
      * @return "Input" or "Output"
      * @since dev 1.0.0
      */
-    String inout(){
-        String temp = uniqueConnections.get(loc),toReturn;
+    String inout() {
+        String temp = uniqueConnections.get(loc), toReturn;
         toReturn = (temp.contains("in") || temp.contains("In")) ? "Input" : "Output"; //ternary operator
         return toReturn;
     }
@@ -266,14 +302,16 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * Sorting implementation using default Mergesort. Time complexity of Olog(n).
      * Users are allowed to sort the pins by either pin number or by name.
      * This is implemented using a switch and final constants.
+     *
      * @since dev 1.0.0
      */
-    void sortConnections(){
+    void sortConnections() {
         Collections.sort(connections); //sort them
     }
 
     /**
      * This method will fill the pinnumbers hashmap. This map is used to map connectors to their total pin numbers.
+     *
      * @since dev 1.0.0
      */
     private void setPinnumbers() {
@@ -314,23 +352,29 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
         this.pinCount = pinCount;
     }
 
-    private void addConnection(connection toAdd){
+    private void addConnection(connection toAdd) {
         this.connections.add(toAdd);
     }
 
-    private void addUniqueconnection(String s){
+    private void addUniqueconnection(String s) {
         this.uniqueConnections.add(s.toLowerCase());
     }
 
-    ArrayList<String> getUniqueConnections(){
+    ArrayList<String> getUniqueConnections() {
         return this.uniqueConnections;
     }
 
-    ArrayList<connection> getConnections(){return connections;}
+    ArrayList<connection> getConnections() {
+        return connections;
+    }
 
-    void setConnections(ArrayList<connection> c){connections = c;}
+    void setConnections(ArrayList<connection> c) {
+        connections = c;
+    }
 
-    void addUniquePin(String s){uniquePins.add(s.toLowerCase().trim());}
+    void addUniquePin(String s) {
+        uniquePins.add(s.toLowerCase().trim());
+    }
 
     int getLoc() {
         return loc;
@@ -340,19 +384,19 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
         this.loc = loc;
     }
 
-    void setIs(InputStreamReader s){
+    void setIs(InputStreamReader s) {
         this.isr = s;
     }
 
-    public String toString(){
-        return ("Id: "+ vehicleId + "\n Connections: " + connections.size() + "\n Unique Connections: " + uniqueConnections.size());
+    public String toString() {
+        return ("Id: " + vehicleId + "\n Connections: " + connections.size() + "\n Unique Connections: " + uniqueConnections.size());
     }
 
     ArrayList<String> getUniquePins() {
         return uniquePins;
     }
 
-    ArrayList<String> getVehicleIds(){
+    ArrayList<String> getVehicleIds() {
         return this.vehicleIds;
     }
 }

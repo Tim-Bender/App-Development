@@ -21,32 +21,42 @@ import com.google.firebase.auth.FirebaseUser;
 
 
 /**
- * Welcome to the starting activity of the app. This activity will serve as a loading screen, an authentication check, and an automate database update.
- * During creation, it begins an automatic database update, and then moves to the next screen when that update has been completed.
+ * Loading screen, performs a database update in the background. Directs to login screen if not logged in, otherwise directs to home.
  *
  * @author timothy.bender
  * @version dev 1.0.0
- * @since dev 1.0.0
  * @see vehicle
  * @see UpdateDatabase
  * @see Glide
+ * @since dev 1.0.0
  */
 public class MainActivity extends AppCompatActivity {
 
-    /**Handler, used for delayed UI updates and other multithreaded control*/
+    /**
+     * Handler, used for delayed UI updates and other multithreaded control
+     */
     private Handler handler = new Handler();
-    /**Instance of our firebase user, retrieved from FireBaseAuth. If null: User not logged in*/
+    /**
+     * Instance of our firebase user, retrieved from FireBaseAuth. If null: User not logged in
+     */
     private FirebaseUser user;
-    /**Initial initiation of vehicle object. This object is used to hold all information, in concordance with the connection object about the machine we are diagnosing.*/
+    /**
+     * Initial initiation of vehicle object. This object is used to hold all information, in concordance with the connection object about the machine we are diagnosing.
+     */
     private vehicle myvehicle;
-    /**Broadcast Receiver object. Defined below. Captures broadcasts from UpdateDatabase.class*/
+    /**
+     * Broadcast Receiver object. Defined below. Captures broadcasts from UpdateDatabase.class
+     */
     private UpdateDatabaseBroadcastReceiver broadcastReceiver;
-    /**Boolean value used to make this activity thread safe, prevents an issue during handler delay causing activity split.*/
+    /**
+     * Boolean value used to make this activity thread safe, prevents an issue during handler delay causing activity split.
+     */
     private boolean updateBegun = false;
 
     /**
      * Setup the toolbar, this will be the same across all activities, and will thus only be mentioned here.
      * Assign values to instance fields, including SharedPreferences and firebase authentication/user.
+     *
      * @param savedInstanceState savedInstanceState
      * @since dev 1.0.0
      */
@@ -66,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION); //create a new intent filter for our broadcast listener
         filter.addAction(UpdateDatabase.action); //add the action inside of UpdateDatabase, we will listen for these broadcasts
         broadcastReceiver = new UpdateDatabaseBroadcastReceiver(); //create the broadcast receiver
-        registerReceiver(broadcastReceiver,filter); //register the receiver with our broadcast filter.
+        registerReceiver(broadcastReceiver, filter); //register the receiver with our broadcast filter.
 
         TextView textView = findViewById(R.id.textView3); //set the version name dynamically. This will be the version_name that is packaged during apk building.
         textView.setText(BuildConfig.VERSION_NAME); //set the text for version name
@@ -75,10 +85,11 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * This method is primarily used to toggle between night and day mode. It also begins the gif animation.
+     *
      * @since dev 1.0.0
      */
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
         ImageView image = findViewById(R.id.gifloadingscreen); //image reference
         Glide.with(getApplicationContext()).load(R.drawable.heartbeatgiftransparent).into(image); //begin the gif animation
@@ -87,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * This method will attempt to do database update, then begin updating the progress bar and also
      * Nested threads are used to achieve this. Since UpdateDataBase is an Asynchronous object it doesn't need to be inside of the Asnyc execution.
+     *
      * @since dev 1.0.0
      */
     @Override
@@ -97,41 +109,43 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Unregister the broadcast receiver on destroy to avoid memory leak
+     *
      * @since dev 1.0.0
      */
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         unregisterReceiver(broadcastReceiver); //unregister the receiver
         super.onDestroy();
     }
 
     /**
      * Move to the next activity. If the user is not logged in, aka !null then we direct them to home. Else they go to login
+     *
      * @since dev 1.0.0
      */
-    private void go(){
+    private void go() {
         Intent i;
-        if(user != null){ //if the user is already logged in, then we send them to the home screen
+        if (user != null) { //if the user is already logged in, then we send them to the home screen
             i = new Intent(getBaseContext(), home.class);
-            i.putExtra("myvehicle",myvehicle); //attach the machine object to be passed to home activity
-        }
-        else //otherwise they get passed over to login
-            i = new Intent(getBaseContext(),LoginActivity.class);
+            i.putExtra("myvehicle", myvehicle); //attach the machine object to be passed to home activity
+        } else //otherwise they get passed over to login
+            i = new Intent(getBaseContext(), LoginActivity.class);
         startActivity(i); //start the selected activity
         finish(); //if the user tries to go back to this activity, close and exit the app
     }
 
     /**
      * Here's our broadcast receiver to receive updates from Updatedatabase.java
+     *
      * @since dev 1.0.0
      */
     private class UpdateDatabaseBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getAction().equals(UpdateDatabase.action)) {
-                if(intent.getIntExtra("data",0) == UpdateDatabase.UPDATE_COMPLETE)
+            if (intent.getAction().equals(UpdateDatabase.action)) {
+                if (intent.getIntExtra("data", 0) == UpdateDatabase.UPDATE_COMPLETE)
                     updateBegun = true; //protection against multiple threads branching off, resulting in multiple home screens
-                else if(!updateBegun) { //else, if there isnt already a thread running here then we delay moving to the home screen for now.
+                else if (!updateBegun) { //else, if there isnt already a thread running here then we delay moving to the home screen for now.
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {

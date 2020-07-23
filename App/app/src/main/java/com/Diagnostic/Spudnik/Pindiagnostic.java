@@ -23,35 +23,51 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
- * Welcome to the pin diagnostic activity. This activity mainly consists of diagnostic information and a horizontal scrollable
- * recycler view so that users may scroll through the pins.
+ * Display diagnostic information pertaining to the currently selected pin. Pins may be scrolled through horizontally.
  *
  * @author timothy.bender
  * @version dev 1.0.0
- * @since dev 1.0.0
  * @see RecyclerView
  * @see SnapHelper
+ * @since dev 1.0.0
  */
 public class Pindiagnostic extends AppCompatActivity {
-    /**Vehicle object*/
+    /**
+     * Vehicle object
+     */
     private vehicle myvehicle;
-    /**Our two textviews that will need to be kept updated*/
-    private TextView direction,connectorinformation;
-    /**the current connection that we are viewing*/
+    /**
+     * Our two textviews that will need to be kept updated
+     */
+    private TextView direction, connectorinformation;
+    /**
+     * the current connection that we are viewing
+     */
     private connection myConnection;
-    /**Unique connections, scrollview will be filled by this*/
+    /**
+     * Unique connections, scrollview will be filled by this
+     */
     private ArrayList<connection> uniqueConnections;
-    /**Current position users are in the scrollview*/
+    /**
+     * Current position users are in the scrollview
+     */
     private int loc;
-    /**Custom view adapter for the recyclerview*/
+    /**
+     * Custom view adapter for the recyclerview
+     */
     private ConnectionAdapterHorizontal myAdapter;
-    /**Will allow us to "snap" to items in the horizontal scrollview*/
+    /**
+     * Will allow us to "snap" to items in the horizontal scrollview
+     */
     private SnapHelper snapHelper;
-    /**Our recyclerview object, will be in horizontal orientation*/
+    /**
+     * Our recyclerview object, will be in horizontal orientation
+     */
     private RecyclerView recyclerView;
 
     /**
      * Typical onCreate, we do setup the recyclerview with its scrolllistener and snaphelper
+     *
      * @param savedInstanceState Bundle
      * @since dev 1.0.0
      */
@@ -75,7 +91,7 @@ public class Pindiagnostic extends AppCompatActivity {
         //setup the recyclerview
         recyclerView = findViewById(R.id.horizontalrecyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        myAdapter = new ConnectionAdapterHorizontal(this,uniqueConnections,myvehicle);
+        myAdapter = new ConnectionAdapterHorizontal(this, uniqueConnections, myvehicle);
         LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(Pindiagnostic.this, LinearLayoutManager.HORIZONTAL, false); //make it horizontal
         recyclerView.setLayoutManager(horizontalLayoutManager); //set the layout manager for the recycler view
         snapHelper = new PagerSnapHelper();
@@ -84,7 +100,7 @@ public class Pindiagnostic extends AppCompatActivity {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                updateSnapPosition(recyclerView,dx,dy); //when users scroll using the horizontal recyclerview we update the snap position
+                updateSnapPosition(recyclerView, dx, dy); //when users scroll using the horizontal recyclerview we update the snap position
             }
         });
         recyclerView.setAdapter(myAdapter); //set the adapter to our recyclerview, pulls objects from our arraylist
@@ -93,20 +109,22 @@ public class Pindiagnostic extends AppCompatActivity {
 
     /**
      * This method will be used to snap to the correct position in the recyclerview when the page is first loaded
+     *
      * @since dev 1.0.0
      */
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
         recyclerView.scrollToPosition(loc); //snap to the correct position when the page is first loaded
     }
 
     /**
      * This method will update the textviews
+     *
      * @since dev 1.0.0
      */
     @SuppressLint("SetTextI18n")
-    private void updateValues(){
+    private void updateValues() {
         myConnection = uniqueConnections.get(loc);
         String temp = myConnection.getDirection();
         String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
@@ -118,14 +136,15 @@ public class Pindiagnostic extends AppCompatActivity {
 
     /**
      * Here the "loc" variable is updated and then the textviews will be updated. called whenever the user scrolls.
+     *
      * @param recyclerView our recyclerview
-     * @param dx x position
-     * @param dy y position
+     * @param dx           x position
+     * @param dy           y position
      * @since dev 1.0.0
      */
-    private void updateSnapPosition(@NonNull RecyclerView recyclerView, @NonNull int dx, @NonNull int dy){
-        int newSnapPosition = snapHelper.findTargetSnapPosition(recyclerView.getLayoutManager(),dx,dy);
-        if(newSnapPosition != loc && newSnapPosition >-1){ //dont update if it hasn't moved, or is less than 0
+    private void updateSnapPosition(@NonNull RecyclerView recyclerView, @NonNull int dx, @NonNull int dy) {
+        int newSnapPosition = snapHelper.findTargetSnapPosition(recyclerView.getLayoutManager(), dx, dy);
+        if (newSnapPosition != loc && newSnapPosition > -1) { //dont update if it hasn't moved, or is less than 0
             loc = newSnapPosition;
             updateValues();
         }
@@ -133,43 +152,45 @@ public class Pindiagnostic extends AppCompatActivity {
 
     /**
      * Button redirect to send users to the pinlocation activity
+     *
      * @param view View
      * @since dev 1.0.0
      */
-    public void viewpinloc(View view){
+    public void viewpinloc(View view) {
         Intent i = new Intent(getBaseContext(), pinlocation.class);
         i.putExtra("myvehicle", myvehicle);
-        i.putParcelableArrayListExtra("connections",myvehicle.getConnections());
-        i.putExtra("myConnection",myConnection);
+        i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
+        i.putExtra("myConnection", myConnection);
         startActivity(i);
     }
 
     /**
      * Button redirect to send users towards the pintestmode, will pass to warningscreen activity
+     *
      * @param view View
      * @since dev 1.0.0
      */
-    public void testMode(View view){
+    public void testMode(View view) {
         Intent i = new Intent(getApplicationContext(), warningscreen.class);
         i.putExtra("myvehicle", myvehicle);
-        i.putParcelableArrayListExtra("connections",myvehicle.getConnections());
-        i.putExtra("myConnection",myConnection);
+        i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
+        i.putExtra("myConnection", myConnection);
         startActivity(i);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        if(item.getItemId() == R.id.action_settings){
-            Intent i = new Intent(getBaseContext(),settings.class);
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_settings) {
+            Intent i = new Intent(getBaseContext(), settings.class);
             startActivity(i);
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public boolean onCreateOptionsMenu(Menu menu){
+    public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.toolbarbuttons,menu);
+        inflater.inflate(R.menu.toolbarbuttons, menu);
         return true;
     }
 }

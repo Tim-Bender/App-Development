@@ -16,8 +16,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 /**
- * Welcome to the homescreen activity. This activity's primary job is to direct the user where they want to go.
- * The middle two functions are not currently supported. Support will likely be added at a later date... maybe.
+ * Home page. Buttons which will direct the user throughout the rest of the app.
  *
  * @author timothy.bender
  * @version dev1.0.0
@@ -25,10 +24,14 @@ import com.google.firebase.auth.FirebaseUser;
  */
 
 public class home extends AppCompatActivity {
-    /**Vehicle object. Initialized in mainactivity, and usually pre-build there as well. */
+    /**
+     * Vehicle object. Initialized in mainactivity, and usually pre-build there as well.
+     */
     private vehicle myvehicle;
+
     /**
      * Nothing special in this onCreate. There is a check whether or not the vehicle object's id's have been constructed or not
+     *
      * @param savedInstanceState savedInstancestate
      * @since dev 1.0.0
      */
@@ -42,54 +45,57 @@ public class home extends AppCompatActivity {
         setTitle("Home");
         myToolBar.setTitleTextColor(Color.WHITE);
 
-        Snackbar.make(findViewById(R.id.homeconstraintlayout),"Welcome",Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(findViewById(R.id.homeconstraintlayout), "Welcome", Snackbar.LENGTH_SHORT).show();
         myvehicle = getIntent().getParcelableExtra("myvehicle"); //get out parcelabled vehicle object
-        if(myvehicle.getVehicleIds().isEmpty())
+        if (myvehicle.getVehicleIds().isEmpty())
             myvehicle.preBuildVehicleObject(this); //try again to prebuild the vehicle ids and dealer names.
     }
 
     /**
      * Button Redirect for the Diagnostic Tool button.
+     *
      * @param view view
      * @since dev 1.0.0
      */
-    public void diagTool(View view){
+    public void diagTool(View view) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get the current firebase user
-        if(user != null) { //authentication is required before one can access the diagnostic tool
+        if (user != null) { //authentication is required before one can access the diagnostic tool
             Intent i = new Intent(getBaseContext(), inputserial.class);
-            i.putExtra("myvehicle",myvehicle); //add the myvehicle object as a parcelable extra in the intent
+            i.putExtra("myvehicle", myvehicle); //add the myvehicle object as a parcelable extra in the intent
             startActivity(i);
-        }
-        else
+        } else
             Snackbar.make(findViewById(R.id.homeconstraintlayout), "Please Sign In", Snackbar.LENGTH_SHORT).show();
 
     }
 
     /**
      * Update Button redirect, currently disabled.
+     *
      * @param view view
      * @since dev 1.0.0
      */
-    public void update(View view){
+    public void update(View view) {
         Snackbar.make(findViewById(R.id.homeconstraintlayout), "Function Not Supported", Snackbar.LENGTH_SHORT).show();
     }
 
     /**
      * Log Data button redirect, currently disabled
+     *
      * @param view view
      * @since dev 1.0.0
      */
 
-    public void logData(View view){
+    public void logData(View view) {
         Snackbar.make(findViewById(R.id.homeconstraintlayout), "Function Not Supported", Snackbar.LENGTH_SHORT).show();
     }
 
     /**
      * Settings button redirect, will start the settings activity.
+     *
      * @param view view
      * @since dev 1.0.0
      */
-    public void settings(View view){
+    public void settings(View view) {
         Intent i = new Intent(getApplicationContext(), settings.class);
         startActivity(i);
     }
@@ -98,25 +104,25 @@ public class home extends AppCompatActivity {
     /**
      * The next two methods will create the toolbar menu item on the top right, this will be on every
      * activity that contains this shortcut.
+     *
      * @param item MenuItem
      * @return onOptionsItemSelected(item)
      * @since dev 1.0.0
      */
     @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        if(item.getItemId() == R.id.action_settings){
-            Intent i = new Intent(getBaseContext(),settings.class);
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_settings) {
+            Intent i = new Intent(getBaseContext(), settings.class);
             startActivity(i);
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public boolean onCreateOptionsMenu(Menu menu){
+    public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.toolbarbuttons,menu);
+        inflater.inflate(R.menu.toolbarbuttons, menu);
         return true;
     }
-
 
 }

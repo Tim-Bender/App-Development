@@ -14,26 +14,31 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 /**
- * Welcome to the adapter for our vertical recyclerview contained within the selectpin activity.
- * This will deliver view objects to the recyclerview, built from the arraylist of connection objects
+ * Recyclerview adapter for connection objects
  *
  * @author timothy.bender
  * @version dev 1.0.0
- * @since dev 1.0.0
  * @see androidx.recyclerview.widget.RecyclerView.Adapter
  * @see selectpin
+ * @since dev 1.0.0
  */
 
-class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolder>  {
+class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolder> {
 
-    /**Our arraylist of connection objects that we will be building cards out of*/
+    /**
+     * Our arraylist of connection objects that we will be building cards out of
+     */
     private ArrayList<connection> connections;
-    /**Context of the activity on the main UI thread*/
+    /**
+     * Context of the activity on the main UI thread
+     */
     private Context mContext;
-    /**vehicle object, we will need some methods from it*/
+    /**
+     * vehicle object, we will need some methods from it
+     */
     private vehicle myvehicle;
 
-    ConnectionAdapter(@NonNull Context context,@NonNull ArrayList<connection> connections,@NonNull vehicle vehicle) {
+    ConnectionAdapter(@NonNull Context context, @NonNull ArrayList<connection> connections, @NonNull vehicle vehicle) {
         this.connections = connections;
         this.mContext = context;
         this.myvehicle = vehicle;
@@ -56,11 +61,11 @@ class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolde
     }
 
     /**
+     * This class will hold the views...
+     *
      * @author timothy.bender
      * @version dev 1.0.0
      * @since dev 1.0.0
-     *
-     * This class will hold the views...
      */
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView mTitleText;
@@ -74,25 +79,26 @@ class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolde
         }
 
         @SuppressLint("SetTextI18n")
-        void bindTo(connection currentConnection){
+        void bindTo(connection currentConnection) {
             mTitleText.setText("Pin: " + currentConnection.getS4());
             String temp = currentConnection.getName(); //capitalize it
             String s1 = temp.substring(0, 1).toUpperCase();
-            mInfoText.setText(s1 +temp.substring(1));
+            mInfoText.setText(s1 + temp.substring(1));
 
         }
 
         /**
          * Click redirect. Implementation of the View.OnClickListener. Send users to the pindiagnostic activity
+         *
          * @param v View
          */
         @Override
         public void onClick(View v) {
             Intent i = new Intent(mContext.getApplicationContext(), Pindiagnostic.class);
             i.putExtra("myvehicle", myvehicle);
-            i.putParcelableArrayListExtra("connections",myvehicle.getConnections());
-            i.putExtra("loc",getAdapterPosition());
-            i.putParcelableArrayListExtra("uniqueconnections",new ArrayList<>(connections));
+            i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
+            i.putExtra("loc", getAdapterPosition());
+            i.putParcelableArrayListExtra("uniqueconnections", new ArrayList<>(connections));
             mContext.startActivity(i);
         }
     }

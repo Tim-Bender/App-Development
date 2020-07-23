@@ -77,9 +77,9 @@
             android:layout_height="0px"
             android:layout_gravity="center"
             android:layout_weight="1.625"
+            android:contentDescription="@string/todo"
             android:onClick="up"
-            app:srcCompat="@android:drawable/arrow_up_float"
-            android:contentDescription="@string/todo" />
+            app:srcCompat="@android:drawable/arrow_up_float" />
 
         <Space
             android:layout_width="match_parent"
@@ -92,9 +92,9 @@
             android:layout_height="0px"
             android:layout_gravity="center"
             android:layout_weight="1.625"
+            android:contentDescription="@string/todo"
             android:onClick="down"
-            app:srcCompat="@android:drawable/arrow_down_float"
-            android:contentDescription="@string/todo" />
+            app:srcCompat="@android:drawable/arrow_down_float" />
 
         <Space
             android:layout_width="match_parent"

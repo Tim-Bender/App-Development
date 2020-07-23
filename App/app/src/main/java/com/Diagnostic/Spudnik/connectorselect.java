@@ -22,14 +22,12 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * Allow the user to select the specific connector they wish to interface with.
+ *
  * @author timothy.bender
  * @version dev1.0.0
  * @since dev 1.0.0
  * Please see README before updating anything
- *
- *
- * Welcome to the conenctorselect class. This activity's primary job is to allow populate the list of connectors,
- * then allow the user to pick one to begin viewing diagnostics for.
  */
 public class connectorselect extends AppCompatActivity {
     private vehicle myvehicle;
@@ -37,6 +35,7 @@ public class connectorselect extends AppCompatActivity {
 
     /**
      * Just your normal onCreate.
+     *
      * @param savedInstanceState Bundle
      */
     @SuppressLint("SetTextI18n")
@@ -58,7 +57,7 @@ public class connectorselect extends AppCompatActivity {
      */
     @SuppressLint("SetTextI18n")
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
         // boolean nightMode = preferences.getBoolean("nightmode",false); //Determine whether or not we are in nightmode
         Spinner mySpinner = findViewById(R.id.myconnectorspinner); //get our spinner view
@@ -90,13 +89,16 @@ public class connectorselect extends AppCompatActivity {
                 connectorSelectionEdittext.setText(s1 + temp.substring(1)); //update the connectorselect edittext field with the selected item
                 myvehicle.setLoc(position);     //This will be used to track which one we are looking at.
             }
+
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
     }
 
     /**
      * Button redirect for the "down" button.
+     *
      * @param view View
      */
     @SuppressLint("SetTextI18n")
@@ -114,10 +116,11 @@ public class connectorselect extends AppCompatActivity {
 
     /**
      * Button redirect for the "up' button.
+     *
      * @param view View
      */
     @SuppressLint("SetTextI18n")
-    public void up(View view){
+    public void up(View view) {
         if (!myvehicle.getUniqueConnections().isEmpty()) { //check that unique connections is not empty
             myvehicle.setLoc(myvehicle.getLoc() - 1); //subtract one from the location tracking variable
             if (myvehicle.getLoc() < 0) //if we have gone past the front of the list, go to the end
@@ -130,9 +133,10 @@ public class connectorselect extends AppCompatActivity {
 
     /**
      * Button redirect for next, will send the user to the selectpin activity
+     *
      * @param view View
      */
-    public void next(View view){
+    public void next(View view) {
         String connector = connectorSelectionEdittext.getText().toString();
         if (!connector.isEmpty()) {
             if (myvehicle.getUniqueConnections().contains(connector.toLowerCase())) {
@@ -147,22 +151,23 @@ public class connectorselect extends AppCompatActivity {
     /**
      * The next two methods will create the toolbar menu item on the top right, this will be on every
      * activity that contains this shortcut.
+     *
      * @param item MenuItem
      * @return onOptionsItemSelected(item)
      */
     @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        if(item.getItemId() == R.id.action_settings){
-            Intent i = new Intent(getBaseContext(),settings.class);
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_settings) {
+            Intent i = new Intent(getBaseContext(), settings.class);
             startActivity(i);
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public boolean onCreateOptionsMenu(Menu menu){
+    public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.toolbarbuttons,menu);
+        inflater.inflate(R.menu.toolbarbuttons, menu);
         return true;
     }
 

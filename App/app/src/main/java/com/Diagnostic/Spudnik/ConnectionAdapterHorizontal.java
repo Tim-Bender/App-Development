@@ -13,14 +13,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 /**
- * This is the adapter for the horizontal recyclerview located in the pindiagnostic activity
+ * Recyclerview adapter for connection objects.
  *
  * @author timothy.bender
  * @version dev 1.0.0
  * @since dev 1.0.0
  */
-class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapterHorizontal.ViewHolder>  {
-    /***/
+class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapterHorizontal.ViewHolder> {
+
     private ArrayList<connection> connections;
     private Context mContext;
     private vehicle myvehicle;
@@ -61,11 +61,11 @@ class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapter
         }
 
         @SuppressLint("SetTextI18n")
-        void bindTo(connection currentConnection){
+        void bindTo(connection currentConnection) {
             mTitleText.setText("Pin: " + currentConnection.getS4());
             String temp = currentConnection.getName();
             String s1 = temp.substring(0, 1).toUpperCase();
-            mInfoText.setText(s1 +temp.substring(1));
+            mInfoText.setText(s1 + temp.substring(1));
             voltage.setText("6.6 mA");
 
         }
@@ -74,8 +74,8 @@ class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapter
         public void onClick(View v) {
             Intent i = new Intent(mContext, pinlocation.class);
             i.putExtra("myvehicle", myvehicle);
-            i.putParcelableArrayListExtra("connections",myvehicle.getConnections());
-            i.putExtra("myConnection",connections.get(getAdapterPosition()));
+            i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
+            i.putExtra("myConnection", connections.get(getAdapterPosition()));
             mContext.startActivity(i);
         }
     }

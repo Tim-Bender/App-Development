@@ -6,33 +6,60 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 /**
- * This connection object will hold data about an individual connection. vehicle.java contains an arraylist of these objects which represents all the connections on a machine
- * Parcelable is implemented here to allow for transfer of an list of connections between activities.
+ * Hold data about individual connections.
+ * <p>
  * Comparable is also implemented here to allow for easy sorting via the vehicle sort method.
  *
  * @author timothy.bender
  * @version dev 1.0.0
- * @since dev 1.0.0
  * @see vehicle
  * @see android.os.Parcelable
  * @see java.lang.Comparable
- *
+ * @since dev 1.0.0
  */
 
-public class connection implements Parcelable,Comparable<connection> {
-    /**Each string will hold an aspect of a connection*/
-    private String id,direction,name,units,plug,s4,type;
+public class connection implements Parcelable, Comparable<connection> {
+
+    /**
+     * Vehicle id
+     */
+    private String id;
+    /**
+     * Connector direction. Such as "In1" or "Out4"
+     */
+    private String direction;
+    /**
+     * Connector name
+     */
+    private String name;
+    /**
+     * Connector units
+     */
+    private String units;
+    /**
+     * Connector plug
+     */
+    private String plug;
+    /**
+     * Connector s4 pin number
+     */
+    private String s4;
+    /**
+     * Connector type
+     */
+    private String type;
 
     /**
      * Constructor
-     * @param id Vehicle id
-     * @param dir Connector direction
-     * @param s s4
-     * @param nm name
-     * @param un units
+     *
+     * @param id   Vehicle id
+     * @param dir  Connector direction
+     * @param s    s4
+     * @param nm   name
+     * @param un   units
      * @param type type
      */
-    connection(String id,String dir, String s, String nm, String un, String type){
+    connection(String id, String dir, String s, String nm, String un, String type) {
         this.id = id;
         this.direction = dir;
         this.name = nm;
@@ -42,7 +69,8 @@ public class connection implements Parcelable,Comparable<connection> {
     }
 
     /**
-     * Heres the parcelable implementation
+     * Parcelable implementation
+     *
      * @param in Parcel
      * @since dev 1.0.0
      */
@@ -56,6 +84,7 @@ public class connection implements Parcelable,Comparable<connection> {
         s4 = in.readString();
         type = in.readString();
     }
+
     @Override
     public int describeContents() {
         return 0;
@@ -85,24 +114,26 @@ public class connection implements Parcelable,Comparable<connection> {
     };
 
     /**
-     * Here is the most important compareTo method. If in compare by name mode, it will cast the names of both objects into chararrays and compare them alphabetically
-     * If it is in S4 mode then it converts the S4's of both connections into integers, then uses the default Integer.compare() method.
+     * Compare the s4's to one another. Allows implementation of Collections.sort on our arraylist of connection objects
+     *
      * @param o Connection
      * @return int
+     * @see vehicle
      * @since dev 1.0.0
      */
     @Override
-    public int compareTo(@NonNull connection o){
+    public int compareTo(@NonNull connection o) {
         return Integer.compare(Integer.parseInt(s4), Integer.parseInt(o.s4));
     }
 
     /**
-     * This function will do a quick check of whether the connection is an input or an output.
+     * Return whether or not a connection is an input or output.
+     *
      * @return String
      * @since dev 1.0.0
      */
-    String inout(){
-        String temp = direction,toReturn;
+    String inout() {
+        String temp = direction, toReturn;
         toReturn = (temp.contains("in") || temp.contains("In")) ? "Input" : "Output";
         return toReturn;
     }
@@ -134,8 +165,9 @@ public class connection implements Parcelable,Comparable<connection> {
     String getS4() {
         return s4;
     }
-    public String toString(){
-        return (id+" " + direction + " " + name + " " + units + " " + units + " " + type);
+
+    public String toString() {
+        return (id + " " + direction + " " + name + " " + units + " " + units + " " + type);
     }
 
 }

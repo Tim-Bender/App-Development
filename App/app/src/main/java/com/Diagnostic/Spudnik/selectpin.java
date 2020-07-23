@@ -18,30 +18,39 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Objects;
+
 /**
- * Welcome to the pin selection activity.
+ * Select a pin for which to view diagnostics for. Display pins in a vertical recyclerview.
  *
  * @author timothy.bender
  * @version dev 1.0.0
- * @since dev 1.0.0
  * @see vehicle
  * @see ItemTouchHelper
+ * @since dev 1.0.0
  */
 
 public class selectpin extends AppCompatActivity {
-    /**vehicle object*/
+    /**
+     * vehicle object
+     */
     private vehicle myvehicle;
-    /**Will be used to update textviews*/
-    private TextView  textView;
-    /**An Arraylist of connection objects. Will be parsed, and then used by the recyclerview*/
+    /**
+     * Will be used to update textviews
+     */
+    private TextView textView;
+    /**
+     * An Arraylist of connection objects. Will be parsed, and then used by the recyclerview
+     */
     private ArrayList<connection> connections = new ArrayList<>();
-    /**Custom adapter for our recyclerview*/
+    /**
+     * Custom adapter for our recyclerview
+     */
     private ConnectionAdapter myAdapter;
 
     /**
-     *
      * Some interesting stuff going on in this onCreate. First we setup our recycler view. and then we setupon an itemtouchhelper which allows
      * for the "deleting" of elements by swiping them off the screen.
+     *
      * @param savedInstanceState Bundle
      * @since dev 1.0.0
      */
@@ -61,7 +70,7 @@ public class selectpin extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.selectpinrecyclerview); //setup our recyclerview
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        myAdapter = new ConnectionAdapter(this,connections,myvehicle); //we will be using our custom adapter for this recyclerview
+        myAdapter = new ConnectionAdapter(this, connections, myvehicle); //we will be using our custom adapter for this recyclerview
         recyclerView.setAdapter(myAdapter); //set the adapter
 
         ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) { //setup our itemtouchhelper
@@ -72,7 +81,7 @@ public class selectpin extends AppCompatActivity {
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                if(direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.RIGHT){ //if you swipe right or left..
+                if (direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.RIGHT) { //if you swipe right or left..
                     if (connections.size() != 1) { //and it isnt a 1 pin connection
                         connections.remove(viewHolder.getAdapterPosition()); //then we remove the item from the arraylist
                         myAdapter.notifyItemRemoved(viewHolder.getAdapterPosition()); //and we notify the adapter that there as been a change so it may animate it.
@@ -86,10 +95,11 @@ public class selectpin extends AppCompatActivity {
 
     /**
      * We will use onResume to ensure that our recyclerview is up to date
+     *
      * @since dev 1.0.0
      */
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
         myAdapter.notifyDataSetChanged(); //notify that the dataset has changed
         updatevalues();
@@ -97,22 +107,24 @@ public class selectpin extends AppCompatActivity {
 
     /**
      * We will sort our connections by s4 number and then pass them to buildconnections
+     *
      * @since dev 1.0.0
      */
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
         myvehicle.sortConnections(); //sort the connections
-        if(connections.isEmpty()) //build them
+        if (connections.isEmpty()) //build them
             buildConnections();
     }
 
     /**
      * This method will parse the connections further and fill our arraylists.
+     *
      * @since dev 1.0.0
      */
-    private void buildConnections(){
-        if(connections.isEmpty()) {
+    private void buildConnections() {
+        if (connections.isEmpty()) {
             String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc());
             int counter = 0;
             for (connection c : myvehicle.getConnections()) {
@@ -135,10 +147,11 @@ public class selectpin extends AppCompatActivity {
 
     /**
      * This method will update the textfields
+     *
      * @since dev 1.0.0
      */
     @SuppressLint("SetTextI18n")
-    private void updatevalues(){
+    private void updatevalues() {
         String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc());
         String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
         textView.setText(s1 + temp.substring(1));
@@ -147,18 +160,18 @@ public class selectpin extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        if(item.getItemId() == R.id.action_settings){
-            Intent i = new Intent(getBaseContext(),settings.class);
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_settings) {
+            Intent i = new Intent(getBaseContext(), settings.class);
             startActivity(i);
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public boolean onCreateOptionsMenu(Menu menu){
+    public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.toolbarbuttons,menu);
+        inflater.inflate(R.menu.toolbarbuttons, menu);
         return true;
     }
 

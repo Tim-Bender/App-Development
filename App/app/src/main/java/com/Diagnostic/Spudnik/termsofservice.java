@@ -17,13 +17,13 @@ import com.github.barteksc.pdfviewer.util.FitPolicy;
 import java.io.File;
 
 /**
- * Welcome to the terms of service activity. This activity is responsible for displaying an up-to-date version of the spudnik terms of service.
+ * Display the most up to date version of the Spudnik Terms of Service.
  *
  * @author timothy.bender
  * @version dev 1.0.0
- * @since dev 1.0.0
  * @see PDFView
  * @see UpdateDatabase
+ * @since dev 1.0.0
  */
 public class termsofservice extends AppCompatActivity {
 
@@ -40,7 +40,7 @@ public class termsofservice extends AppCompatActivity {
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(UpdateDatabase.action);
         UpdateDatabaseBroadcastReceiver broadcastReceiver = new UpdateDatabaseBroadcastReceiver();
-        registerReceiver(broadcastReceiver,filter);
+        registerReceiver(broadcastReceiver, filter);
         loadPdf();
 
     }
@@ -48,11 +48,12 @@ public class termsofservice extends AppCompatActivity {
     /**
      * This method will load the pdf into the view, it will default to the most up to date one downloaded. If there is no updated version
      * available then it will load from the pre-included version that ships with the installer.
+     *
      * @since dev 1.0.0
      */
-    private void loadPdf(){
+    private void loadPdf() {
         final PDFView pdfView = findViewById(R.id.pdfView); //grab our pdf view object
-        final File pdf = new File(new File(getFilesDir(),"database"),"termsofservice.pdf"); //filepath to where the termsofservice.pdf will be stored
+        final File pdf = new File(new File(getFilesDir(), "database"), "termsofservice.pdf"); //filepath to where the termsofservice.pdf will be stored
         if (pdf.exists())  //if the filepath exists, then we use that one, since this one will be the updated one
             pdfView.fromFile(pdf)   //load the pdfview view from the file url
                     .enableSwipe(true)
@@ -72,15 +73,16 @@ public class termsofservice extends AppCompatActivity {
 
     /**
      * UpdateDataBase broadcast receiver. Will listen for events from UpdateDatabase and then load the pdf correctly
+     *
      * @since dev 1.0.0
      */
     private class UpdateDatabaseBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getAction().equals(UpdateDatabase.action)){
-                if(intent.getIntExtra("data",2) == UpdateDatabase.UPDATE_COMPLETE)
-                   loadPdf();
-                else if(intent.getIntExtra("data",2) == UpdateDatabase.UPDATE_FAILED) {
+            if (intent.getAction().equals(UpdateDatabase.action)) {
+                if (intent.getIntExtra("data", 2) == UpdateDatabase.UPDATE_COMPLETE)
+                    loadPdf();
+                else if (intent.getIntExtra("data", 2) == UpdateDatabase.UPDATE_FAILED) {
                     final PDFView pdfView = findViewById(R.id.pdfView); //grab our pdf view object
                     pdfView.fromAsset("termsofservice.pdf") //load the pdf from assets
                             .enableSwipe(true)
