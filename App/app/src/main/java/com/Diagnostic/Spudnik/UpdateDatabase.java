@@ -1,14 +1,15 @@
 package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
-import androidx.annotation.NonNull;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.os.AsyncTask;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,32 +27,28 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
+ * Welcome to the UpdateDataBase class, this class is used to synchronize the files stored within the Spudnik Diagnostic Firebase Storage Bucket
+ * with the phone's local copies.
+ *
+ * The simplest way to initiate a database update is just: "new UpdateDataBase()".
  * @author timothy.bender
  * @version dev 1.0.0
  * @since dev 1.0.0
  * @see <a href="https://firebase.google.com/docs/storage">FireBase Storage Documentation</a>
- *
- * Welcome to the UpdateDataBase class, this class is used to synchronize the files stored within the Spudnik Diagnostic Firebase Storage Bucket
- * with the phone's local copies.
- *
- * The simplest way to initiate a database update is just: "new UpdateDataBase()". No need to store it. It will be picked up by the garbage connector when its done.
- * If you would like to disable broadcasts create object as such: new UpdateDataBase(UpdateDataBase.DISABLE_BROADCASTS);
- *
- * Please note that some activities rely upon the broadcasts to move forward with execution, such as mainactivity.
+ * @see com.google.firebase.storage
+ * @see com.google.firebase.auth.FirebaseUser
+ * @see AsyncTask
+ * @see BufferedReader
  */
 class UpdateDatabase{
     /**Context of the app's current activity. Used to send broadcasts and communicate with the main UI thread*/
     private final Context context;
     /**Constants used for control flow and broadcast filtering*/
-    public static final int UPDATE_BEGUN = 0, UPDATE_COMPLETE = 1, UPDATE_FAILED = 2;
-    /**Constant used to disable broadcasts. Pass in during object creation if you wish to use this feature.*/
-    public static final int DISABLE_BROADCASTS = -1;
+    public static final int UPDATE_BEGUN = 0, UPDATE_COMPLETE = 1, UPDATE_FAILED = 2, TERMS_OF_SERVICE_UPDATED = 3;
     /**Action String used to filter by broadcast receivers on the main UI thread.*/
     public static final String action = "com.Diagnostic.Spudnik.UpdateDatabase.Update"; //this can really be anything but must be unique
     /**Used to keep track of the number of files that were updated.*/
     private int numberOfFilesUpdated = 0;
-    /**Used to store whether or not updates will be broadcast*/
-    private int broadcastToggle = 0;
 
     /**
      * <p>Constructor, a context is required to be passed from the parent activity. This context allows us to locate file directories...
@@ -66,25 +63,12 @@ class UpdateDatabase{
     }
 
     /**
-     * <p>Overloaded constructor, used if dev would like to disable broadcasts
-     * Like above, update will be triggered automatically from object creation</p>
-     * @since dev 1.0.0
-     * @param context Context of the current Activity on main UI thread
-     * @param broadcasts Broadcast Toggle broadcasts off
-     */
-    UpdateDatabase(@NonNull Context context, @NonNull int broadcasts){
-        this.context = context;
-        broadcastToggle = broadcasts;
-        updateDataBase(); //will automatically trigger an update upon object creation
-    }
-
-    /**
      * @since dev 1.0.0
      * <p>Asynchronously check's the firebase database bucket for updated files, downloads them and updates the machine id's data file.
      * First we use ConnectivityManager to determine whether or not we are connected to a network, if we are then we attempt the update.
      * All event listeners are asynchronous and thus must be nested within one another for correct runtime execution.</p>
      */
-    private void updateDataBase(){
+    private void updateDataBase() {
         AsyncTask.execute(new Runnable() { //Everything will be done asynchronously
             @Override
             public void run() {
@@ -116,6 +100,8 @@ class UpdateDatabase{
                                                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                                                     if (!item.getName().equals("dealerids") && !item.getName().equals("termsofservice.pdf")) //we dont want to add "dealerids and termsofservice.pdf to the list of machine ids
                                                         writeMachineIdFile(item);  //write the name of the file to the list of acceptable machine ids
+                                                    if(item.getName().equals("termsofservice.pdf"))
+                                                        broadcastUpdate(TERMS_OF_SERVICE_UPDATED);
                                                     fileNumber[0]++; //iterate up to the next file
                                                     numberOfFilesUpdated++; //iterate up
                                                     if (fileNumber[0] == fileTotalNumber[0]) //if we have downloaded our final file then we are done
@@ -125,6 +111,11 @@ class UpdateDatabase{
                                                 @Override
                                                 public void onFailure(@NonNull Exception e) {
                                                     broadcastUpdate(UPDATE_FAILED); //update failure
+                                                }
+                                            }).addOnCanceledListener(new OnCanceledListener() {
+                                                @Override
+                                                public void onCanceled() {
+                                                    broadcastUpdate(UPDATE_FAILED);
                                                 }
                                             });
                                         } else if (localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()) { //if there is not a newer version, we still need to add the filename
@@ -145,6 +136,11 @@ class UpdateDatabase{
                                     public void onFailure(@NonNull Exception e) {
                                         broadcastUpdate(UPDATE_FAILED); //update failure
                                     }
+                                }).addOnCanceledListener(new OnCanceledListener() {
+                                    @Override
+                                    public void onCanceled() {
+                                        broadcastUpdate(UPDATE_FAILED);
+                                    }
                                 });
                             }
                         }
@@ -152,6 +148,11 @@ class UpdateDatabase{
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             broadcastUpdate(UPDATE_FAILED); //update failure
+                        }
+                    }).addOnCanceledListener(new OnCanceledListener() {
+                        @Override
+                        public void onCanceled() {
+                            broadcastUpdate(UPDATE_FAILED);
                         }
                     });
                 } else //failure in network connectivity or user is null
@@ -161,10 +162,10 @@ class UpdateDatabase{
     }
 
     /**
-     * @since dev 1.0.0
      * <p>This method will update the machineids data file. It will take its current contents, and then append the new item's name onto the end.
      * It is done Asynchronously so that our download file threads above may not be interrupted.</p>
      * @param item StorageReference
+     * @since dev 1.0.0
      */
     private void writeMachineIdFile(@NonNull final StorageReference item) {
         AsyncTask.execute(new Runnable() { //Asynchronous of course
@@ -192,19 +193,13 @@ class UpdateDatabase{
      * @param result Result code
      */
     private void broadcastUpdate(@NonNull final int result){
-        AsyncTask.execute(new Runnable() {//asynchronous
-            @Override
-            public void run() {
-                if(broadcastToggle != DISABLE_BROADCASTS) { //during construction you may disable broadcasts.
-                    Intent intent = new Intent(); //an intent will be broadcasted
-                    intent.setAction(action); //set the action for later filtering
-                    intent.putExtra("data", result); //attach the result of the update
-                    if (result == UPDATE_COMPLETE)
-                        intent.putExtra("updatedfiles", numberOfFilesUpdated);//if the update is complete we include the number of files that were updated in the broadcast
-                    context.sendBroadcast(intent); //send the broadcast
-                }
-            }
-        });
+        Intent intent = new Intent(); //an intent will be broadcasted
+        intent.setAction(action); //set the action for later filtering
+        intent.putExtra("data", result); //attach the result of the update
+        if (result == UPDATE_COMPLETE)
+            intent.putExtra("updatedfiles", numberOfFilesUpdated);//if the update is complete we include the number of files that were updated in the broadcast
+        context.sendBroadcast(intent); //send the broadcast
+
     }
 }
 

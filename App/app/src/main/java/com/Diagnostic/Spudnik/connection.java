@@ -6,12 +6,17 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 /**
- * @author timothy.bender
- * @version dev1.0.0
- *
  * This connection object will hold data about an individual connection. vehicle.java contains an arraylist of these objects which represents all the connections on a machine
  * Parcelable is implemented here to allow for transfer of an list of connections between activities.
  * Comparable is also implemented here to allow for easy sorting via the vehicle sort method.
+ *
+ * @author timothy.bender
+ * @version dev 1.0.0
+ * @since dev 1.0.0
+ * @see vehicle
+ * @see android.os.Parcelable
+ * @see java.lang.Comparable
+ *
  */
 
 public class connection implements Parcelable,Comparable<connection> {
@@ -39,6 +44,7 @@ public class connection implements Parcelable,Comparable<connection> {
     /**
      * Heres the parcelable implementation
      * @param in Parcel
+     * @since dev 1.0.0
      */
 
     private connection(Parcel in) {
@@ -83,6 +89,7 @@ public class connection implements Parcelable,Comparable<connection> {
      * If it is in S4 mode then it converts the S4's of both connections into integers, then uses the default Integer.compare() method.
      * @param o Connection
      * @return int
+     * @since dev 1.0.0
      */
     @Override
     public int compareTo(@NonNull connection o){
@@ -92,6 +99,7 @@ public class connection implements Parcelable,Comparable<connection> {
     /**
      * This function will do a quick check of whether the connection is an input or an output.
      * @return String
+     * @since dev 1.0.0
      */
     String inout(){
         String temp = direction,toReturn;
@@ -99,7 +107,9 @@ public class connection implements Parcelable,Comparable<connection> {
         return toReturn;
     }
 
-    //set methods
+    /**
+     * Set methods
+     */
     public void setId(String id) {
         this.id = id;
     }

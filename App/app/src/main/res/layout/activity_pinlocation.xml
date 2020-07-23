@@ -111,7 +111,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:onClick="prevPin"
-                android:text="Prev Pin" />
+                android:text="@string/prev_pin" />
 
             <Button
                 android:layout_width="0px"
@@ -119,7 +119,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:onClick="nextPin"
-                android:text="Next Pin" />
+                android:text="@string/next_pin" />
         </LinearLayout>
 
     </LinearLayout>

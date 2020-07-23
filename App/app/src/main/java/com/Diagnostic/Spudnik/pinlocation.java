@@ -24,11 +24,11 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * Welcome to the pinlocation activity. It's primary job is to display the location of pins in on-board orientations
+ *
  * @author timothy.bender
  * @version dev 1.0.0
  * @since dev 1.0.0
- *
- * Welcome to the pinlocation activity. It's primary job is to display the location of pins in on-board orientations
  */
 public class pinlocation extends AppCompatActivity {
 
@@ -103,31 +103,31 @@ public class pinlocation extends AppCompatActivity {
 
     /** This method is used to create the gridlayout depending on the orientation, number of pins and other factors.
      * It is a polymorphic mess that i hope to replace with a grid layout in the future. Since i hope to replace it,
-     * and its obscenely complicated to begin with i will not be including in-line comments.
+     * and its obscenely complicated to begin with i will not be including many in-line comments.
      * @since dev 1.0.0
      */
     @SuppressLint("SetTextI18n")
     private void buildLayout(){
-        int pinnumber = myvehicle.getMap(myConnection.getDirection());
+        int pinnumber = myvehicle.getMap(myConnection.getDirection()); //get all the views we will need to be editing
         orientation = orientations.get(myConnection.getDirection());
 
-        Space topspace = findViewById(R.id.topspacepinlocation);
+        Space topspace = findViewById(R.id.topspacepinlocation); //the 4 spaces will allow us to "squish" our layout depending on which orientation we are in
         Space bottomspace = findViewById(R.id.bottomspacepinlocation);
         Space leftspace = findViewById(R.id.leftspacepinlocation);
         Space rightspace = findViewById(R.id.rightspacepinlocation);
 
-        LinearLayout outsidelayout = findViewById(R.id.outsidelayoutpinlocation);
+        LinearLayout outsidelayout = findViewById(R.id.outsidelayoutpinlocation); //all of our different linear layouts
         LinearLayout innerlayout1 = findViewById(R.id.innerlayout1);
         LinearLayout innerlayout2 = findViewById(R.id.innerlayout2);
 
-        if(orientation == VERTICAL){
-            topspace.setVisibility(View.GONE);
+        if(orientation == VERTICAL){ //vertical orientation
+            topspace.setVisibility(View.GONE); //remove top space
             topspace.setLayoutParams(new LinearLayout.LayoutParams(0,0));
-            bottomspace.setVisibility(View.GONE);
+            bottomspace.setVisibility(View.GONE); //remove bottom space
             bottomspace.setLayoutParams(new LinearLayout.LayoutParams(0,0));
-            rightspace.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,4));
+            rightspace.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,4)); //squish from the right and the left
             leftspace.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,4));
-            outsidelayout.setOrientation(LinearLayout.HORIZONTAL);
+            outsidelayout.setOrientation(LinearLayout.HORIZONTAL); //ensure our layouts are in the correct orientation
             innerlayout1.setOrientation(LinearLayout.VERTICAL);
             innerlayout1.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,1));
 
@@ -135,7 +135,7 @@ public class pinlocation extends AppCompatActivity {
             innerlayout2.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,1));
 
             outsidelayout.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,2));
-            if(pinnumber == 2){
+            if(pinnumber == 2){ //if its a 2 pin connector we treat it specially
                 rightspace.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,4.5f));
                 leftspace.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,4.5f));
                 innerlayout2.setVisibility(View.GONE);
@@ -147,12 +147,12 @@ public class pinlocation extends AppCompatActivity {
                 topspace.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0,2.25f));
                 bottomspace.setVisibility(View.VISIBLE);
                 bottomspace.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0,2.25f));
-                for(int i = 1; i < 3; i ++){
+                for(int i = 1; i < 3; i ++){ //add both of our textviews to the layout
                     innerlayout1.addView(getTextView(i));
                 }
             }
             else{
-                for(int i = 1; i <= pinnumber/2; i++){
+                for(int i = 1; i <= pinnumber/2; i++){ //add all of our textviews to the layout
                     innerlayout2.addView(getTextView(i));
                 }
                 for(int i = pinnumber/2+1; i <= pinnumber; i++){
@@ -160,16 +160,16 @@ public class pinlocation extends AppCompatActivity {
                 }
             }
         }
-        else{
-            leftspace.setVisibility(View.GONE);
+        else{ //otherwise we are in horizontal orientation
+            leftspace.setVisibility(View.GONE); //remove the left and right spaces
             leftspace.setLayoutParams(new LinearLayout.LayoutParams(0,0));
             rightspace.setVisibility(View.GONE);
             rightspace.setLayoutParams(new LinearLayout.LayoutParams(0,0));
 
-            topspace.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0,2.25f));
+            topspace.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0,2.25f)); //squish from the top and the bottom
             bottomspace.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0,2.25f));
 
-            outsidelayout.setOrientation(LinearLayout.VERTICAL);
+            outsidelayout.setOrientation(LinearLayout.VERTICAL); //ensure that the layout's are in the correct orientations
             outsidelayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
             innerlayout1.setOrientation(LinearLayout.HORIZONTAL);
@@ -180,7 +180,7 @@ public class pinlocation extends AppCompatActivity {
 
             LinearLayout superlayout = findViewById(R.id.superlinearlayoutpinlocation);
             superlayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0,2));
-            for(int i = pinnumber; i > pinnumber/2; i--){
+            for(int i = pinnumber; i > pinnumber/2; i--){ //add the textviews
                 innerlayout1.addView(getTextView(i));
             }
             for(int i = pinnumber/2; i >=1; i--){
@@ -197,13 +197,13 @@ public class pinlocation extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     private TextView getTextView(@NonNull int i){
         TextView textView = new TextView(getApplicationContext()); //create a new textview
+        textView.setTextSize(14);
+        textView.setText(Integer.toString(i));
+        textView.setGravity(Gravity.CENTER);
         if(orientation != VERTICAL)
             textView.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
         else
             textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0,1));
-        textView.setTextSize(14);
-        textView.setText(Integer.toString(i));
-        textView.setGravity(Gravity.CENTER);
         if(i == loc){ //if this the pin we are currently looking at, we change the background and textcolor.
             textView.setBackgroundResource(R.drawable.pinlocationcurrentbuttonbackground); //set the background
             textView.setTextColor(Color.BLACK); //set the textcolor
@@ -273,6 +273,7 @@ public class pinlocation extends AppCompatActivity {
 
     /**
      * This method will fill the hasmap which is responsible for maping directions to their orientation. 1 is vertical, 2 is horizontal
+     * @since dev 1.0.0
      */
     private void fillHashMap(){
         orientations.put("out1",1);

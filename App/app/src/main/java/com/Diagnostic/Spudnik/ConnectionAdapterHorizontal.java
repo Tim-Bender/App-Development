@@ -11,8 +11,16 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapterHorizontal.ViewHolder>  {
 
+/**
+ * This is the adapter for the horizontal recyclerview located in the pindiagnostic activity
+ *
+ * @author timothy.bender
+ * @version dev 1.0.0
+ * @since dev 1.0.0
+ */
+class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapterHorizontal.ViewHolder>  {
+    /***/
     private ArrayList<connection> connections;
     private Context mContext;
     private vehicle myvehicle;

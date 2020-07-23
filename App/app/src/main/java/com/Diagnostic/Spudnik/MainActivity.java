@@ -21,11 +21,15 @@ import com.google.firebase.auth.FirebaseUser;
 
 
 /**
+ * Welcome to the starting activity of the app. This activity will serve as a loading screen, an authentication check, and an automate database update.
+ * During creation, it begins an automatic database update, and then moves to the next screen when that update has been completed.
+ *
  * @author timothy.bender
  * @version dev 1.0.0
  * @since dev 1.0.0
- * Welcome to the starting activity of the app. This activity will serve as a loading screen, an authentication check, and an automate database update.
- * During creation, it begins an automatic database update, and then moves to the next screen when that update has been completed.
+ * @see vehicle
+ * @see UpdateDatabase
+ * @see Glide
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -44,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
      * Setup the toolbar, this will be the same across all activities, and will thus only be mentioned here.
      * Assign values to instance fields, including SharedPreferences and firebase authentication/user.
      * @param savedInstanceState savedInstanceState
+     * @since dev 1.0.0
      */
     @SuppressLint({"CommitPrefEdits", "SetTextI18n"})
     @Override

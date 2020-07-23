@@ -24,6 +24,7 @@ import java.util.Objects;
 /**
  * @author timothy.bender
  * @version dev1.0.0
+ * @since dev 1.0.0
  * Please see README before updating anything
  *
  *

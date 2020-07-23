@@ -28,13 +28,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 /**
- * Author: Timothy Bender
- * timothy.bender@spudnik.com
- * 530-414-6778
- * Please see README before updating anything
- *
- *
  * Welcome to the Settings activity.
+ *
+ * @author timothy.bender
+ * @version dev 1.0.0
+ * @since dev 1.0.0
  */
 public class settings extends AppCompatActivity {
 
@@ -53,7 +51,7 @@ public class settings extends AppCompatActivity {
 
         Toolbar myToolBar = findViewById(R.id.topAppBar);
         setSupportActionBar(myToolBar);
-        //getSupportActionBar().setIcon(R.mipmap.ic_launcher);
+
         setTitle("Settings");
         myToolBar.setTitleTextColor(Color.WHITE);
         firebaseDatabase = FirebaseDatabase.getInstance();
@@ -74,7 +72,6 @@ public class settings extends AppCompatActivity {
      * Report a bug button redirect, create an email with auto-filled fields
      * @param view view
      */
-
     public void reportBug(View view){
         try{
             DatabaseReference reference = firebaseDatabase.getReference("settings").child("reportemail");
@@ -163,9 +160,8 @@ public class settings extends AppCompatActivity {
            Snackbar.make(layout, "Signed Out", Snackbar.LENGTH_SHORT).show();
        }
        //else we assume it was a mistake.
-       else{
+       else
            Snackbar.make(layout, "Already Signed Out", Snackbar.LENGTH_SHORT).show();
-       }
     }
 
     private class UpdateDatabaseBroadcastReceiver extends BroadcastReceiver{
@@ -187,6 +183,8 @@ public class settings extends AppCompatActivity {
                     findViewById(R.id.settingsprogressbar).setVisibility(View.VISIBLE);
                     findViewById(R.id.settingsspace).setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,.4f));
                 }
+                else if(intent.getIntExtra("data",2) == UpdateDatabase.TERMS_OF_SERVICE_UPDATED)
+                    Snackbar.make(findViewById(R.id.settingsconstraintlayout),"Updated Terms Of Service Available For Viewing",Snackbar.LENGTH_SHORT).show();
             }
         }
     }

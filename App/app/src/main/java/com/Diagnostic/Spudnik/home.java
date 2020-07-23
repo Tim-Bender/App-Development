@@ -16,11 +16,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 /**
+ * Welcome to the homescreen activity. This activity's primary job is to direct the user where they want to go.
+ * The middle two functions are not currently supported. Support will likely be added at a later date... maybe.
+ *
  * @author timothy.bender
  * @version dev1.0.0
  * @since dev 1.0.0
- * Welcome to the homescreen activity. This activity's primary job is to direct the user where they want to go.
- * The middle two functions are not currently supported. Support will likely be added at a later date... maybe.
  */
 
 public class home extends AppCompatActivity {
@@ -29,15 +30,18 @@ public class home extends AppCompatActivity {
     /**
      * Nothing special in this onCreate. There is a check whether or not the vehicle object's id's have been constructed or not
      * @param savedInstanceState savedInstancestate
+     * @since dev 1.0.0
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_home);
+
         Toolbar myToolBar = findViewById(R.id.topAppBar); //typical toolbar setup
         setSupportActionBar(myToolBar);
         setTitle("Home");
         myToolBar.setTitleTextColor(Color.WHITE);
+
         Snackbar.make(findViewById(R.id.homeconstraintlayout),"Welcome",Snackbar.LENGTH_SHORT).show();
         myvehicle = getIntent().getParcelableExtra("myvehicle"); //get out parcelabled vehicle object
         if(myvehicle.getVehicleIds().isEmpty())
@@ -47,59 +51,47 @@ public class home extends AppCompatActivity {
     /**
      * Button Redirect for the Diagnostic Tool button.
      * @param view view
+     * @since dev 1.0.0
      */
     public void diagTool(View view){
-        try {
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get the current firebase user
-            if(user != null) { //authentication is required before one can access the diagnostic tool
-                Intent i = new Intent(getBaseContext(), inputserial.class);
-                i.putExtra("myvehicle",myvehicle); //add the myvehicle object as a parcelable extra in the intent
-                startActivity(i);
-            }
-            else{
-                Snackbar.make(findViewById(R.id.homeconstraintlayout), "Please Sign In", Snackbar.LENGTH_SHORT).show();
-            }
-        } catch (Exception ignored) {}
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get the current firebase user
+        if(user != null) { //authentication is required before one can access the diagnostic tool
+            Intent i = new Intent(getBaseContext(), inputserial.class);
+            i.putExtra("myvehicle",myvehicle); //add the myvehicle object as a parcelable extra in the intent
+            startActivity(i);
+        }
+        else
+            Snackbar.make(findViewById(R.id.homeconstraintlayout), "Please Sign In", Snackbar.LENGTH_SHORT).show();
 
     }
 
     /**
      * Update Button redirect, currently disabled.
      * @param view view
+     * @since dev 1.0.0
      */
     public void update(View view){
-        try {
-            Snackbar.make(findViewById(R.id.homeconstraintlayout), "Function Not Supported", Snackbar.LENGTH_SHORT).show();
-            //Intent i = new Intent(getBaseContext(), inputserial.class);
-            //startActivity(i);
-        } catch (Exception ignored) {}
-
+        Snackbar.make(findViewById(R.id.homeconstraintlayout), "Function Not Supported", Snackbar.LENGTH_SHORT).show();
     }
 
     /**
      * Log Data button redirect, currently disabled
      * @param view view
+     * @since dev 1.0.0
      */
 
     public void logData(View view){
-        try {
-            Snackbar.make(findViewById(R.id.homeconstraintlayout), "Function Not Supported", Snackbar.LENGTH_SHORT).show();
-            //Intent i = new Intent(getBaseContext(), inputserial.class);
-            //startActivity(i);
-        } catch (Exception ignored) {}
-
+        Snackbar.make(findViewById(R.id.homeconstraintlayout), "Function Not Supported", Snackbar.LENGTH_SHORT).show();
     }
 
     /**
      * Settings button redirect, will start the settings activity.
      * @param view view
+     * @since dev 1.0.0
      */
     public void settings(View view){
-        try{
-            Intent i = new Intent(getApplicationContext(), settings.class);
-            startActivity(i);
-        }catch(Exception ignored){}
-
+        Intent i = new Intent(getApplicationContext(), settings.class);
+        startActivity(i);
     }
 
 
@@ -108,6 +100,7 @@ public class home extends AppCompatActivity {
      * activity that contains this shortcut.
      * @param item MenuItem
      * @return onOptionsItemSelected(item)
+     * @since dev 1.0.0
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item){

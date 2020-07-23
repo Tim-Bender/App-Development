@@ -7,11 +7,10 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
-import com.google.firebase.auth.FirebaseAuth;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,9 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author timothy.bender
- * @version dev 1.0.0
- * @since dev 1.0.0
  * This is vehicle super class. It will serve as a Parcelable container of all information partaining to a machine.
  * It also contains numerous methods for database construction.
  * On app startup, ArrayLists containing the valid vehicleIDs and dealerID's are created on an Async Thread
@@ -29,6 +25,13 @@ import java.util.Map;
  * During Parcelable implementation, the object is essentially reset, and thus the HashMap of pinnumbers must be re-input when every new object is created.
  *
  * Another primary method is the sortconnections class described below
+ *
+ * @author timothy.bender
+ * @version dev 1.0.0
+ * @since dev 1.0.0
+ * @see android.os.Parcelable
+ * @see UpdateDatabase
+ * @see connection
  */
 public class vehicle implements Parcelable { //Parcelable implementation allows cross Activity passing of this object
     /**Vehicle id string*/
@@ -54,6 +57,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
 
     /**
      * Constructor, not very interesting. The pinnumber map must be filled, so we call the method which completes that.
+     *  @since dev 1.0.0
      */
     vehicle(){
         setPinnumbers(); //this must be done every time we create a new object
@@ -236,29 +240,21 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * This method will pre-build the vehicle object by constructing the preliminary lists of acceptable
      * vehicleids and dealerids. This should be completed before inputserial.class is ever started.
      * @param context Context
+     * @since dev 1.0.0
      */
-    public void preBuildVehicleObject(@NonNull final Context context){
-        if(FirebaseAuth.getInstance().getCurrentUser() != null) { //If the user is authenticated, then we begin.
-            try {
-                AsyncTask.execute(new Runnable() { //this second thread is necessary
-                    @Override
-                    public void run() {
-                        try {
-                            buildVehicleIds(new InputStreamReader(new FileInputStream(      //create and pass inputstreamreaders to the appropriate methods
-                                    new File(new File(context.getFilesDir(),"database"),"machineids"))));
-                        } catch (Exception ignored) {}
-                    }
-                });
-                buildDealers(new InputStreamReader(new FileInputStream(new File(new File( //build the dealers, create a new fileinputstream
-                        context.getFilesDir(),"database"),"dealerids"))));
-            } catch (Exception ignored){}
-
-        }
+    public void preBuildVehicleObject(@NonNull final Context context) {
+        try {
+            buildVehicleIds(new InputStreamReader(new FileInputStream(new File(new File(  //create and pass inputstreamreaders to the appropriate methods
+                    context.getFilesDir(), "database"), "machineids"))));
+            buildDealers(new InputStreamReader(new FileInputStream(new File(new File( //build the dealers, create a new fileinputstream
+                    context.getFilesDir(), "database"), "dealerids"))));
+        } catch (IOException ignored){}
     }
 
     /**
      * Will return a string depending on whether or not the connection is input or output
      * @return "Input" or "Output"
+     * @since dev 1.0.0
      */
     String inout(){
         String temp = uniqueConnections.get(loc),toReturn;
@@ -270,6 +266,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * Sorting implementation using default Mergesort. Time complexity of Olog(n).
      * Users are allowed to sort the pins by either pin number or by name.
      * This is implemented using a switch and final constants.
+     * @since dev 1.0.0
      */
     void sortConnections(){
         Collections.sort(connections); //sort them
@@ -277,6 +274,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
 
     /**
      * This method will fill the pinnumbers hashmap. This map is used to map connectors to their total pin numbers.
+     * @since dev 1.0.0
      */
     private void setPinnumbers() {
         pinnumbers.put("in1", 14);

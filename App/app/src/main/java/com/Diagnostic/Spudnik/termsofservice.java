@@ -1,6 +1,11 @@
 package com.Diagnostic.Spudnik;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,11 +17,13 @@ import com.github.barteksc.pdfviewer.util.FitPolicy;
 import java.io.File;
 
 /**
+ * Welcome to the terms of service activity. This activity is responsible for displaying an up-to-date version of the spudnik terms of service.
+ *
  * @author timothy.bender
  * @version dev 1.0.0
- *
- * Welcome to the terms of service activity. This activity is responsible for displaying an up-to-date version of the spudnik terms of service.
- * It makes use of the Pdfviewer package.
+ * @since dev 1.0.0
+ * @see PDFView
+ * @see UpdateDatabase
  */
 public class termsofservice extends AppCompatActivity {
 
@@ -29,9 +36,20 @@ public class termsofservice extends AppCompatActivity {
         setSupportActionBar(toolbar);
         setTitle("Spudnik Terms of Service");
         toolbar.setTitleTextColor(Color.WHITE);
+
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(UpdateDatabase.action);
+        UpdateDatabaseBroadcastReceiver broadcastReceiver = new UpdateDatabaseBroadcastReceiver();
+        registerReceiver(broadcastReceiver,filter);
         loadPdf();
+
     }
 
+    /**
+     * This method will load the pdf into the view, it will default to the most up to date one downloaded. If there is no updated version
+     * available then it will load from the pre-included version that ships with the installer.
+     * @since dev 1.0.0
+     */
     private void loadPdf(){
         final PDFView pdfView = findViewById(R.id.pdfView); //grab our pdf view object
         final File pdf = new File(new File(getFilesDir(),"database"),"termsofservice.pdf"); //filepath to where the termsofservice.pdf will be stored
@@ -48,21 +66,36 @@ public class termsofservice extends AppCompatActivity {
                     .spacing(0)
                     .pageFitPolicy(FitPolicy.WIDTH) //width justification is preferred, it will fill vertical anyway
                     .load(); //load the pdf
+        else
+            new UpdateDatabase(this);
+    }
 
-        else {     //if the filepath does not exist, then we haven't updated the database yet and we will fall back on the included verison
-            new UpdateDatabase(termsofservice.this);
-            pdfView.fromAsset("termsofservice.pdf") //load the pdf from assets
-                    .enableSwipe(true)
-                    .swipeHorizontal(true)
-                    .enableDoubletap(true)
-                    .defaultPage(0)
-                    .enableAnnotationRendering(false)
-                    .password(null)
-                    .scrollHandle(null)
-                    .enableAntialiasing(true) //sharpens the picture a bit
-                    .spacing(0)
-                    .pageFitPolicy(FitPolicy.WIDTH)
-                    .load();
+    /**
+     * UpdateDataBase broadcast receiver. Will listen for events from UpdateDatabase and then load the pdf correctly
+     * @since dev 1.0.0
+     */
+    private class UpdateDatabaseBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(UpdateDatabase.action)){
+                if(intent.getIntExtra("data",2) == UpdateDatabase.UPDATE_COMPLETE)
+                   loadPdf();
+                else if(intent.getIntExtra("data",2) == UpdateDatabase.UPDATE_FAILED) {
+                    final PDFView pdfView = findViewById(R.id.pdfView); //grab our pdf view object
+                    pdfView.fromAsset("termsofservice.pdf") //load the pdf from assets
+                            .enableSwipe(true)
+                            .swipeHorizontal(true)
+                            .enableDoubletap(true)
+                            .defaultPage(0)
+                            .enableAnnotationRendering(false)
+                            .password(null)
+                            .scrollHandle(null)
+                            .enableAntialiasing(true) //sharpens the picture a bit
+                            .spacing(0)
+                            .pageFitPolicy(FitPolicy.WIDTH)
+                            .load();
+                }
+            }
         }
     }
 

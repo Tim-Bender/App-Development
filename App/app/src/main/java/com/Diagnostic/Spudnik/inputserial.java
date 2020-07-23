@@ -31,11 +31,12 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 /**
+ * Welcome to the input serial activity. Here the user will input a dealer id, an implement serial number,
+ * the validity of both will be checked, and then our all important machine object containing that data will be created.
+ *
  * @author timothy.bender
  * @version dev 1.0.0
  * @since dev 1.0.0
- * Welcome to the input serial activity. Here the user will input a dealer id, an implement serial number,
- * the validity of both will be checked, and then our all important machine object containing that data will be created.
  */
 
 public class inputserial extends AppCompatActivity {
@@ -175,6 +176,7 @@ public class inputserial extends AppCompatActivity {
      * This method will navigate the user to the connector select screen. It will also ensure that all necessary database objects are constructed.
      * In addition the validity of user inputs is checked here using abstracted methods.
      * @param view view
+     * @since dev 1.0.0
      */
     @SuppressLint("SetTextI18n")
     public void go(View view) {
@@ -201,6 +203,7 @@ public class inputserial extends AppCompatActivity {
     /**
      * This method will be called anytime a user edits the contents of the inputserial edittext field. The entire process is done asynchronously, with multiple
      * extraneous threads splitting off from the original.
+     * @since dev 1.0.0
      */
     public void tryBuildDataBaseObject(){
         AsyncTask.execute(new Runnable() { //Begin a new thread
@@ -226,6 +229,7 @@ public class inputserial extends AppCompatActivity {
      * This method is called whenever a menuitem is selected from the toolbar menu.
      * @param item MenuItem
      * @return boolean
+     * @since dev 1.0.0
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
@@ -241,6 +245,7 @@ public class inputserial extends AppCompatActivity {
      * This just inflates the menu view.
      * @param menu Menu
      * @return boolean
+     * @since dev 1.0.0
      */
     public boolean onCreateOptionsMenu(Menu menu){
         MenuInflater inflater = getMenuInflater();

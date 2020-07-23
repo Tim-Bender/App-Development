@@ -32,12 +32,15 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 /**
+ * Welcome to the login activity. This activity is responsible for logging the user in, validating that they have accepted the terms of service
+ * performing a database update to ensure everything is up to date, and finally prebuilding the vehicle object.
+ *
  * @author timothy.bender
  * @version dev 1.0.0
  * @since dev 1.0.0
- *
- * Welcome to the login activity. This activity is responsible for logging the user in, validating that they have accepted the terms of service
- * performing a database update to ensure everything is up to date, and finally prebuilding the vehicle object.
+ * @see UpdateDatabase
+ * @see FirebaseAuth
+ * @see vehicle
  */
 
 public class LoginActivity extends AppCompatActivity {
@@ -74,9 +77,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         auth = FirebaseAuth.getInstance();  //setup firebase user and auth
         user = auth.getCurrentUser();
-        if(user != null){   //If they are already logged in, send them to the home activity. redundancy check
+        if(user != null)   //If they are already logged in, send them to the home activity. redundancy check
             finish();
-        }
         Toolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
         setTitle("Sign In");

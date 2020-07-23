@@ -14,6 +14,16 @@ import androidx.appcompat.widget.Toolbar;
 
 import java.util.ArrayList;
 
+/**
+ * @author timothy.bender
+ * @version dev 1.0.0
+ * @since dev 1.0.0
+ * @see android.bluetooth.BluetoothGatt
+ * @see vehicle
+ * @see android.bluetooth.BluetoothGattCharacteristic
+ *
+ *
+ */
 public class pintest extends AppCompatActivity {
     private SeekBar seekBar;
     private TextView pwmTextview;
