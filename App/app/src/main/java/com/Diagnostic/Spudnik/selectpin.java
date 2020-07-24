@@ -1,3 +1,21 @@
+/*
+ *
+ *  Copyright (c) 2020, Spudnik LLc <https://www.spudnik.com/>
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are not permitted in any form.
+ *
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION, DEATH, or SERIOUS INJURY or DAMAGE)
+ *  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
@@ -41,7 +59,7 @@ public class selectpin extends AppCompatActivity {
     /**
      * An Arraylist of connection objects. Will be parsed, and then used by the recyclerview
      */
-    private ArrayList<connection> connections = new ArrayList<>();
+    private ArrayList<connection> connections = new ArrayList<>(24);
     /**
      * Custom adapter for our recyclerview
      */
@@ -65,7 +83,7 @@ public class selectpin extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE);
 
         myvehicle = getIntent().getParcelableExtra("myvehicle");
-        Objects.requireNonNull(myvehicle).setConnections(getIntent().<connection>getParcelableArrayListExtra("connections"));
+        Objects.requireNonNull(myvehicle).setConnections(getIntent().getParcelableArrayListExtra("connections"));
         textView = findViewById(R.id.connectorid);
 
         RecyclerView recyclerView = findViewById(R.id.selectpinrecyclerview); //setup our recyclerview

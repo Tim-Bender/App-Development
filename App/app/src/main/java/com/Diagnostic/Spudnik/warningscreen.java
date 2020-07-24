@@ -1,3 +1,21 @@
+/*
+ *
+ *  Copyright (c) 2020, Spudnik LLc <https://www.spudnik.com/>
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are not permitted in any form.
+ *
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION, DEATH, or SERIOUS INJURY or DAMAGE)
+ *  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package com.Diagnostic.Spudnik;
 
 import android.content.Intent;
@@ -49,11 +67,9 @@ public class warningscreen extends AppCompatActivity {
         myconnection = getIntent().getParcelableExtra("myConnection");
         loc = getIntent().getIntExtra("loc", 0);
 
-        findViewById(R.id.warningscreenabortbutton).setOnClickListener(new View.OnClickListener() { //add onclick listener to the abort button.
-            @Override
-            public void onClick(View v) {
-                finish(); //close the activity
-            }
+        //add onclick listener to the abort button.
+        findViewById(R.id.warningscreenabortbutton).setOnClickListener(v -> {
+            finish(); //close the activity
         });
     }
 

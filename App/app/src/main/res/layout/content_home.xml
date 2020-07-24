@@ -1,4 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~
+  ~  Copyright (c) 2020, Spudnik LLc <https://www.spudnik.com/>
+  ~  All rights reserved.
+  ~
+  ~  Redistribution and use in source and binary forms, with or without
+  ~  modification, are not permitted in any form.
+  ~
+  ~  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+  ~  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  ~  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  ~  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION, DEATH, or SERIOUS INJURY or DAMAGE)
+  ~  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  ~  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  ~  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  ~
+  -->
+
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/homeconstraintlayout"
@@ -32,11 +50,11 @@
             android:textStyle="bold" />
 
         <Button
+            android:id="@+id/homediagtoolbutton"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="2"
             android:drawableStart="@drawable/tinyheartbeattransparent"
-            android:onClick="diagTool"
             android:text="@string/run_diagnostic_tool"
             android:textSize="18sp" />
 
@@ -46,12 +64,12 @@
             android:layout_weight=".1" />
 
         <Button
+            android:id="@+id/homeupdatebutton"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="2"
             android:alpha=".5"
             android:drawableStart="@drawable/tinygreenarrowtransparent"
-            android:onClick="update"
             android:text="@string/update_implement_software"
             android:textColor="#434242"
             android:textSize="18sp" />
@@ -62,12 +80,12 @@
             android:layout_weight=".1" />
 
         <Button
+            android:id="@+id/homelogbutton"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="2"
             android:alpha=".5"
             android:drawableStart="@drawable/binarytexttransparent"
-            android:onClick="logData"
             android:text="@string/log_implement_io_data"
             android:textColor="#434242"
             android:textSize="18sp" />
@@ -78,11 +96,11 @@
             android:layout_weight=".1" />
 
         <Button
+            android:id="@+id/homesettingsbutton"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="2"
             android:drawableStart="@drawable/cogwheeltransparent"
-            android:onClick="settings"
             android:text="@string/view_tool_settings"
             android:textSize="18sp" />
 

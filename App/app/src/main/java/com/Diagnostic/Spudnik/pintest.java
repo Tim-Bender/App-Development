@@ -1,10 +1,27 @@
+/*
+ *
+ *  Copyright (c) 2020, Spudnik LLc <https://www.spudnik.com/>
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are not permitted in any form.
+ *
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION, DEATH, or SERIOUS INJURY or DAMAGE)
+ *  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -76,46 +93,33 @@ public class pintest extends AppCompatActivity {
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
+        pwmTextview.setText(seekBar.getProgress() + " PWM");
         TextView pinnumber = findViewById(R.id.pintestpinnumber);
         pinnumber.setText("Pin " + myconnection.getS4() + " Test");
 
-        //the following assigns click listeners to all of our buttons and includes the logic
-        Button button = findViewById(R.id.buttonminus5);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pwm = (pwm > 4) ? pwm - 5 : 0;
-                updatePwmStatus();
-            }
+        //the following assigns click listeners to all of our buttons and includes the logic. Lambda implementation
+        findViewById(R.id.buttonplus5).setOnClickListener(v -> {
+            pwm = (pwm > 4) ? pwm - 5 : 0;
+            updatePwmStatus();
         });
-        button = findViewById(R.id.buttonminus1);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pwm = (pwm > 0) ? --pwm : 0;
-                updatePwmStatus();
-            }
+        findViewById(R.id.buttonminus1).setOnClickListener(v -> {
+            pwm = (pwm > 0) ? --pwm : 0;
+            updatePwmStatus();
         });
-        button = findViewById(R.id.buttonplus1);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pwm = (pwm < 100) ? ++pwm : 100;
-                updatePwmStatus();
-            }
+        findViewById(R.id.buttonplus1).setOnClickListener(v -> {
+            pwm = (pwm < 100) ? ++pwm : 100;
+            updatePwmStatus();
         });
-        button = findViewById(R.id.buttonplus5);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pwm = (pwm < 96) ? pwm + 5 : 100;
-                updatePwmStatus();
-            }
+        findViewById(R.id.buttonplus5).setOnClickListener(v -> {
+            pwm = (pwm < 96) ? pwm + 5 : 100;
+            updatePwmStatus();
         });
         updateTextFields();
     }

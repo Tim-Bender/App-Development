@@ -1,3 +1,21 @@
+/*
+ *
+ *  Copyright (c) 2020, Spudnik LLc <https://www.spudnik.com/>
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are not permitted in any form.
+ *
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION, DEATH, or SERIOUS INJURY or DAMAGE)
+ *  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package com.Diagnostic.Spudnik;
 
 import android.content.Intent;
@@ -6,7 +24,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -49,57 +66,19 @@ public class home extends AppCompatActivity {
         myvehicle = getIntent().getParcelableExtra("myvehicle"); //get out parcelabled vehicle object
         if (myvehicle.getVehicleIds().isEmpty())
             myvehicle.preBuildVehicleObject(this); //try again to prebuild the vehicle ids and dealer names.
+        findViewById(R.id.homediagtoolbutton).setOnClickListener((view) -> {
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get the current firebase user
+            if (user != null) { //authentication is required before one can access the diagnostic tool
+                Intent i = new Intent(getBaseContext(), inputserial.class);
+                i.putExtra("myvehicle", myvehicle); //add the myvehicle object as a parcelable extra in the intent
+                startActivity(i);
+            } else
+                Snackbar.make(findViewById(R.id.homeconstraintlayout), "Please Sign In", Snackbar.LENGTH_SHORT).show();
+        });
+        findViewById(R.id.homeupdatebutton).setOnClickListener((view) -> Snackbar.make(findViewById(R.id.homeconstraintlayout), "Function Not Supported", Snackbar.LENGTH_SHORT).show());
+        findViewById(R.id.homelogbutton).setOnClickListener((view) -> Snackbar.make(findViewById(R.id.homeconstraintlayout), "Function Not Supported", Snackbar.LENGTH_SHORT).show());
+        findViewById(R.id.homesettingsbutton).setOnClickListener((view) -> startActivity(new Intent(getApplicationContext(),settings.class)));
     }
-
-    /**
-     * Button Redirect for the Diagnostic Tool button.
-     *
-     * @param view view
-     * @since dev 1.0.0
-     */
-    public void diagTool(View view) {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get the current firebase user
-        if (user != null) { //authentication is required before one can access the diagnostic tool
-            Intent i = new Intent(getBaseContext(), inputserial.class);
-            i.putExtra("myvehicle", myvehicle); //add the myvehicle object as a parcelable extra in the intent
-            startActivity(i);
-        } else
-            Snackbar.make(findViewById(R.id.homeconstraintlayout), "Please Sign In", Snackbar.LENGTH_SHORT).show();
-
-    }
-
-    /**
-     * Update Button redirect, currently disabled.
-     *
-     * @param view view
-     * @since dev 1.0.0
-     */
-    public void update(View view) {
-        Snackbar.make(findViewById(R.id.homeconstraintlayout), "Function Not Supported", Snackbar.LENGTH_SHORT).show();
-    }
-
-    /**
-     * Log Data button redirect, currently disabled
-     *
-     * @param view view
-     * @since dev 1.0.0
-     */
-
-    public void logData(View view) {
-        Snackbar.make(findViewById(R.id.homeconstraintlayout), "Function Not Supported", Snackbar.LENGTH_SHORT).show();
-    }
-
-    /**
-     * Settings button redirect, will start the settings activity.
-     *
-     * @param view view
-     * @since dev 1.0.0
-     */
-    public void settings(View view) {
-        Intent i = new Intent(getApplicationContext(), settings.class);
-        startActivity(i);
-    }
-
 
     /**
      * The next two methods will create the toolbar menu item on the top right, this will be on every

@@ -1,3 +1,21 @@
+/*
+ *
+ *  Copyright (c) 2020, Spudnik LLc <https://www.spudnik.com/>
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are not permitted in any form.
+ *
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION, DEATH, or SERIOUS INJURY or DAMAGE)
+ *  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package com.Diagnostic.Spudnik;
 
 import android.content.BroadcastReceiver;
@@ -21,7 +39,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -37,7 +54,6 @@ import com.google.firebase.database.ValueEventListener;
  */
 public class settings extends AppCompatActivity {
 
-    private FirebaseDatabase firebaseDatabase;
     private UpdateDatabaseBroadcastReceiver broadcastReceiver;
     private String reportEmail;
 
@@ -59,12 +75,45 @@ public class settings extends AppCompatActivity {
 
         setTitle("Settings");
         myToolBar.setTitleTextColor(Color.WHITE);
-        firebaseDatabase = FirebaseDatabase.getInstance();
+        updateEmail(false);
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(UpdateDatabase.action);
         broadcastReceiver = new UpdateDatabaseBroadcastReceiver();
         registerReceiver(broadcastReceiver, filter);
         findViewById(R.id.settingsprogressbar).setVisibility(View.GONE);
+        findViewById(R.id.settingsupdatedatabasebutton).setOnClickListener((view) -> {
+            if (FirebaseAuth.getInstance().getCurrentUser() != null)
+                new UpdateDatabase(this);
+            else
+                Snackbar.make(findViewById(R.id.settingsconstraintlayout), "Please Sign In", Snackbar.LENGTH_SHORT).show();
+        });
+        findViewById(R.id.settingsreportbugbutton).setOnClickListener((view) -> {
+            if (reportEmail != null)
+                sendEmail();
+            else
+                updateEmail(true);
+        });
+        findViewById(R.id.settingstermsbutton).setOnClickListener((view) -> startActivity(new Intent(getBaseContext(), termsofservice.class)));
+        findViewById(R.id.settingsbluetoothbutton).setOnClickListener((view) -> startActivity(new Intent(getApplicationContext(), BluetoothTestActivity.class)));
+        findViewById(R.id.settingssignoutbutton).setOnClickListener((view) -> {
+            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                FirebaseAuth.getInstance().signOut();
+                Snackbar.make(findViewById(R.id.settingsconstraintlayout), "Signed Out", Snackbar.LENGTH_SHORT).show();
+            }
+            //else we assume it was a mistake.
+            else
+                Snackbar.make(findViewById(R.id.settingsconstraintlayout), "Already Signed Out", Snackbar.LENGTH_SHORT).show();
+        });
+        findViewById(R.id.settingssigninbutton).setOnClickListener((view) -> {
+            if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+                startActivity(new Intent(getApplicationContext(), LoginActivity.class).putExtra("fromsettings", true));
+                finish();
+            } else {
+                ConstraintLayout layout = findViewById(R.id.settingsconstraintlayout);
+                Snackbar.make(layout, "Already Signed In", Snackbar.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     @Override
@@ -74,23 +123,10 @@ public class settings extends AppCompatActivity {
     }
 
     /**
-     * Retrieve the latest up to date reportemail from firebase realtime database.
-     *
-     * @since dev 1.0.0
-     */
-    @Override
-    protected void onStart() {
-        super.onStart();
-        updateEmail(false);
-    }
-
-    /**
-     *
-     *
      * @param sendEmail Whether or not after retrieving the latest email it will auto send the user to the email client.
      */
     private void updateEmail(@NonNull final boolean sendEmail) {
-        DatabaseReference reference = firebaseDatabase.getReference("settings").child("reportemail");
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("settings").child("reportemail");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -103,19 +139,6 @@ public class settings extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError error) {
             }
         });
-    }
-
-    /**
-     * Report a bug button redirect, create an email with auto-filled fields
-     *
-     * @param view view
-     * @since dev 1.0.0
-     */
-    public void reportBug(View view) {
-        if (reportEmail != null)
-            sendEmail();
-        else
-            updateEmail(true);
     }
 
     /**
@@ -137,77 +160,6 @@ public class settings extends AppCompatActivity {
                 Build.VERSION.CODENAME + " " + Build.VERSION.RELEASE + "\n\nPlease describe the bug in detail:\n");
         //start the intent and start an email
         startActivity(Intent.createChooser(emailIntent, "Send mail..."));
-    }
-
-    /**
-     * Button redirect to the terms and conditons page
-     *
-     * @param view View
-     * @since dev 1.0.0
-     */
-    public void terms(View view) {
-        Intent toTermsAndConditons = new Intent(getBaseContext(), termsofservice.class);
-        startActivity(toTermsAndConditons);
-    }
-
-    /**
-     * Update DataBase button redirect, see UpdateDatabase.java
-     *
-     * @param view view
-     * @since dev 1.0.0
-     */
-    public void updateDataBase(View view) {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null)
-            new UpdateDatabase(this);
-        else {
-            ConstraintLayout layout = findViewById(R.id.settingsconstraintlayout);
-            Snackbar.make(layout, "Please Sign In", Snackbar.LENGTH_SHORT).show();
-        }
-
-    }
-
-    /**
-     * Login button redirect
-     *
-     * @param view view
-     * @since dev 1.0.0
-     */
-    public void login(View view) {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        //if the user hasn't been authenticated, then we pass them to the login activity
-        if (user == null) {
-            Intent i = new Intent(getBaseContext(), LoginActivity.class);
-            i.putExtra("fromsettings", true);
-            startActivity(i);
-            finish();
-        }
-        //otherwise we assume it was a mistake
-        else {
-            ConstraintLayout layout = findViewById(R.id.settingsconstraintlayout);
-            Snackbar.make(layout, "Already Signed In", Snackbar.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * Log out button redirect
-     *
-     * @param view view
-     * @since dev 1.0.0
-     */
-    public void logout(View view) {
-        //log the user out.
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        ConstraintLayout layout = findViewById(R.id.settingsconstraintlayout);
-        //if logged in, log out
-        if (user != null) {
-            auth.signOut();
-            Snackbar.make(layout, "Signed Out", Snackbar.LENGTH_SHORT).show();
-        }
-        //else we assume it was a mistake.
-        else
-            Snackbar.make(layout, "Already Signed Out", Snackbar.LENGTH_SHORT).show();
     }
 
     /**
@@ -236,17 +188,5 @@ public class settings extends AppCompatActivity {
             }
         }
     }
-
-    /**
-     * DEV MODE FEATURE, WILL BE REMOVED LATER
-     *
-     * @param view view
-     * @since dev 1.0.0
-     */
-    public void testBluetooth(View view) {
-        Intent i = new Intent(getBaseContext(), BluetoothTestActivity.class);
-        startActivity(i);
-    }
-
 
 }

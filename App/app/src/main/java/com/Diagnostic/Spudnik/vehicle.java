@@ -1,3 +1,19 @@
+/*
+ *  Copyright (c) 2020, Spudnik LLc <https://www.spudnik.com/>
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are prohibited in any form.
+ *
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION, DEATH, or SERIOUS INJURY or DAMAGE)
+ *  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package com.Diagnostic.Spudnik;
 
 import android.content.Context;
@@ -41,23 +57,23 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
     /**
      * Stores all connections. Is build inside of buildDataBase() method
      */
-    private ArrayList<connection> connections = new ArrayList<>();
+    private ArrayList<connection> connections = new ArrayList<>(36);
     /**
      * Contains the unique "directions" I.E. In1, out2 etc
      */
-    private ArrayList<String> uniqueConnections = new ArrayList<>();
+    private ArrayList<String> uniqueConnections = new ArrayList<>(24);
     /**
      * This contains all of the unique pins. Used to filter out duplicate pin entries
      */
-    private ArrayList<String> uniquePins = new ArrayList<>();
+    private ArrayList<String> uniquePins = new ArrayList<>(24);
     /**
      * List of acceptable dealer id's
      */
-    private ArrayList<String> dealers = new ArrayList<>(); //this stores the dealerids
+    private ArrayList<String> dealers = new ArrayList<>(10); //this stores the dealerids
     /**
      * List of acceptable vehicle id numbers
      */
-    private ArrayList<String> vehicleIds = new ArrayList<>(); //this stores the vehicle ids
+    private ArrayList<String> vehicleIds = new ArrayList<>(15); //this stores the vehicle ids
     /**
      * Used to store which connection the user is currently viewing
      */
@@ -73,7 +89,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
     /**
      * Map used to match connections with their pin arrangement number. I.E. Out1 is a 24pin connector....
      */
-    private Map<String, Integer> pinnumbers = new HashMap<>();
+    private Map<String, Integer> pinnumbers = new HashMap<>(15);
 
     /**
      * Constructor, not very interesting. The pinnumber map must be filled, so we call the method which completes that.
@@ -154,21 +170,19 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
     void buildDataBase() {
         connections.clear(); //clear the old connections and uniqueconnections arraylists to avoid overlap
         uniqueConnections.clear();
-        AsyncTask.execute(new Runnable() { //Asynchronous of course
-            @Override
-            public void run() {
-                try {
-                    BufferedReader reader = new BufferedReader(isr); //Reader
-                    String line;  //string to the store the line read by buffered reader
-                    while ((line = reader.readLine()) != null) { //Until we run out of lines, read lines.
-                        String[] tokens = line.toLowerCase().split(","); //split the line at commas, and lowercase everything
-                        addConnection(new connection(vehicleId, tokens[0], tokens[1],
-                                tokens[2], tokens[3], tokens[4])); //build the new connection
-                        if (!getUniqueConnections().contains(tokens[0])) //if we have a unique connection, then we add it to the list.
-                            addUniqueconnection(tokens[0]);
-                    }
-                } catch (Exception ignored) {
+        //Asynchronous of course
+        AsyncTask.execute(() -> {
+            try {
+                BufferedReader reader = new BufferedReader(isr); //Reader
+                String line;  //string to the store the line read by buffered reader
+                while ((line = reader.readLine()) != null) { //Until we run out of lines, read lines.
+                    String[] tokens = line.toLowerCase().split(","); //split the line at commas, and lowercase everything
+                    addConnection(new connection(vehicleId, tokens[0], tokens[1],
+                            tokens[2], tokens[3], tokens[4])); //build the new connection
+                    if (!getUniqueConnections().contains(tokens[0])) //if we have a unique connection, then we add it to the list.
+                        addUniqueconnection(tokens[0]);
                 }
+            } catch (Exception ignored) {
             }
         });
     }
@@ -181,19 +195,16 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      */
     private void buildDealers(@NonNull final InputStreamReader i) {
         dealers.clear(); //clear the dealer's arraylist so we dont have memory overlap
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    BufferedReader reader = new BufferedReader(i); //build our new bufferedreader
-                    String line; //string to store each line
-                    while ((line = reader.readLine()) != null) { //read each line
-                        line = line.toLowerCase(); //cast it to lowercase
-                        if (!dealers.contains(line))  //if it is a unique id we add it to the list
-                            dealers.add(line);
-                    }
-                } catch (Exception ignored) {
+        AsyncTask.execute(() -> {
+            try {
+                BufferedReader reader = new BufferedReader(i); //build our new bufferedreader
+                String line; //string to store each line
+                while ((line = reader.readLine()) != null) { //read each line
+                    line = line.toLowerCase(); //cast it to lowercase
+                    if (!dealers.contains(line))  //if it is a unique id we add it to the list
+                        dealers.add(line);
                 }
+            } catch (Exception ignored) {
             }
         });
     }
@@ -206,18 +217,15 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      */
     private void buildVehicleIds(@NonNull final InputStreamReader i) {
         vehicleIds.clear(); //wipe the old vehicle ids just to be sure
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String line = new BufferedReader(i).readLine(); //initiate bufferedreader readline and grab the first line
-                    String[] holder = line.toLowerCase().split(","); //split items on comma's and cast into string array
-                    for (String s : holder) { //iterate through each string within the array
-                        if (!vehicleIds.contains(s))  //if the vehicleid is unique we add it to the list
-                            vehicleIds.add(s);
-                    }
-                } catch (Exception ignored) {
+        AsyncTask.execute(() -> { //lambda
+            try {
+                String line = new BufferedReader(i).readLine(); //initiate bufferedreader readline and grab the first line
+                String[] holder = line.toLowerCase().split(","); //split items on comma's and cast into string array
+                for (String s : holder) { //iterate through each string within the array
+                    if (!vehicleIds.contains(s))  //if the vehicleid is unique we add it to the list
+                        vehicleIds.add(s);
                 }
+            } catch (Exception ignored) {
             }
         });
     }

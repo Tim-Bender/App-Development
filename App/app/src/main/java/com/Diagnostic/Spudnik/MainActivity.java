@@ -1,3 +1,21 @@
+/*
+ *
+ *  Copyright (c) 2020, Spudnik LLc <https://www.spudnik.com/>
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are not permitted in any form.
+ *
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION, DEATH, or SERIOUS INJURY or DAMAGE)
+ *  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
@@ -18,7 +36,6 @@ import androidx.appcompat.widget.Toolbar;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
 
 /**
  * Loading screen, performs a database update in the background. Directs to login screen if not logged in, otherwise directs to home.
@@ -146,12 +163,7 @@ public class MainActivity extends AppCompatActivity {
                 if (intent.getIntExtra("data", 0) == UpdateDatabase.UPDATE_COMPLETE)
                     updateBegun = true; //protection against multiple threads branching off, resulting in multiple home screens
                 else if (!updateBegun) { //else, if there isnt already a thread running here then we delay moving to the home screen for now.
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            go(); //go to home or login activity, see above
-                        }
-                    }, 2000);//delay execution by 2000ms so that the loading screen is not completely skipped.
+                    handler.postDelayed(MainActivity.this::go,2000);
                     myvehicle.preBuildVehicleObject(getApplicationContext());//during the delay we will pre-build the vehicle object
                 }
             }

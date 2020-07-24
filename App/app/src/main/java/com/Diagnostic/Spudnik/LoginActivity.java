@@ -1,3 +1,21 @@
+/*
+ *
+ *  Copyright (c) 2020, Spudnik LLc <https://www.spudnik.com/>
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are not permitted in any form.
+ *
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION, DEATH, or SERIOUS INJURY or DAMAGE)
+ *  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
@@ -14,7 +32,6 @@ import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -22,12 +39,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -125,22 +138,16 @@ public class LoginActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         final CheckBox acceptTermsCheckbox = findViewById(R.id.logincheckbox); //set the oncheckedchange listener for the accepttermscheckbox
-        acceptTermsCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (!pressed) //toggle the boolean
-                    termsAgreed = isChecked;
-                else
-                    acceptTermsCheckbox.setChecked(true); //once they have accepted, and pressed login. they cannot un-accept the terms.
-            }
+        acceptTermsCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!pressed) //toggle the boolean
+                termsAgreed = isChecked;
+            else
+                acceptTermsCheckbox.setChecked(true); //once they have accepted, and pressed login. they cannot un-accept the terms.
         });
         TextView termsOfServiceTextView = findViewById(R.id.logintermsoftersivetextview); //set an onclick listener onto the text field. This will be used to redirect them
-        termsOfServiceTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent toTermsOfServiceIntent = new Intent(getBaseContext(), termsofservice.class);
-                startActivity(toTermsOfServiceIntent); //send them to the terms of service activity
-            }
+        termsOfServiceTextView.setOnClickListener(v -> {
+            Intent toTermsOfServiceIntent = new Intent(getBaseContext(), termsofservice.class);
+            startActivity(toTermsOfServiceIntent); //send them to the terms of service activity
         });
     }
 
@@ -168,25 +175,19 @@ public class LoginActivity extends AppCompatActivity {
                 pressed = true;
                 updateLoadingView(LOGGING_IN_BEGUN);
                 auth.signInWithEmailAndPassword(emailEditText.getText().toString().trim(), passwordEditText.getText().toString().trim()) //pass the information into an authentication request
-                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful())  //if the task is successful, we begin a database update/
-                                    new UpdateDatabase(LoginActivity.this);
-                                else {
-                                    //otherwise we inform them that authentication has failed.
-                                    updateLoadingView(LOGGING_IN_FAILURE);
-                                    Snackbar.make(findViewById(R.id.loginconstraintlayout), "Sign In Failed", Snackbar.LENGTH_SHORT).show();
-                                }
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful())  //if the task is successful, we begin a database update/
+                                new UpdateDatabase(LoginActivity.this);
+                            else {
+                                //otherwise we inform them that authentication has failed.
+                                updateLoadingView(LOGGING_IN_FAILURE);
+                                Snackbar.make(findViewById(R.id.loginconstraintlayout), "Sign In Failed", Snackbar.LENGTH_SHORT).show();
                             }
-                        }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) { //if we fail sign in then we inform then the same as above
-                        pressed = false;
-                        Snackbar.make(findViewById(R.id.loginconstraintlayout), "Sign In Failed", Snackbar.LENGTH_SHORT).show();
-                        updateLoadingView(LOGGING_IN_FAILURE);
-                    }
-                });
+                        }).addOnFailureListener(e -> { //if we fail sign in then we inform then the same as above
+                            pressed = false;
+                            Snackbar.make(findViewById(R.id.loginconstraintlayout), "Sign In Failed", Snackbar.LENGTH_SHORT).show();
+                            updateLoadingView(LOGGING_IN_FAILURE);
+                        });
             } else //if they have no accepted the terms and conditions we ask them to
                 Snackbar.make(findViewById(R.id.loginconstraintlayout), "Please Accept the Terms and Conditions", Snackbar.LENGTH_SHORT).show();
         }

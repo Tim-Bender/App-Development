@@ -1,3 +1,21 @@
+/*
+ *
+ *  Copyright (c) 2020, Spudnik LLc <https://www.spudnik.com/>
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are not permitted in any form.
+ *
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION, DEATH, or SERIOUS INJURY or DAMAGE)
+ *  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
@@ -9,14 +27,8 @@ import android.os.AsyncTask;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.tasks.OnCanceledListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.ListResult;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.BufferedReader;
@@ -40,6 +52,7 @@ import java.io.InputStreamReader;
  * @see BufferedReader
  * @since dev 1.0.0
  */
+
 class UpdateDatabase {
     /**
      * Context of the app's current activity. Used to send broadcasts and communicate with the main UI thread
@@ -79,95 +92,66 @@ class UpdateDatabase {
      * @since dev 1.0.0
      */
     private void updateDataBase() {
-        AsyncTask.execute(new Runnable() { //Everything will be done asynchronously
-            @Override
-            public void run() {
-                final ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE); //Check if a network is active
-                Network activeNetwork = cm.getActiveNetwork();
-                if (activeNetwork != null && FirebaseAuth.getInstance().getCurrentUser() != null) {   //If we are connected go ahead and try updating. Also must be logged in...
-                    StorageReference reference = FirebaseStorage.getInstance().getReference().getRoot().child("DataBase"); //Storage reference to firebase bucket, at its child "Database"
-                    broadcastUpdate(UPDATE_BEGUN); //send a broadcast that we have begun the update
-                    final File rootpath = new File(context.getFilesDir(), "database"); //Rootpath to local database folder
+        //Everything will be done asynchronously
+        AsyncTask.execute(() -> {
+            final ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE); //Check if a network is active
+            Network activeNetwork = cm.getActiveNetwork();
+            if (activeNetwork != null && FirebaseAuth.getInstance().getCurrentUser() != null) {   //If we are connected go ahead and try updating. Also must be logged in...
+                StorageReference reference = FirebaseStorage.getInstance().getReference().getRoot().child("DataBase"); //Storage reference to firebase bucket, at its child "Database"
+                broadcastUpdate(UPDATE_BEGUN); //send a broadcast that we have begun the update
+                final File rootpath = new File(context.getFilesDir(), "database"); //Rootpath to local database folder
 
-                    if (!rootpath.exists())  //if the rootpath doesn't exist, we create the folder. This is necessary on first boot
-                        rootpath.mkdirs();
-                    new File(rootpath, "machineids").delete();    //delete the current list of machine id's.
-                    final int[] fileTotalNumber = new int[1]; // will be used to track the number of total files in the firebase bucket, so we can broadcast when are done
-                    final int[] fileNumber = new int[]{0}; //will be used to track which file we are current at in the list. when we reach the end we know we are done
-                    reference.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() { //get all the items in at the firebase reference location
-                        @Override
-                        public void onSuccess(ListResult listResult) {
-                            fileTotalNumber[0] = listResult.getItems().size() - 1; //get the number of items in the firebase storage bucket
-                            for (final StorageReference item : listResult.getItems()) { //begin iterating through each storage item
-                                final File localFile = new File(rootpath, item.getName().toLowerCase()); //get the local version of the file for comparison
-                                item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() { //Get the metadata of the item.
-                                    @Override
-                                    public void onSuccess(StorageMetadata storageMetadata) {
-                                        if (localFile.lastModified() < storageMetadata.getUpdatedTimeMillis()) {    //if the file either doesn't exist locally, or is outdated.. we download
-                                            localFile.delete(); //delete the old version
-                                            item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() { //download the file
-                                                @Override
-                                                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                                                    if (!item.getName().equals("dealerids") && !item.getName().equals("termsofservice.pdf")) //we dont want to add "dealerids and termsofservice.pdf to the list of machine ids
-                                                        writeMachineIdFile(item);  //write the name of the file to the list of acceptable machine ids
-                                                    if (item.getName().equals("termsofservice.pdf"))
-                                                        broadcastUpdate(TERMS_OF_SERVICE_UPDATED);
-                                                    fileNumber[0]++; //iterate up to the next file
-                                                    numberOfFilesUpdated++; //iterate up
-                                                    if (fileNumber[0] == fileTotalNumber[0]) //if we have downloaded our final file then we are done
-                                                        broadcastUpdate(UPDATE_COMPLETE); //broadcast then that the update is complete
-                                                }
-                                            }).addOnFailureListener(new OnFailureListener() { //failure on item download
-                                                @Override
-                                                public void onFailure(@NonNull Exception e) {
-                                                    broadcastUpdate(UPDATE_FAILED); //update failure
-                                                }
-                                            }).addOnCanceledListener(new OnCanceledListener() {
-                                                @Override
-                                                public void onCanceled() {
-                                                    broadcastUpdate(UPDATE_FAILED);
-                                                }
-                                            });
-                                        } else if (localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()) { //if there is not a newer version, we still need to add the filename
-                                            if (!item.getName().equals("dealerids") && !item.getName().equals("termsofservice.pdf")) //we dont want to add "dealerids and termsofservice.pdf to the list of machine ids
-                                                writeMachineIdFile(item); //write the name of the file to the list of acceptable machine ids
-                                            fileNumber[0]++; //iterate up
-                                            if (fileNumber[0] == fileTotalNumber[0]) //if we have iterated to the last file then we are done
-                                                broadcastUpdate(UPDATE_COMPLETE); //update that the update is complete
+                if (!rootpath.exists())  //if the rootpath doesn't exist, we create the folder. This is necessary on first boot
+                    rootpath.mkdirs();
+                new File(rootpath, "machineids").delete();    //delete the current list of machine id's.
+                final int[] fileTotalNumber = new int[1]; // will be used to track the number of total files in the firebase bucket, so we can broadcast when are done
+                final int[] fileNumber = new int[]{0}; //will be used to track which file we are current at in the list. when we reach the end we know we are done
+                //get all the items in at the firebase reference location
+                //Failure on firebase bucket item list request
+                reference.listAll().addOnSuccessListener(listResult -> {
+                    fileTotalNumber[0] = listResult.getItems().size() - 1; //get the number of items in the firebase storage bucket
+                    for (final StorageReference item : listResult.getItems()) { //begin iterating through each storage item
+                        final File localFile = new File(rootpath, item.getName().toLowerCase()); //get the local version of the file for comparison
+                        //Get the metadata of the item.
+                        //failure on item metadata request
+                        item.getMetadata().addOnSuccessListener(storageMetadata -> {
+                            if (localFile.lastModified() < storageMetadata.getUpdatedTimeMillis()) {    //if the file either doesn't exist locally, or is outdated.. we download
+                                localFile.delete(); //delete the old version
+                                //download the file
+                                //failure on item download
+                                item.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
+                                    if (!item.getName().equals("dealerids") && !item.getName().equals("termsofservice.pdf")) //we dont want to add "dealerids and termsofservice.pdf to the list of machine ids
+                                        writeMachineIdFile(item);  //write the name of the file to the list of acceptable machine ids
+                                    if (item.getName().equals("termsofservice.pdf"))
+                                        broadcastUpdate(TERMS_OF_SERVICE_UPDATED);
+                                    fileNumber[0]++; //iterate up to the next file
+                                    numberOfFilesUpdated++; //iterate up
+                                    if (fileNumber[0] == fileTotalNumber[0]) //if we have downloaded our final file then we are done
+                                        broadcastUpdate(UPDATE_COMPLETE); //broadcast then that the update is complete
+                                }).addOnFailureListener(e -> {
+                                    broadcastUpdate(UPDATE_FAILED); //update failure
+                                }).addOnCanceledListener(() -> broadcastUpdate(UPDATE_FAILED));
+                            } else if (localFile.lastModified() > storageMetadata.getUpdatedTimeMillis()) { //if there is not a newer version, we still need to add the filename
+                                if (!item.getName().equals("dealerids") && !item.getName().equals("termsofservice.pdf")) //we dont want to add "dealerids and termsofservice.pdf to the list of machine ids
+                                    writeMachineIdFile(item); //write the name of the file to the list of acceptable machine ids
+                                fileNumber[0]++; //iterate up
+                                if (fileNumber[0] == fileTotalNumber[0]) //if we have iterated to the last file then we are done
+                                    broadcastUpdate(UPDATE_COMPLETE); //update that the update is complete
 
-                                        }
-                                        /*The rest of the method are all error catchers. The onFailureListener's will react if a download, meta data fetch, or firebase bucket
-                                         * list request fails. The else blocks will trigger if there is another error, such as the user being null or
-                                         * a lack of internet connectivity.
-                                         */
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() { //failure on item metadata request
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        broadcastUpdate(UPDATE_FAILED); //update failure
-                                    }
-                                }).addOnCanceledListener(new OnCanceledListener() {
-                                    @Override
-                                    public void onCanceled() {
-                                        broadcastUpdate(UPDATE_FAILED);
-                                    }
-                                });
                             }
-                        }
-                    }).addOnFailureListener(new OnFailureListener() { //Failure on firebase bucket item list request
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
+                            /*The rest of the method are all error catchers. The onFailureListener's will react if a download, meta data fetch, or firebase bucket
+                             * list request fails. The else blocks will trigger if there is another error, such as the user being null or
+                             * a lack of internet connectivity.
+                             */
+                        }).addOnFailureListener(e -> {
                             broadcastUpdate(UPDATE_FAILED); //update failure
-                        }
-                    }).addOnCanceledListener(new OnCanceledListener() {
-                        @Override
-                        public void onCanceled() {
-                            broadcastUpdate(UPDATE_FAILED);
-                        }
-                    });
-                } else //failure in network connectivity or user is null
+                        }).addOnCanceledListener(() -> broadcastUpdate(UPDATE_FAILED));
+                    }
+                }).addOnFailureListener(e -> {
                     broadcastUpdate(UPDATE_FAILED); //update failure
-            }
+                }).addOnCanceledListener(() -> broadcastUpdate(UPDATE_FAILED));
+            } else //failure in network connectivity or user is null
+                broadcastUpdate(UPDATE_FAILED); //update failure
         });
     }
 
@@ -179,20 +163,17 @@ class UpdateDatabase {
      * @since dev 1.0.0
      */
     private void writeMachineIdFile(@NonNull final StorageReference item) {
-        AsyncTask.execute(new Runnable() { //Asynchronous of course
-            @Override
-            public void run() {
-                File toEdit = new File(new File(context.getFilesDir(), "database"), "machineids"); //reference to the machineids data file
-                try {
-                    String line = (toEdit.exists()) ? new BufferedReader(new InputStreamReader(new FileInputStream(toEdit))).readLine() : null; //read the line, ternary operator
-                    String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("_", "") + ","; //format the item's name. Strip the .csv, and _ off
-                    editedItemName = (line != null) ? line + editedItemName : editedItemName; //ternary operator.
-                    FileWriter fw = new FileWriter(toEdit); //create the new FileWriter
-                    fw.append(editedItemName).flush(); //append the new name on.
-                    fw.close();//close the file
-                } catch (IOException e) {
-                    broadcastUpdate(UPDATE_FAILED); //update failure
-                }
+        AsyncTask.execute(() -> {
+            File toEdit = new File(new File(context.getFilesDir(), "database"), "machineids"); //reference to the machineids data file
+            try {
+                String line = (toEdit.exists()) ? new BufferedReader(new InputStreamReader(new FileInputStream(toEdit))).readLine() : null; //read the line, ternary operator
+                String editedItemName = item.getName().toLowerCase().replace(".csv", "").replace("_", "") + ","; //format the item's name. Strip the .csv, and _ off
+                editedItemName = (line != null) ? line + editedItemName : editedItemName; //ternary operator.
+                FileWriter fw = new FileWriter(toEdit); //create the new FileWriter
+                fw.append(editedItemName).flush(); //append the new name on.
+                fw.close();//close the file
+            } catch (IOException e) {
+                broadcastUpdate(UPDATE_FAILED); //update failure
             }
         });
     }

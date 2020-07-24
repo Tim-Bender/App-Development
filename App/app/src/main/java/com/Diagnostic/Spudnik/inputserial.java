@@ -1,3 +1,21 @@
+/*
+ *
+ *  Copyright (c) 2020, Spudnik LLc <https://www.spudnik.com/>
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are not permitted in any form.
+ *
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION, DEATH, or SERIOUS INJURY or DAMAGE)
+ *  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
@@ -12,7 +30,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -22,7 +39,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
@@ -67,15 +83,13 @@ public class inputserial extends AppCompatActivity {
         setSupportActionBar(toolbar);
         setTitle("Input Serial Number");
         toolbar.setTitleTextColor(Color.parseColor("#ffffff"));
-
         imageView = findViewById(R.id.helpimage);
         imageView.setVisibility(View.GONE);
         textView = findViewById(R.id.helptextview);
         textView.setVisibility(View.GONE);
-        checkBox = findViewById(R.id.rememberdealeridcheckbox);
-
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = preferences.edit();
+        checkBox = findViewById(R.id.rememberdealeridcheckbox);
         //FINAL PRE-DATABASE CHECK ON THE VEHICLE OBJECT
         myvehicle = getIntent().getParcelableExtra("myvehicle");
         myvehicle.preBuildVehicleObject(this); //final prebuild attempt...
@@ -95,36 +109,27 @@ public class inputserial extends AppCompatActivity {
         super.onStart();
         //When a user makes a change to the inputid edit text view, then we will check if the new value is a valid id, and if it is, then we attempt to build our database of connections
         serialNumberText = findViewById(R.id.inputid);
-        serialNumberText.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                //if they hit enter, then we will attempt to begin the next activity.
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    go(getCurrentFocus());
-                    return true;
-                }
-                //any other keystroke will lead to an attempt to build the database
-                else if (event.getAction() != KeyEvent.ACTION_DOWN)
-                    tryBuildDataBaseObject();
-
-
-                return false;
+        serialNumberText.setOnKeyListener((v, keyCode, event) -> {
+            //if they hit enter, then we will attempt to begin the next activity.
+            if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                go(getCurrentFocus());
+                return true;
             }
+            //any other keystroke will lead to an attempt to build the database
+            else if (event.getAction() != KeyEvent.ACTION_DOWN)
+                tryBuildDataBaseObject();
+            return false;
         });
         //Here we add a keystroke listener to the dealerText edittext field
         dealerText = findViewById(R.id.dealeridtextview);
-        dealerText.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                //if the user presses enter, then they will be re-focused onto the input serial number edit text view
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    Toast.makeText(inputserial.this, "Enter A Serial Number", Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-                return false;
+        dealerText.setOnKeyListener((v, keyCode, event) -> {
+            //if the user presses enter, then they will be re-focused onto the input serial number edit text view
+            if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                Toast.makeText(inputserial.this, "Enter A Serial Number", Toast.LENGTH_SHORT).show();
+                return true;
             }
+            return false;
         });
-
         //Attempt to load a saved dealer id from shared preferences.
         if (!preferences.getString("dealerid", "").equals("")) {
             dealerText.setText(preferences.getString("dealerid", ""));
@@ -133,17 +138,14 @@ public class inputserial extends AppCompatActivity {
 
         // Set the oncheckedchange listener for the  "remember" checkbox. If it is checked, then we put the contents
         // of the dealertext edittext view into shared preferences.
-        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                //if checked, save the dealer id
-                if (isChecked)
-                    editor.putString("dealerid", dealerText.getText().toString().trim());
-                    //else we wipe it
-                else
-                    editor.putString("dealerid", "");
-                editor.apply();
-            }
+        checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            //if checked, save the dealer id
+            if (isChecked)
+                editor.putString("dealerid", dealerText.getText().toString().trim());
+                //else we wipe it
+            else
+                editor.putString("dealerid", "");
+            editor.apply();
         });
 
         //If there is a dealer id in shared preferences, then we set the checkbox to checked.
@@ -156,20 +158,17 @@ public class inputserial extends AppCompatActivity {
         Switch toggle = findViewById(R.id.helptoggle);
         //heres our background image
         final ImageView spudnikelectrical = findViewById(R.id.spudnikelectrical);
-        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                //if it is checked, we swap the views and display the helpful diagram and description
-                if (isChecked) {
-                    spudnikelectrical.setVisibility(View.GONE);
-                    imageView.setVisibility(View.VISIBLE);
-                    textView.setVisibility(View.VISIBLE);
-                } else {
-                    //otherwise we show the decoration electrical background
-                    imageView.setVisibility(View.GONE);
-                    textView.setVisibility(View.GONE);
-                    spudnikelectrical.setVisibility(View.VISIBLE);
-                }
+        toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            //if it is checked, we swap the views and display the helpful diagram and description
+            if (isChecked) {
+                spudnikelectrical.setVisibility(View.GONE);
+                imageView.setVisibility(View.VISIBLE);
+                textView.setVisibility(View.VISIBLE);
+            } else {
+                //otherwise we show the decoration electrical background
+                imageView.setVisibility(View.GONE);
+                textView.setVisibility(View.GONE);
+                spudnikelectrical.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -183,20 +182,12 @@ public class inputserial extends AppCompatActivity {
      */
     @SuppressLint("SetTextI18n")
     public void go(View view) {
-        if (!(serialNumberText.getText().length() < 3)) {
-            if (myvehicle.checkDealer(dealerText.getText().toString().toLowerCase().trim())) {//If the contents of the inputserial edittext have a length less than three we will not accept it.
-                if (!myvehicle.getConnections().isEmpty()) { //final check that connections exist and checks if dealer id is valid
-                    if (checkBox.isChecked()) {                                                                    //if "Remember" toggle is enabled then we save the dealer id into sharedpreferences
-                        editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());   //Important to lowercase it and trim whitespace...
-                    }
-                    Intent i = new Intent(getBaseContext(), connectorselect.class);
-                    i.putExtra("myvehicle", myvehicle);                            //add our vehicle object as a parcelable extra.
-                    i.putParcelableArrayListExtra("connections", myvehicle.getConnections()); //add the list of connections as a parcelable extra
-                    startActivity(i); //go to connectorselect.class
-                } else
-                    Snackbar.make(findViewById(R.id.inputserialconstraintlayout), "Error", Snackbar.LENGTH_SHORT).setTextColor(Color.RED);
-            } else
-                dealerText.setError("Invalid");
+        if (!(serialNumberText.getText().length() < 3) || myvehicle.checkDealer(dealerText.getText().toString().toLowerCase().trim())) {
+            if (checkBox.isChecked())                                                           //if "Remember" toggle is enabled then we save the dealer id into sharedpreferences
+                editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());   //Important to lowercase it and trim whitespace...
+            startActivity(new Intent(getApplicationContext(), connectorselect.class)
+                    .putExtra("myvehicle", myvehicle)
+                    .putParcelableArrayListExtra("connections", myvehicle.getConnections()));
         } else
             serialNumberText.setError("Invalid");
     }
@@ -208,23 +199,16 @@ public class inputserial extends AppCompatActivity {
      * @since dev 1.0.0
      */
     public void tryBuildDataBaseObject() {
-        AsyncTask.execute(new Runnable() { //Begin a new thread
-            @Override
-            public void run() {
-                try {
-                    final String vehicleId = serialNumberText.getText().toString().toLowerCase().trim(); //get their inputted vehicle id
-                    if (vehicleId.length() > 2) {          //It has to be at least 3 long for us to accept it
-                        final String determined = myvehicle.determineComparison(vehicleId); //Determine the most likely vehicle id to match with. See myvehicle's documentation for this function.
-                        File localFile = new File(new File(getFilesDir(), "database"), "_" + determined + ".csv"); //We need to re-add the _ and .csv to the name of the file. Pointer to file we will reading from
-                        FileInputStream fis2 = new FileInputStream(localFile);//our fileinputstream
-                        is = new InputStreamReader(fis2, StandardCharsets.UTF_8); //new inputstreamreader
-                        myvehicle.setIs(is);        //give the inputstreamreader to our vehicle object
-                        myvehicle.setVehicleId(vehicleId.toLowerCase().trim());     //set the vehicle id
-                        myvehicle.buildDataBase();      //initiate database construction
-                    }
-                } catch (Exception ignored) {
-                }
-            }
+        AsyncTask.execute(() -> { //Begin a new thread
+            try {
+                final String vehicleId = serialNumberText.getText().toString().toLowerCase().trim(); //get their inputted vehicle id
+                FileInputStream fis2 = new FileInputStream(new File(new File(getFilesDir(), "database"), "_"
+                        + myvehicle.determineComparison(vehicleId) + ".csv"));//our fileinputstream
+                is = new InputStreamReader(fis2, StandardCharsets.UTF_8); //new inputstreamreader
+                myvehicle.setIs(is);        //give the inputstreamreader to our vehicle object
+                myvehicle.setVehicleId(vehicleId.toLowerCase().trim());     //set the vehicle id
+                myvehicle.buildDataBase();      //initiate database construction
+            } catch (Exception ignored) {}
         });
     }
 
