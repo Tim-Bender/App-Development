@@ -35,6 +35,7 @@
             android:layout_weight=".75" />
 
         <TextView
+            android:id="@+id/bluetoothtestconnectionstatetextview"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1.5"
@@ -42,6 +43,7 @@
             android:textSize="30sp" />
 
         <TextView
+            android:id="@+id/bluetoothtestdatatextview"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1.5"

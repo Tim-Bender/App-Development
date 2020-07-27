@@ -19,14 +19,19 @@
 package com.Diagnostic.Spudnik;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.view.View;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class BluetoothTestActivity extends AppCompatActivity {
     private BluetoothLeServiceTest bluetoothService;
+    private BluetoothBroadcastReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,31 +39,47 @@ public class BluetoothTestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_bluetooth_test);
         bluetoothService = new BluetoothLeServiceTest(this);
         checkPermissions();
-        findViewById(R.id.bluetoothteststartscanbutton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bluetoothService.scanLeDevice(true);
-            }
-        });
-        findViewById(R.id.bluetoothteststopscanbutton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bluetoothService.scanLeDevice(false);
-            }
-        });
+        findViewById(R.id.bluetoothteststartscanbutton).setOnClickListener(v -> bluetoothService.scanLeDevice(true));
+        findViewById(R.id.bluetoothteststopscanbutton).setOnClickListener(v -> bluetoothService.scanLeDevice(false));
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothLeServiceTest.ACTION_CHARACTERISTIC_READ);
+        filter.addAction(BluetoothLeServiceTest.ACTION_GATT_SERVICES_DISCOVERED);
+        receiver = new BluetoothTestActivity.BluetoothBroadcastReceiver();
+        registerReceiver(receiver, filter);
     }
 
-    public void checkPermissions(){
-        if(!(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)){
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
+    public void checkPermissions() {
+        if (!(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
     }
 
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         bluetoothService.scanLeDevice(false);
+        unregisterReceiver(receiver);
+        bluetoothService.disconnect();
         super.onDestroy();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
 
+    private class BluetoothBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(BluetoothLeServiceTest.ACTION_CHARACTERISTIC_READ)) {
+                byte[] bytes = intent.getByteArrayExtra("bytes");
+                if (bytes != null) {
+                    TextView textView = findViewById(R.id.bluetoothtestdatatextview);
+                    textView.setText(bytes[0] * 0x100 + bytes[1]);
+                    //bluetoothService.requestConnectorVoltage(new connection("bacon", "out1", "", "", "", ""));
+                }
+            } else if (intent.getAction().equals(BluetoothLeServiceTest.ACTION_GATT_SERVICES_DISCOVERED)) {
+                 bluetoothService.requestConnectorVoltage(new connection("bacon", "out1", "", "", "", ""));
+            }
+        }
+    }
 }

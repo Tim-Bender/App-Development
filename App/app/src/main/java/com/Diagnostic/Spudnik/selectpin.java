@@ -18,9 +18,15 @@
 
 package com.Diagnostic.Spudnik;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -64,6 +70,9 @@ public class selectpin extends AppCompatActivity {
      * Custom adapter for our recyclerview
      */
     private ConnectionAdapter myAdapter;
+
+    private BluetoothLeServiceTest bluetoothService;
+    private BluetoothBroadcastReceiver receiver;
 
     /**
      * Some interesting stuff going on in this onCreate. First we setup our recycler view. and then we setupon an itemtouchhelper which allows
@@ -109,6 +118,33 @@ public class selectpin extends AppCompatActivity {
             }
         });
         helper.attachToRecyclerView(recyclerView); //attach the helper above to our recyclerview
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothLeServiceTest.ACTION_CHARACTERISTIC_READ);
+        filter.addAction(BluetoothLeServiceTest.ACTION_GATT_SERVICES_DISCOVERED);
+        receiver = new BluetoothBroadcastReceiver();
+        registerReceiver(receiver, filter);
+    }
+
+    public void checkPermissions() {
+        if (!(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+    }
+
+    private class BluetoothBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(BluetoothLeServiceTest.ACTION_CHARACTERISTIC_READ)) {
+                byte[] bytes = intent.getByteArrayExtra("bytes");
+                if (bytes != null) {
+                    updatevalues(bytes[0] * 0x100 + bytes[1]);
+                    bluetoothService.requestConnectorVoltage(connections.get(0));
+                }
+            }
+            else if (intent.getAction().equals(BluetoothLeServiceTest.ACTION_GATT_SERVICES_DISCOVERED)){
+                AsyncTask.execute(() -> bluetoothService.requestConnectorVoltage(connections.get(0)));
+            }
+        }
     }
 
     /**
@@ -120,7 +156,13 @@ public class selectpin extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         myAdapter.notifyDataSetChanged(); //notify that the dataset has changed
-        updatevalues();
+        updatevalues(0);
+    }
+
+    @Override
+    protected void onDestroy(){
+        unregisterReceiver(receiver);
+        super.onDestroy();
     }
 
     /**
@@ -134,6 +176,8 @@ public class selectpin extends AppCompatActivity {
         myvehicle.sortConnections(); //sort the connections
         if (connections.isEmpty()) //build them
             buildConnections();
+        checkPermissions();
+        bluetoothService = new BluetoothLeServiceTest(this);
     }
 
     /**
@@ -169,12 +213,12 @@ public class selectpin extends AppCompatActivity {
      * @since dev 1.0.0
      */
     @SuppressLint("SetTextI18n")
-    private void updatevalues() {
+    private void updatevalues(int voltage) {
         String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc());
         String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
         textView.setText(s1 + temp.substring(1));
         textView = findViewById(R.id.numberofpinstextfield);
-        textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections().get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector\n Connector Voltage\n=12.5VDC");
+        textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections().get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector\n Connector Voltage\n=" + voltage);
     }
 
     @Override

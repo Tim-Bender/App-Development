@@ -42,6 +42,7 @@ public class BluetoothLeService extends Service {
     private final static String TAG = BluetoothLeService.class.getSimpleName();
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter adapter;
+    private OperationManager operationManager;
     private String deviceAddress;
     private BluetoothGatt bluetoothGatt;
     private int connectedState = STATE_DISCONNECTED;
@@ -95,6 +96,7 @@ public class BluetoothLeService extends Service {
         public void onServicesDiscovered(BluetoothGatt gatt, int status){
             if(status == BluetoothGatt.GATT_SUCCESS){
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+
             }
         }
 

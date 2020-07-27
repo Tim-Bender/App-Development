@@ -91,12 +91,12 @@
         </LinearLayout>
 
         <ImageButton
+            android:id="@+id/connectorselectupbutton"
             android:layout_width="95dp"
             android:layout_height="0px"
             android:layout_gravity="center"
             android:layout_weight="1.625"
             android:contentDescription="@string/todo"
-            android:onClick="up"
             app:srcCompat="@android:drawable/arrow_up_float" />
 
         <Space
@@ -105,13 +105,13 @@
             android:layout_weight=".25" />
 
         <ImageButton
+            android:id="@+id/connectorselectdownbutton"
             style="@style/Widget.AppCompat.ImageButton"
             android:layout_width="95dp"
             android:layout_height="0px"
             android:layout_gravity="center"
             android:layout_weight="1.625"
             android:contentDescription="@string/todo"
-            android:onClick="down"
             app:srcCompat="@android:drawable/arrow_down_float" />
 
         <Space
@@ -120,6 +120,7 @@
             android:layout_weight=".25" />
 
         <Button
+            android:id="@+id/connectorselectnextbutton"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="1"

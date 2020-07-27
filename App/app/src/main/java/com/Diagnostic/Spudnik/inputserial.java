@@ -89,7 +89,7 @@ public class inputserial extends AppCompatActivity {
         textView.setVisibility(View.GONE);
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = preferences.edit();
-        checkBox = findViewById(R.id.rememberdealeridcheckbox);
+        checkBox =  findViewById(R.id.rememberdealeridcheckbox);
         //FINAL PRE-DATABASE CHECK ON THE VEHICLE OBJECT
         myvehicle = getIntent().getParcelableExtra("myvehicle");
         myvehicle.preBuildVehicleObject(this); //final prebuild attempt...
@@ -118,8 +118,11 @@ public class inputserial extends AppCompatActivity {
             //any other keystroke will lead to an attempt to build the database
             else if (event.getAction() != KeyEvent.ACTION_DOWN)
                 tryBuildDataBaseObject();
+
+
             return false;
         });
+
         //Here we add a keystroke listener to the dealerText edittext field
         dealerText = findViewById(R.id.dealeridtextview);
         dealerText.setOnKeyListener((v, keyCode, event) -> {
@@ -130,6 +133,7 @@ public class inputserial extends AppCompatActivity {
             }
             return false;
         });
+
         //Attempt to load a saved dealer id from shared preferences.
         if (!preferences.getString("dealerid", "").equals("")) {
             dealerText.setText(preferences.getString("dealerid", ""));
@@ -182,12 +186,16 @@ public class inputserial extends AppCompatActivity {
      */
     @SuppressLint("SetTextI18n")
     public void go(View view) {
-        if (!(serialNumberText.getText().length() < 3) || myvehicle.checkDealer(dealerText.getText().toString().toLowerCase().trim())) {
-            if (checkBox.isChecked())                                                           //if "Remember" toggle is enabled then we save the dealer id into sharedpreferences
-                editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());   //Important to lowercase it and trim whitespace...
-            startActivity(new Intent(getApplicationContext(), connectorselect.class)
-                    .putExtra("myvehicle", myvehicle)
-                    .putParcelableArrayListExtra("connections", myvehicle.getConnections()));
+        if (!(serialNumberText.getText().length() < 3)) {
+            if(myvehicle.checkDealer(dealerText.getText().toString().toLowerCase().trim())) {
+                if (checkBox.isChecked())                                                           //if "Remember" toggle is enabled then we save the dealer id into sharedpreferences
+                    editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());   //Important to lowercase it and trim whitespace...
+                startActivity(new Intent(getApplicationContext(), connectorselect.class)
+                        .putExtra("myvehicle", myvehicle)
+                        .putParcelableArrayListExtra("connections", myvehicle.getConnections()));
+            }
+            else
+                dealerText.setError("Invalid");
         } else
             serialNumberText.setError("Invalid");
     }
@@ -202,13 +210,17 @@ public class inputserial extends AppCompatActivity {
         AsyncTask.execute(() -> { //Begin a new thread
             try {
                 final String vehicleId = serialNumberText.getText().toString().toLowerCase().trim(); //get their inputted vehicle id
-                FileInputStream fis2 = new FileInputStream(new File(new File(getFilesDir(), "database"), "_"
-                        + myvehicle.determineComparison(vehicleId) + ".csv"));//our fileinputstream
-                is = new InputStreamReader(fis2, StandardCharsets.UTF_8); //new inputstreamreader
-                myvehicle.setIs(is);        //give the inputstreamreader to our vehicle object
-                myvehicle.setVehicleId(vehicleId.toLowerCase().trim());     //set the vehicle id
-                myvehicle.buildDataBase();      //initiate database construction
-            } catch (Exception ignored) {}
+                if (vehicleId.length() > 2) {          //It has to be at least 3 long for us to accept it
+                    final String determined = myvehicle.determineComparison(vehicleId); //Determine the most likely vehicle id to match with. See myvehicle's documentation for this function.
+                    File localFile = new File(new File(getFilesDir(), "database"), "_" + determined + ".csv"); //We need to re-add the _ and .csv to the name of the file. Pointer to file we will reading from
+                    FileInputStream fis2 = new FileInputStream(localFile);//our fileinputstream
+                    is = new InputStreamReader(fis2, StandardCharsets.UTF_8); //new inputstreamreader
+                    myvehicle.setIs(is);        //give the inputstreamreader to our vehicle object
+                    myvehicle.setVehicleId(vehicleId.toLowerCase().trim());     //set the vehicle id
+                    myvehicle.buildDataBase();      //initiate database construction
+                }
+            } catch (Exception ignored) {
+            }
         });
     }
 

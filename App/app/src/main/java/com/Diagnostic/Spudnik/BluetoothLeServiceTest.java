@@ -20,92 +20,99 @@
 package com.Diagnostic.Spudnik;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
-import android.os.Handler;
 
-import java.util.HashSet;
-import java.util.Set;
+import androidx.annotation.NonNull;
+
+import java.util.Arrays;
+import java.util.UUID;
 
 class BluetoothLeServiceTest {
-    private final Context context;
+    private Context context;
     private BluetoothAdapter adapter;
-    private Handler handler;
-    private Set<BluetoothDevice> bluetoothDevices = new HashSet<>();
-    private Set<String> bluetoothDeviceNames = new HashSet<>();
-    private BluetoothDevice device;
+    private OperationManager operationManager;
     private BluetoothAdapter.LeScanCallback leScanCallback;
+    @SuppressWarnings("unused")
+    private final static UUID SYSTEMINFORMATIONUUID = UUID.fromString("0edc348b-399a-ba9c-8f48-4d3a594c4b0a");
+
+    @SuppressWarnings("unused")
+    private final static UUID WRITESERVICEUUID = UUID.fromString("30573506-7bda-3893-7c48-b6f8ebd963ad");
+    @SuppressWarnings("unused")
+    private final static UUID WRITECHARACTERISTICUUID = UUID.fromString("9cc2bcf8-ee9d-40b1-704a-0befaef5e9e9"); //write data
+
+    @SuppressWarnings("unused")
+    private final static UUID READSERVICEUUID = UUID.fromString("2940f3d6-7439-1bbc-4b4b-28bd6780d17d");
+    @SuppressWarnings("unused")
+    private final static UUID READINPUTDATACHARACTERISTICUUID = UUID.fromString("0edc348b-399a-ba9c-8f48-4d3a594c4b0a"); //read all input data
+    @SuppressWarnings("unused")
+    private final static UUID READOUTPUTDATACHARACTERISTICUUID = UUID.fromString("645fb84b-7b42-ea90-664c-1b7031eef5b2"); //all STD output data
+    @SuppressWarnings("unused")
+    private final static UUID READSETTINGSCHARACTERISTICUUID = UUID.fromString("5fa78df8-ed5c-59a5-d343-3a596c2dcfa5"); //read settings data
+    @SuppressWarnings("unused")
+    private final static UUID READSPOUTPUTCHARACTERISTICUUID = UUID.fromString("7e621674-082a-4aa3-b847-4ff71309b472"); //SP output connector data 4-9
+
+    private boolean connecting = false;
 
     BluetoothLeServiceTest(Context context) {
-        this.context = context;
-        handler = new Handler();
-        setUpBluetooth();
+        AsyncTask.execute(() ->{
+            this.context = context;
+            leScanCallback = (device, rssi, scanRecord) -> {
+                if (device.getName() != null && !connecting) {
+                    if (device.getName().equals("test_dev_1")) {
+                        System.out.println("Connecting to: " + device.getName());
+                        adapter.stopLeScan(leScanCallback);
+                        connecting = true;
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException ignored) {
 
-        leScanCallback = new BluetoothAdapter.LeScanCallback() {
-            @Override
-            public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                if (device.getName() != null) {// && !bluetoothDeviceNames.contains(device.getName())) {
-                    bluetoothDevices.add(device);
-                    bluetoothDeviceNames.add(device.getName());
-                    System.out.println("BLUETOOTH DEVICE DISCOVERED: " + device.getName());
+                        }
+                        device.connectGatt(context, false, gattCallback);
+                    }
                 }
-            }
-        };
-    }
-
-    private void setUpBluetooth() {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (checkBluetoothCompatible()) {
-                    BluetoothManager manager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
-                    adapter = manager.getAdapter();
-                }
-                if (adapter == null || !adapter.isEnabled()) {
-                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    context.startActivity(enableBtIntent);
-                }
+            };
+            if (checkBluetoothCompatible()) {
+                setUpBluetooth();
+                scanLeDevice(true);
             }
         });
+    }
+
+
+    private void setUpBluetooth() {
+        if (checkBluetoothCompatible()) {
+            BluetoothManager manager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+            adapter = manager.getAdapter();
+        }
+        if (adapter == null || !adapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            context.startActivity(enableBtIntent);
+        }
     }
 
     private boolean checkBluetoothCompatible() {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
-    private boolean scanning;
-    private static final long SCAN_PERIOD = 100000;
 
     public void scanLeDevice(final boolean enable) {
         if (enable) {
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    scanning = false;
-                    adapter.stopLeScan(leScanCallback);
-                }
-            }, SCAN_PERIOD);
-            scanning = true;
             adapter.startLeScan(leScanCallback);
+            System.out.println("SCAN STARTED");
         } else {
-            scanning = false;
             adapter.stopLeScan(leScanCallback);
+            System.out.println("SCAN STOPPEd");
         }
     }
-
-    private String deviceAddress;
-    private BluetoothGatt bluetoothGatt;
-    private int connectionState = STATE_DISCONNECTED;
-
-    private final static int STATE_DISCONNECTED = 0, STATE_CONNECTING = 1, STATE_CONNECTED = 2;
 
     public final static String ACTION_GATT_CONNECTED =
             "com.Diagnostic.Spudnik.le.ACTION_GATT_CONNECTED";
@@ -113,12 +120,8 @@ class BluetoothLeServiceTest {
             "com.Diagnostic.Spudnik.le.ACTION_GATT_DISCONNECTED";
     public final static String ACTION_GATT_SERVICES_DISCOVERED =
             "com.Diagnostic.Spudnik.le.ACTION_GATT_SERVICES_DISCOVERED";
-    public final static String ACTION_DATA_AVAILABLE =
-            "com.Diagnostic.Spudnik.le.ACTION_DATA_AVAILABLE";
-    public final static String EXTRA_DATA =
-            "com.Diagnostic.Spudnik.le.EXTRA_DATA";
-
-    //public final static UUID SPUDNIK_DIAGNOSTIC_UUID = UUID.fromString("MyDeviceName");
+    public final static String ACTION_CHARACTERISTIC_READ =
+            "com.Diagnostic.Spudnik.le.ACTION_CHARACTERISTIC_READ";
 
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
@@ -126,12 +129,15 @@ class BluetoothLeServiceTest {
             String intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 intentAction = ACTION_GATT_CONNECTED;
-                connectionState = STATE_CONNECTED;
+                operationManager = new OperationManager(gatt);
+                operationManager.request(new Operation(null, Operation.DISCOVER_SERVICES, -1));
                 broadcastUpdate(intentAction);
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                System.out.println("CONNECTION STATE Connected");
+            } else {
                 intentAction = ACTION_GATT_DISCONNECTED;
-                connectionState = STATE_DISCONNECTED;
                 broadcastUpdate(intentAction);
+                connecting = false;
+                System.out.println("CONNECTION STATE Distconnected");
             }
         }
 
@@ -139,41 +145,85 @@ class BluetoothLeServiceTest {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
+                System.out.println("SERVICESDISCOVERED SUCCESS");
+                for (BluetoothGattService s : gatt.getServices()) {
+                    System.out.println("SERVICE UUID: " + s.getUuid());
+                    if (s.getUuid().toString().equals(READSERVICEUUID.toString())) {
+                        operationManager.setReadService(s);
+                        /*for (BluetoothGattCharacteristic c : s.getCharacteristics()) {
+                            System.out.println("CHARACTERISTIC: " + c.getUuid());
+                        }*/
+                    } else if (s.getUuid().toString().equals(WRITESERVICEUUID.toString())) {
+                        operationManager.setWriteService(s);
+                        /*for (BluetoothGattCharacteristic c : s.getCharacteristics()) {
+                            System.out.println("CHARACTERISTIC: " + c.getUuid());
+                            System.out.println("CHARACTERISTIC VALUE " + Arrays.toString(c.getValue()));
+                        }*/
+                    }
+                }
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+
             } else {
-                System.out.println("onServicesDiscovered received: " + status);
+                System.out.println("SERFICESDISCOVERED FAILURE");
+                operationManager.request(new Operation(null, Operation.DISCOVER_SERVICES, -1));
             }
+            operationManager.operationCompleted();
+
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                //broadcastUpdate(ACTION_DATA_AVAILABLE,characteric);
+                //format stuffs
+                broadcastUpdate(ACTION_CHARACTERISTIC_READ, characteristic);
+                System.out.println("CHARACTERISTIC READ SUCCESS");
+            } else {
+                System.out.println("CHARACTERISTIC READ FAILURE");
             }
+            System.out.println("VALUE: " + Arrays.toString(characteristic.getValue()));
+            System.out.println("STATUS: " + status);
+            System.out.println("PROPERTIES " + characteristic.getProperties());
+            operationManager.operationCompleted();
+        }
+
+        @Override
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                System.out.println("WRITE CHARACTERISTIC SUCCESS");
+                broadcastUpdate(ACTION_CHARACTERISTIC_READ, characteristic);
+            } else {
+                System.out.println("WRITE CHARACTERSTISTIC FAILURE");
+            }
+            operationManager.operationCompleted();
         }
     };
+
 
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
         context.sendBroadcast(intent);
     }
 
-    private void broadcastUpdate(final String action, final BluetoothGattCharacteristic characteristic) {
+    private void broadcastUpdate(@NonNull final String action, @SuppressWarnings("unused") @NonNull final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
-        /*if(SPUDNIK_DIAGNOSTIC_UUID.equals(characteristic.getUuid())){
-             //formatting here
-         }
-         else{
-             final byte[] data = characteristic.getValue();
-             if(data != null && data.length > 0){
-                 final StringBuilder stringBuilder = new StringBuilder(data.length);
-                 for(byte bit : data){
-                     stringBuilder.append(String.format("%02X ", bit));
-
-                 }
-             }
-         }*/
+        intent.putExtra("bytes", characteristic.getValue());
         context.sendBroadcast(intent);
+    }
+
+    public void requestConnectorVoltage(connection c) {
+        if (c.inout().equals("Output")) {
+            operationManager.request(new Operation(READOUTPUTDATACHARACTERISTICUUID, Operation.READ_CHARACTERISTIC, -1));
+        } else {
+            operationManager.request(new Operation(READINPUTDATACHARACTERISTICUUID, Operation.READ_CHARACTERISTIC, -1));
+        }
+    }
+
+    public void disconnect() {
+        scanLeDevice(false);
+        if (operationManager != null) {
+            operationManager.request(new Operation(null, Operation.CLOSE_CONNECTION, -1));
+            operationManager.request(new Operation(null, Operation.DISCONNECT, -1));
+        }
     }
 
 
