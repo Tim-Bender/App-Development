@@ -343,13 +343,15 @@ class BluetoothLeService {
                 0x00, 0x00);
         private final byte[] bytes;
 
-        PacketConstants(int... bytes) {
+        PacketConstants(@NonNull int... bytes) {
             ByteArrayOutputStream bos = new ByteArrayOutputStream(bytes.length * 4);
             DataOutputStream dos = new DataOutputStream(bos);
             try {
                 for (int i : bytes)
                     dos.write(i);
-            } catch (IOException ignored) {
+            } catch (IOException e) {
+                this.bytes = bos.toByteArray();
+                return;
             }
             this.bytes = bos.toByteArray();
         }
