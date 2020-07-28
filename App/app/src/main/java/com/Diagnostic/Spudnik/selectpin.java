@@ -71,7 +71,7 @@ public class selectpin extends AppCompatActivity {
      */
     private ConnectionAdapter myAdapter;
 
-    private BluetoothLeServiceTest bluetoothService;
+    private BluetoothLeService bluetoothService;
     private BluetoothBroadcastReceiver receiver;
 
     /**
@@ -119,8 +119,8 @@ public class selectpin extends AppCompatActivity {
         });
         helper.attachToRecyclerView(recyclerView); //attach the helper above to our recyclerview
         IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothLeServiceTest.ACTION_CHARACTERISTIC_READ);
-        filter.addAction(BluetoothLeServiceTest.ACTION_GATT_SERVICES_DISCOVERED);
+        filter.addAction(BluetoothLeService.ACTION_CHARACTERISTIC_READ);
+        filter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
         receiver = new BluetoothBroadcastReceiver();
         registerReceiver(receiver, filter);
     }
@@ -134,14 +134,14 @@ public class selectpin extends AppCompatActivity {
     private class BluetoothBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(BluetoothLeServiceTest.ACTION_CHARACTERISTIC_READ)) {
+            if (intent.getAction().equals(BluetoothLeService.ACTION_CHARACTERISTIC_READ)) {
                 byte[] bytes = intent.getByteArrayExtra("bytes");
                 if (bytes != null) {
                     updatevalues(bytes[0] * 0x100 + bytes[1]);
                     bluetoothService.requestConnectorVoltage(connections.get(0));
                 }
             }
-            else if (intent.getAction().equals(BluetoothLeServiceTest.ACTION_GATT_SERVICES_DISCOVERED)){
+            else if (intent.getAction().equals(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED)){
                 AsyncTask.execute(() -> bluetoothService.requestConnectorVoltage(connections.get(0)));
             }
         }
@@ -177,7 +177,7 @@ public class selectpin extends AppCompatActivity {
         if (connections.isEmpty()) //build them
             buildConnections();
         checkPermissions();
-        bluetoothService = new BluetoothLeServiceTest(this);
+        bluetoothService = new BluetoothLeService(this);
     }
 
     /**

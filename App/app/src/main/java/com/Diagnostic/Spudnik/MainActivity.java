@@ -18,11 +18,13 @@
 
 package com.Diagnostic.Spudnik;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -141,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
      * @since dev 1.0.0
      */
     private void go() {
+        if (!(checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED))
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
         Intent i;
         if (user != null) { //if the user is already logged in, then we send them to the home screen
             i = new Intent(getBaseContext(), home.class);

@@ -30,25 +30,28 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class BluetoothTestActivity extends AppCompatActivity {
-    private BluetoothLeServiceTest bluetoothService;
+    private BluetoothLeService bluetoothService;
     private BluetoothBroadcastReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_test);
-        bluetoothService = new BluetoothLeServiceTest(this);
         checkPermissions();
+        bluetoothService = new BluetoothLeService(this);
         findViewById(R.id.bluetoothteststartscanbutton).setOnClickListener(v -> bluetoothService.scanLeDevice(true));
         findViewById(R.id.bluetoothteststopscanbutton).setOnClickListener(v -> bluetoothService.scanLeDevice(false));
         IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothLeServiceTest.ACTION_CHARACTERISTIC_READ);
-        filter.addAction(BluetoothLeServiceTest.ACTION_GATT_SERVICES_DISCOVERED);
+        filter.addAction(BluetoothLeService.ACTION_CHARACTERISTIC_READ);
+        filter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
         receiver = new BluetoothTestActivity.BluetoothBroadcastReceiver();
         registerReceiver(receiver, filter);
     }
 
     public void checkPermissions() {
+        if (!(checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+        }
         if (!(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
@@ -70,15 +73,15 @@ public class BluetoothTestActivity extends AppCompatActivity {
     private class BluetoothBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(BluetoothLeServiceTest.ACTION_CHARACTERISTIC_READ)) {
+            if (intent.getAction().equals(BluetoothLeService.ACTION_CHARACTERISTIC_READ)) {
                 byte[] bytes = intent.getByteArrayExtra("bytes");
                 if (bytes != null) {
                     TextView textView = findViewById(R.id.bluetoothtestdatatextview);
-                    textView.setText(bytes[0] * 0x100 + bytes[1]);
+                     textView.setText(bytes[0] * 0x100 + bytes[1]);
                     //bluetoothService.requestConnectorVoltage(new connection("bacon", "out1", "", "", "", ""));
                 }
-            } else if (intent.getAction().equals(BluetoothLeServiceTest.ACTION_GATT_SERVICES_DISCOVERED)) {
-                 bluetoothService.requestConnectorVoltage(new connection("bacon", "out1", "", "", "", ""));
+            } else if (intent.getAction().equals(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED)) {
+                bluetoothService.requestConnectorVoltage(new connection("bacon", "out1", "", "", "", ""));
             }
         }
     }
