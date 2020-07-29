@@ -62,6 +62,7 @@ public class Connection implements Parcelable, Comparable<Connection> {
      * Connector s4 pin number
      */
     private String s4;
+
     /**
      * Connector type
      */
@@ -151,10 +152,9 @@ public class Connection implements Parcelable, Comparable<Connection> {
      * @since dev 1.0.0
      */
     public String inout() {
-        String temp = direction, toReturn;
-        toReturn = (temp.contains("in") || temp.contains("In")) ? "Input" : "Output";
-        return toReturn;
+        return direction.toLowerCase().contains("in") ? "Input" : "Output";
     }
+
 
     /**
      * Set methods
@@ -186,6 +186,22 @@ public class Connection implements Parcelable, Comparable<Connection> {
 
     public String toString() {
         return (id + " " + direction + " " + name + " " + units + " " + units + " " + type);
+    }
+
+    public String getType() {
+        return type.toLowerCase().trim();
+    }
+
+    public int getConnectionNumber() {
+        char[] numbers = new char[]{'1', '2', '3', '4', '5', '6', '7', '8', '9'};
+
+        String parsed = direction;
+        for (char c : numbers) {
+            if (parsed.contains(String.valueOf(c)))
+                return Integer.parseInt(String.valueOf(c));
+        }
+        return 1;
+
     }
 
 }

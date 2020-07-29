@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -141,7 +142,7 @@ public class SelectPin extends AppCompatActivity {
             if (intent.getAction().equals(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString())) {
                 byte[] bytes = intent.getByteArrayExtra("bytes");
                 if (bytes != null) {
-                    updatevalues(bytes[0] * 0x100 + bytes[1]);
+                    updatevalues(((bytes[0] << 8) + bytes[1]) / 100f);
                     bluetoothService.requestConnectorVoltage(Connections.get(0));
                 }
             }
@@ -166,6 +167,7 @@ public class SelectPin extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         unregisterReceiver(receiver);
+        AsyncTask.execute(() -> bluetoothService.disconnect(true));
         super.onDestroy();
     }
 
@@ -182,6 +184,7 @@ public class SelectPin extends AppCompatActivity {
             buildConnections();
         checkPermissions();
         bluetoothService = new BluetoothLeService(this);
+        bluetoothService.resetKilledProcess();
     }
 
     /**
@@ -217,12 +220,12 @@ public class SelectPin extends AppCompatActivity {
      * @since dev 1.0.0
      */
     @SuppressLint("SetTextI18n")
-    private void updatevalues(int voltage) {
+    private void updatevalues(float voltage) {
         String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc());
         String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
         textView.setText(s1 + temp.substring(1));
         textView = findViewById(R.id.numberofpinstextfield);
-        textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections().get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector\n Connector Voltage\n=" + voltage);
+        textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections().get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector\n Connector Voltage\n=" + voltage+"v");
     }
 
     @Override

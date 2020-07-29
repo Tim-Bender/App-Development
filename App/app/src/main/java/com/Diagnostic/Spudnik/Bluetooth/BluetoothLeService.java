@@ -34,6 +34,7 @@ import androidx.annotation.NonNull;
 
 import com.Diagnostic.Spudnik.CustomObjects.Connection;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class BluetoothLeService {
@@ -45,21 +46,17 @@ public class BluetoothLeService {
     private BluetoothGatt server;
     private boolean connecting = false;
 
-
-    @SuppressWarnings("unused")
     public final byte IDLETYPE = 0x00;
-    @SuppressWarnings("unused")
     public final byte ONOFFTYPE = 0x01;
-    @SuppressWarnings("unused")
     public final byte CURRENTTYPE = 0x02;
-    @SuppressWarnings("unused")
     public final byte VOLTAGETYPE = 0x03;
-    @SuppressWarnings("unused")
     public final byte FREQUENCYTYPE = 0x04;
-    @SuppressWarnings("unused")
     public final byte COUNTSTYPE = 0x05;
+    public final byte PULSEWIDTHTYPE = 0x08;
+    public Connection connection;
 
     private static boolean USER_DISCONNECT = false;
+    private static boolean WRITTEN = false;
 
     public BluetoothLeService(Context context) {
         this.context = context;
@@ -95,14 +92,16 @@ public class BluetoothLeService {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
-
-    public void scanLeDevice(final boolean enable) {
+    public static boolean SCANNING = false;
+    public synchronized void scanLeDevice(final boolean enable) {
         if (enable) {
+            SCANNING = true;
             System.out.println(leScanCallback);
             adapter.startLeScan(leScanCallback);
             System.out.println("SCAN STARTED");
         } else {
             adapter.stopLeScan(leScanCallback);
+            SCANNING = false;
             System.out.println("SCAN STOPPED");
         }
     }
@@ -204,7 +203,7 @@ public class BluetoothLeService {
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             try {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    //if
+                    WRITTEN = true;
                     System.out.println("WRITE CHARACTERISTIC SUCCESS");
                     broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC_WRITE.getString());
                 } else {
@@ -234,22 +233,94 @@ public class BluetoothLeService {
         context.sendBroadcast(intent);
     }
 
-    public void requestConnectorVoltage(@NonNull @SuppressWarnings("unused") Connection c) {
+    public void requestConnectorVoltage(@NonNull Connection c) {
         //first write the type, then pull data
-        Packet myPacket = new Packet(PacketConstants.WRITE_SENSOR_CONFIGURATION.getBytes());
-        myPacket.SetSensorType(IDLETYPE);
-        operationManager.request(new Operation(UUIDConstants.WRITE_SENSOR_CONFIGURATION.getFromString(), Operation.WRITE_CHARACTERISTIC, myPacket));
-        operationManager.request(new Operation(UUIDConstants.READ_SENSOR_STATUS.getFromString(), Operation.READ_CHARACTERISTIC, null));
+        Packet myPacket = new Packet(getDefaultPacket(c).getBytes());
+        if (connection == null)
+            connection = c;
+        ArrayList<UUIDConstants> uuids = getUuidSet(c);
+        myPacket.SetSensorType(getType(c));
+        System.out.println("TYPE: " + getType(c));
+        System.out.println("WRITE UUID: " + uuids.get(0));
+        if (uuids.size() == 2)
+            System.out.println("READ UUID: " + uuids.get(1));
+        if (!WRITTEN)
+            operationManager.request(new Operation(uuids.get(0).getFromString(), Operation.WRITE_CHARACTERISTIC, myPacket));
+        operationManager.request(new Operation(uuids.get(1).getFromString(), Operation.READ_CHARACTERISTIC, null));
     }
 
-    public void disconnect(final boolean userDisconnected) {
+    private PacketConstants getDefaultPacket(@NonNull Connection c) {
+        if (c.inout().equals("Input"))
+            return PacketConstants.WRITE_SENSOR_CONFIGURATION;
+        else if (c.getConnectionNumber() < 4 || c.getDirection().trim().contains("exp"))
+            return PacketConstants.WRITE_STANDARD_CONTROL_CONFIGURATION;
+        else {
+            return PacketConstants.WRITE_SPECIAL_CONTROL_CONFIGURATION;
+        }
+    }
+
+    private byte getType(@NonNull Connection c) {
+        if (c.inout().equals("Input")) {
+            switch (c.getType().toLowerCase().trim()) {
+                case "curr":
+                    return CURRENTTYPE;
+                case "freq":
+                    return FREQUENCYTYPE;
+                case "volt":
+                    return VOLTAGETYPE;
+                case "pulsea":
+                case "pulseb":
+                    return COUNTSTYPE;
+                case "toggle":
+                case "i/o":
+                case "i\\o":
+                    return ONOFFTYPE;
+                default:
+                    return IDLETYPE;
+            }
+        } else {
+            switch (c.getType().toLowerCase().trim()) {
+                case "toggle":
+                    return ONOFFTYPE;
+                case "pwm":
+                    return PULSEWIDTHTYPE;
+                default:
+                    return IDLETYPE;
+            }
+        }
+    }
+
+    private ArrayList<UUIDConstants> getUuidSet(@NonNull final Connection c) {
+        final int connectorNumber = c.getConnectionNumber();
+        ArrayList<UUIDConstants> mySet = new ArrayList<>(2);
+        if (c.inout().equals("Output")) {
+            switch (connectorNumber) {
+                case 1:
+                case 2:
+                case 3:
+                    mySet.add(UUIDConstants.WRITE_STANDARD_CONTROL_CONFIGURATION);
+                    mySet.add(UUIDConstants.READ_STANDARD_CONTROL_STATUS);
+                    break;
+                default:
+                    mySet.add(UUIDConstants.WRITE_SPECIAL_CONTROL_CONFIGURATION);
+                    mySet.add(UUIDConstants.READ_SPECIAL_CONTROL_STATUS);
+            }
+        } else {
+            mySet.add(UUIDConstants.WRITE_SENSOR_CONFIGURATION);
+            mySet.add(UUIDConstants.READ_SENSOR_STATUS);
+        }
+        return mySet;
+    }
+
+
+    public synchronized void disconnect(final boolean userDisconnected) {
         if (server != null) {
             server.disconnect();
             USER_DISCONNECT = userDisconnected;
         }
     }
 
-    private void autoReconnect() {
+    private synchronized void autoReconnect() {
         try {
             if (server != null)
                 server.disconnect();
@@ -263,13 +334,18 @@ public class BluetoothLeService {
             Thread.sleep(500);
             checkBluetoothCompatible();
             setUpBluetooth();
-            scanLeDevice(true);
+            if(!SCANNING)
+                scanLeDevice(true);
         } catch (Exception e) {
             e.printStackTrace();
             broadcastUpdate(BroadcastActionConstants.ACTION_AUTORECONNECT_FAILURE.toString());
         } finally {
             broadcastUpdate(BroadcastActionConstants.ACTION_AUTORECONNECT_COMPLETE.getString());
         }
+    }
+
+    public void resetKilledProcess(){
+        USER_DISCONNECT = false;
     }
 
 }

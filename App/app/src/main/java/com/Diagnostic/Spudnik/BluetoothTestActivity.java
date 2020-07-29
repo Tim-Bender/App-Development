@@ -85,10 +85,10 @@ public class BluetoothTestActivity extends AppCompatActivity {
                     TextView textView = findViewById(R.id.bluetoothtestdatatextview);
                     float f = ((bytes[0] << 8) + bytes[1]) / 100f;
                     textView.setText(f + " ");
-                    bluetoothService.requestConnectorVoltage(new Connection("bacon", "out1", "", "", "", ""));
+                    bluetoothService.requestConnectorVoltage(new Connection("bacon", "1", "", "", "", "none"));
                 }
             } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString())) {
-                bluetoothService.requestConnectorVoltage(new Connection("bacon", "out1", "", "", "", ""));
+                bluetoothService.requestConnectorVoltage(new Connection("bacon", "1", "", "", "", "none"));
             }
         }
     }

@@ -20,7 +20,10 @@ package com.Diagnostic.Spudnik;
 
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
@@ -37,6 +40,7 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
+import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
 import com.Diagnostic.Spudnik.CustomObjects.Connection;
 import com.Diagnostic.Spudnik.CustomObjects.vehicle;
 
@@ -86,6 +90,7 @@ public class PinDiagnostic extends AppCompatActivity {
      */
     private RecyclerView recyclerView;
 
+    private PinDiagnostic.BluetoothBroadcastReceiver receiver;
     /**
      * Typical onCreate, we do setup the recyclerview with its scrolllistener and snaphelper
      *
@@ -125,7 +130,12 @@ public class PinDiagnostic extends AppCompatActivity {
             }
         });
         recyclerView.setAdapter(myAdapter); //set the adapter to our recyclerview, pulls objects from our arraylist
-        updateValues();
+        updateValues(0f);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString());
+        filter.addAction(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString());
+        receiver = new PinDiagnostic.BluetoothBroadcastReceiver();
+        registerReceiver(receiver, filter);
     }
 
     /**
@@ -139,20 +149,38 @@ public class PinDiagnostic extends AppCompatActivity {
         recyclerView.scrollToPosition(loc); //snap to the correct position when the page is first loaded
     }
 
+    @Override
+    protected void onDestroy(){
+        unregisterReceiver(receiver);
+        super.onDestroy();
+    }
+
     /**
      * This method will update the textviews
      *
      * @since dev 1.0.0
      */
     @SuppressLint("SetTextI18n")
-    private void updateValues() {
+    private void updateValues(float f) {
         myConnection = uniqueConnections.get(loc);
         String temp = myConnection.getDirection();
         String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
         direction.setText(s1 + temp.substring(1));
-        connectorinformation.setText(myvehicle.getMap(myConnection.getDirection().toLowerCase()) + " " + myConnection.inout() + " Connector\nConnectorVoltage\nVoltage");
+        connectorinformation.setText(myvehicle.getMap(myConnection.getDirection().toLowerCase()) + " " + myConnection.inout() + " Connector\nConnectorVoltage\n" + f +"v");
         setTitle("Viewing Pin:" + myConnection.getS4());
-        myAdapter.notifyDataSetChanged();
+        //myAdapter.notifyDataSetChanged();
+    }
+
+    private class BluetoothBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString())) {
+                byte[] bytes = intent.getByteArrayExtra("bytes");
+                if (bytes != null) {
+                    updateValues(((bytes[0] << 8) + bytes[1]) / 100f);
+                }
+            }
+        }
     }
 
     /**
@@ -167,7 +195,6 @@ public class PinDiagnostic extends AppCompatActivity {
         int newSnapPosition = snapHelper.findTargetSnapPosition(recyclerView.getLayoutManager(), dx, dy);
         if (newSnapPosition != loc && newSnapPosition > -1) { //dont update if it hasn't moved, or is less than 0
             loc = newSnapPosition;
-            updateValues();
         }
     }
 

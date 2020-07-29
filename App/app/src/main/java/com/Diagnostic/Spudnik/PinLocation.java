@@ -19,7 +19,10 @@
 package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -36,6 +39,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
 import com.Diagnostic.Spudnik.CustomObjects.Connection;
 import com.Diagnostic.Spudnik.CustomObjects.vehicle;
 
@@ -86,7 +90,7 @@ public class PinLocation extends AppCompatActivity {
      */
     private int orientation;
 
-
+    private PinLocation.BluetoothBroadcastReceiver receiver;
     /**
      * Normal uninteresting oncreate method
      *
@@ -109,6 +113,11 @@ public class PinLocation extends AppCompatActivity {
         myConnection = getIntent().getParcelableExtra("myConnection"); //get the current connection from parcelable intent
         loc = Integer.parseInt(Objects.requireNonNull(myConnection).getS4()); //get the current location from parcelable intent
         fillHashMap(); //fill the hashmap of orientations
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString());
+        filter.addAction(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString());
+        receiver = new PinLocation.BluetoothBroadcastReceiver();
+        registerReceiver(receiver, filter);
     }
 
     /**
@@ -120,8 +129,13 @@ public class PinLocation extends AppCompatActivity {
         super.onStart();
         if (!built)
             buildLayout(); //build the layout
-        updateValues(); //update the textviews
+        updateValues(0f); //update the textviews
+    }
 
+    @Override
+    protected void onDestroy(){
+        unregisterReceiver(receiver);
+        super.onDestroy();
     }
 
     /**
@@ -129,16 +143,27 @@ public class PinLocation extends AppCompatActivity {
      * Used to update the textviews
      */
     @SuppressLint("SetTextI18n")
-    private void updateValues() {
+    private void updateValues(float f) {
         TextView textView = findViewById(R.id.pinlocationdirection);
         String temp = myConnection.getDirection();
         String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
         textView.setText(s1 + temp.substring(1));  //concatenate them together
         textView = findViewById(R.id.pinlocationconnectorinformation);
         textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections()
-                .get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector\nConnectorVoltage\nVoltage"); //put it all together
+                .get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector\nConnectorVoltage\n" + f +"v"); //put it all together
     }
 
+    private class BluetoothBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString())) {
+                byte[] bytes = intent.getByteArrayExtra("bytes");
+                if (bytes != null) {
+                    updateValues(((bytes[0] << 8) + bytes[1]) / 100f);
+                }
+            }
+        }
+    }
     /**
      * This method is used to create the gridlayout depending on the orientation, number of pins and other factors.
      * It is a polymorphic mess that i hope to replace with a grid layout in the future. Since i hope to replace it,
@@ -266,7 +291,6 @@ public class PinLocation extends AppCompatActivity {
         removeHighlight(loc); //remove highlight at the current spot
         loc = (loc++ == textViews.size()) ? 1 : loc++; //ternary operator. Determine if we have overflowed list
         addHighlight(loc); //add the highlight at the current spot
-        updateValues(); //update textviews
     }
 
     /**
@@ -279,7 +303,6 @@ public class PinLocation extends AppCompatActivity {
         removeHighlight(loc); //remove the highlight at the current position
         loc = (loc == 1) ? textViews.size() : --loc; //ternary operator. Determine if we have underflowed list
         addHighlight(loc); //add the highlight at the new spot
-        updateValues(); //update textviews
     }
 
     /**
