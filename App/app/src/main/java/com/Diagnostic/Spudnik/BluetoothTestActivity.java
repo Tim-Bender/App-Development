@@ -26,12 +26,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
+import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
 import com.Diagnostic.Spudnik.CustomObjects.Connection;
 
 public class BluetoothTestActivity extends AppCompatActivity {
@@ -47,8 +47,8 @@ public class BluetoothTestActivity extends AppCompatActivity {
         findViewById(R.id.bluetoothteststartscanbutton).setOnClickListener(v -> bluetoothService.scanLeDevice(true));
         findViewById(R.id.bluetoothteststopscanbutton).setOnClickListener(v -> bluetoothService.scanLeDevice(false));
         IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothLeService.ACTION_CHARACTERISTIC_READ);
-        filter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
+        filter.addAction(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString());
+        filter.addAction(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString());
         receiver = new BluetoothTestActivity.BluetoothBroadcastReceiver();
         registerReceiver(receiver, filter);
     }
@@ -66,7 +66,7 @@ public class BluetoothTestActivity extends AppCompatActivity {
     protected void onDestroy() {
         bluetoothService.scanLeDevice(false);
         unregisterReceiver(receiver);
-        bluetoothService.disconnect();
+        bluetoothService.disconnect(true);
         super.onDestroy();
     }
 
@@ -79,17 +79,15 @@ public class BluetoothTestActivity extends AppCompatActivity {
         @SuppressLint("SetTextI18n")
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(BluetoothLeService.ACTION_CHARACTERISTIC_READ)) {
+            if (intent.getAction().equals(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString())) {
                 byte[] bytes = intent.getByteArrayExtra("bytes");
-                if (bytes != null) {
-                    Handler handler = new Handler();
-                    handler.post(() -> {
-                        TextView textView = findViewById(R.id.bluetoothtestdatatextview);
-                        textView.setText((bytes[0] * 0x100 + bytes[1]) + " ");
-                        bluetoothService.requestConnectorVoltage(new Connection("bacon", "out1", "", "", "", ""));
-                    });
+                if (bytes != null && bytes.length > 1) {
+                    TextView textView = findViewById(R.id.bluetoothtestdatatextview);
+                    float f = ((bytes[0] << 8) + bytes[1]) / 100f;
+                    textView.setText(f + " ");
+                    bluetoothService.requestConnectorVoltage(new Connection("bacon", "out1", "", "", "", ""));
                 }
-            } else if (intent.getAction().equals(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED)) {
+            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString())) {
                 bluetoothService.requestConnectorVoltage(new Connection("bacon", "out1", "", "", "", ""));
             }
         }

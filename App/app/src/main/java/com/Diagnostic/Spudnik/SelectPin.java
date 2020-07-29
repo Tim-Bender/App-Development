@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,6 +40,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
+import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
 import com.Diagnostic.Spudnik.CustomObjects.Connection;
 import com.Diagnostic.Spudnik.CustomObjects.vehicle;
 
@@ -123,8 +123,8 @@ public class SelectPin extends AppCompatActivity {
         });
         helper.attachToRecyclerView(recyclerView); //attach the helper above to our recyclerview
         IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothLeService.ACTION_CHARACTERISTIC_READ);
-        filter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
+        filter.addAction(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString());
+        filter.addAction(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString());
         receiver = new BluetoothBroadcastReceiver();
         registerReceiver(receiver, filter);
     }
@@ -138,15 +138,15 @@ public class SelectPin extends AppCompatActivity {
     private class BluetoothBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(BluetoothLeService.ACTION_CHARACTERISTIC_READ)) {
+            if (intent.getAction().equals(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString())) {
                 byte[] bytes = intent.getByteArrayExtra("bytes");
                 if (bytes != null) {
                     updatevalues(bytes[0] * 0x100 + bytes[1]);
                     bluetoothService.requestConnectorVoltage(Connections.get(0));
                 }
             }
-            else if (intent.getAction().equals(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED)){
-                AsyncTask.execute(() -> bluetoothService.requestConnectorVoltage(Connections.get(0)));
+            else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString())){
+                bluetoothService.requestConnectorVoltage(Connections.get(0));
             }
         }
     }

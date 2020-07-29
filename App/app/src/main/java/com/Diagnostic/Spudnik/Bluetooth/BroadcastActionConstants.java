@@ -17,6 +17,26 @@
  */
 
 package com.Diagnostic.Spudnik.Bluetooth;
-
+@SuppressWarnings("unused")
 public enum BroadcastActionConstants {
+
+    ACTION_GATT_CONNECTED("com.Diagnostic.Spudnik.le.ACTION_GATT_CONNECTED"),
+    ACTION_GATT_DISCONNECTED("com.Diagnostic.Spudnik.le.ACTION_GATT_DISCONNECTED"),
+    ACTION_GATT_SERVICES_DISCOVERED( "com.Diagnostic.Spudnik.le.ACTION_GATT_SERVICES_DISCOVERED"),
+    ACTION_GATT_SERVICES_DISCOVERED_FAILURE( "com.Diagnostic.Spudnik.le.ACTION_GATT_SERVICES_DISCOVERED_FAILURE"),
+    ACTION_CHARACTERISTIC_READ( "com.Diagnostic.Spudnik.le.ACTION_CHARACTERISTIC_READ"),
+    ACTION_CHARACTERISTIC_READ_FAILURE( "com.Diagnostic.Spudnik.le.ACTION_CHARACTERISTIC_READ_FAILURE"),
+    ACTION_CHARACTERISTIC_WRITE( "com.Diagnostic.Spudnik.le.ACTION_CHARACTERISTIC_WRITE"),
+    ACTION_CHARACTERISTIC__WRITE_FAILURE( "com.Diagnostic.Spudnik.le.ACTION_CHARACTERISTIC_WRITE_FAILURE"),
+    ACTION_AUTORECONNECT_COMPLETE("com.Diagnostic.Spudnik.le.ACTION_AUTORECONNECT_COMPLETE"),
+    ACTION_AUTORECONNECT_FAILURE("com.Diagnostic.Spudnik.le.ACTION_AUTORECONNECT_FAILURE");
+
+
+    public final String string;
+    BroadcastActionConstants(String s) {
+        this.string = s;
+    }
+    public String getString() {
+        return string;
+    }
 }

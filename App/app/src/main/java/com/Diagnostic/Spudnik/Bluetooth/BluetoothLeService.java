@@ -58,22 +58,8 @@ public class BluetoothLeService {
     public final byte FREQUENCYTYPE = 0x04;
     @SuppressWarnings("unused")
     public final byte COUNTSTYPE = 0x05;
-    public final static String ACTION_GATT_CONNECTED =
-            "com.Diagnostic.Spudnik.le.ACTION_GATT_CONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED =
-            "com.Diagnostic.Spudnik.le.ACTION_GATT_DISCONNECTED";
-    public final static String ACTION_GATT_SERVICES_DISCOVERED =
-            "com.Diagnostic.Spudnik.le.ACTION_GATT_SERVICES_DISCOVERED";
-    @SuppressWarnings("unused")
-    public final static String ACTION_GATT_SERVICES_DISCOVERED_FAILURE =
-            "com.Diagnostic.Spudnik.le.ACTION_GATT_SERVICES_DISCOVERED_FAILURE";
-    public final static String ACTION_CHARACTERISTIC_READ =
-            "com.Diagnostic.Spudnik.le.ACTION_CHARACTERISTIC_READ";
-    @SuppressWarnings("unused")
-    private final static String ACTION_CHARACTERISTIC_READ_FAILURE =
-            "com.Diagnostic.Spudnik.le.ACTION_CHARACTERISTIC_READ_FAILURE";
-    private final static String ACTION_AUTORECONNECT_COMPLETE =
-            "com.Diagnostic.Spudnik.le.ACTION_AUTORECONNECT_COMPLETE";
+
+    private static boolean USER_DISCONNECT = false;
 
     public BluetoothLeService(Context context) {
         this.context = context;
@@ -134,34 +120,33 @@ public class BluetoothLeService {
                 autoReconnect();
                 e.printStackTrace();
             } finally {
-                if(operationManager != null)
-                operationManager.operationCompleted();
+                if (operationManager != null)
+                    operationManager.operationCompleted();
             }
         }
 
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             try {
-                String intentAction;
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     server = gatt;
                     operationManager = new OperationManager(gatt);
-                    broadcastUpdate(ACTION_GATT_CONNECTED);
+                    broadcastUpdate(BroadcastActionConstants.ACTION_GATT_CONNECTED.getString());
                     System.out.println("CONNECTION STATE Connected");
                     operationManager.request(new Operation(null, Operation.REQUEST_MTU, null));
                 } else if (newState != BluetoothProfile.STATE_CONNECTING) {
-                    intentAction = ACTION_GATT_DISCONNECTED;
-                    broadcastUpdate(intentAction);
+                    broadcastUpdate(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString());
                     connecting = false;
-                    autoReconnect();
+                    if (!USER_DISCONNECT)
+                        autoReconnect();
                     System.out.println("CONNECTION STATE Disconnected");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 autoReconnect();
             } finally {
-                if(operationManager != null)
-                operationManager.operationCompleted();
+                if (operationManager != null)
+                    operationManager.operationCompleted();
             }
         }
 
@@ -174,18 +159,18 @@ public class BluetoothLeService {
                             operationManager.setService(s);
                         }
                     }
-                    broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+                    broadcastUpdate(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString());
 
                 } else {
-                    broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED_FAILURE);
+                    broadcastUpdate(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED_FAILURE.getString());
                     autoReconnect();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 autoReconnect();
             } finally {
-                if(operationManager != null)
-                operationManager.operationCompleted();
+                if (operationManager != null)
+                    operationManager.operationCompleted();
             }
 
         }
@@ -200,18 +185,18 @@ public class BluetoothLeService {
                         l[i] = characteristic.getValue()[i] % 0xFFFFFFFFL;
                     }
                     System.out.println("VALUE: " + Arrays.toString(l));
-                    broadcastUpdate(ACTION_CHARACTERISTIC_READ, characteristic);
+                    broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString(), characteristic);
                 } else {
                     System.out.println("CHARACTERISTIC READ FAILURE");
-                    broadcastUpdate(ACTION_CHARACTERISTIC_READ_FAILURE);
+                    broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ_FAILURE.getString());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                broadcastUpdate(ACTION_CHARACTERISTIC_READ_FAILURE);
+                broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ_FAILURE.getString());
                 autoReconnect();
             } finally {
-                if(operationManager != null)
-                operationManager.operationCompleted();
+                if (operationManager != null)
+                    operationManager.operationCompleted();
             }
         }
 
@@ -221,17 +206,17 @@ public class BluetoothLeService {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     //if
                     System.out.println("WRITE CHARACTERISTIC SUCCESS");
-                    broadcastUpdate(ACTION_CHARACTERISTIC_READ);
+                    broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC_WRITE.getString());
                 } else {
                     System.out.println("WRITE CHARACTERSTISTIC FAILURE");
-                    broadcastUpdate(ACTION_CHARACTERISTIC_READ_FAILURE);
+                    broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC__WRITE_FAILURE.getString());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 autoReconnect();
             } finally {
-                if(operationManager != null)
-                operationManager.operationCompleted();
+                if (operationManager != null)
+                    operationManager.operationCompleted();
             }
         }
     };
@@ -254,33 +239,36 @@ public class BluetoothLeService {
         Packet myPacket = new Packet(PacketConstants.WRITE_SENSOR_CONFIGURATION.getBytes());
         myPacket.SetSensorType(IDLETYPE);
         operationManager.request(new Operation(UUIDConstants.WRITE_SENSOR_CONFIGURATION.getFromString(), Operation.WRITE_CHARACTERISTIC, myPacket));
-        operationManager.request(new Operation(UUIDConstants.READ_STANDARD_CONTROL_STATUS.getFromString(), Operation.READ_CHARACTERISTIC, null));
+        operationManager.request(new Operation(UUIDConstants.READ_SENSOR_STATUS.getFromString(), Operation.READ_CHARACTERISTIC, null));
     }
 
-    public void disconnect() {
+    public void disconnect(final boolean userDisconnected) {
         if (server != null) {
             server.disconnect();
+            USER_DISCONNECT = userDisconnected;
         }
     }
 
-    private void autoReconnect(){
+    private void autoReconnect() {
         try {
-            if(server != null)
-            server.disconnect();
-            if(operationManager != null) {
+            if (server != null)
+                server.disconnect();
+            if (operationManager != null) {
                 operationManager.reset();
                 operationManager = null;
             }
             adapter = null;
             server = null;
             connecting = false;
+            Thread.sleep(500);
             checkBluetoothCompatible();
             setUpBluetooth();
             scanLeDevice(true);
         } catch (Exception e) {
             e.printStackTrace();
+            broadcastUpdate(BroadcastActionConstants.ACTION_AUTORECONNECT_FAILURE.toString());
         } finally {
-            broadcastUpdate(ACTION_AUTORECONNECT_COMPLETE);
+            broadcastUpdate(BroadcastActionConstants.ACTION_AUTORECONNECT_COMPLETE.getString());
         }
     }
 
