@@ -35,6 +35,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.Diagnostic.Spudnik.CustomObjects.UpdateDatabase;
+import com.Diagnostic.Spudnik.CustomObjects.vehicle;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -147,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
         Intent i;
         if (user != null) { //if the user is already logged in, then we send them to the home screen
-            i = new Intent(getBaseContext(), home.class);
+            i = new Intent(getBaseContext(), Home.class);
             i.putExtra("myvehicle", myvehicle); //attach the machine object to be passed to home activity
         } else //otherwise they get passed over to login
             i = new Intent(getBaseContext(), LoginActivity.class);

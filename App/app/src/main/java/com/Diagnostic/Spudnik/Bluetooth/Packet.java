@@ -16,21 +16,27 @@
  *
  */
 
-package com.Diagnostic.Spudnik;
+package com.Diagnostic.Spudnik.Bluetooth;
 
-import java.util.HashMap;
+import androidx.annotation.NonNull;
 
-public class GattAttributes {
+public class Packet {
 
-    private static HashMap<String,String> attributes = new HashMap<>();
-    public static String PIN_INFORMATION="00002a37-0000-1000-8000-00805f9b34fb";
+    private final byte[] packet;
 
-    static{
-        attributes.put("0000180d-0000-1000-8000-00805f9b34fb","Pin connection service");
+    @SuppressWarnings("unused")
+    Packet(@NonNull byte[] PACKET) {
+        packet = PACKET;
     }
 
-    public static String lookup(String uuid,String defaultName){
-        String name = attributes.get(uuid);
-        return name == null ? defaultName : name;
+    @SuppressWarnings("unused")
+    public byte[] getPacket() {
+        return packet;
+    }
+
+    @SuppressWarnings("unused")
+    public void SetSensorType(@NonNull byte TYPE) {
+        if (packet != null)
+            packet[0] = TYPE;
     }
 }

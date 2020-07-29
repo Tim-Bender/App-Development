@@ -29,6 +29,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.Diagnostic.Spudnik.CustomObjects.UpdateDatabase;
 import com.github.barteksc.pdfviewer.PDFView;
 import com.github.barteksc.pdfviewer.util.FitPolicy;
 
@@ -40,10 +41,9 @@ import java.io.File;
  * @author timothy.bender
  * @version dev 1.0.0
  * @see PDFView
- * @see UpdateDatabase
  * @since dev 1.0.0
  */
-public class termsofservice extends AppCompatActivity {
+public class TermsOfService extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

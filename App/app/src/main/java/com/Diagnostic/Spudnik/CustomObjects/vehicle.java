@@ -1,9 +1,10 @@
 /*
+ *
  *  Copyright (c) 2020, Spudnik LLc <https://www.spudnik.com/>
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
- *  modification, are prohibited in any form.
+ *  modification, are not permitted in any form.
  *
  *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
  *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -12,9 +13,10 @@
  *  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
  */
 
-package com.Diagnostic.Spudnik;
+package com.Diagnostic.Spudnik.CustomObjects;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -45,8 +47,7 @@ import java.util.Map;
  * @author timothy.bender
  * @version dev 1.0.0
  * @see android.os.Parcelable
- * @see UpdateDatabase
- * @see connection
+ * @see Connection
  * @since dev 1.0.0
  */
 public class vehicle implements Parcelable { //Parcelable implementation allows cross Activity passing of this object
@@ -57,7 +58,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
     /**
      * Stores all connections. Is build inside of buildDataBase() method
      */
-    private ArrayList<connection> connections = new ArrayList<>(36);
+    private ArrayList<Connection> Connections = new ArrayList<>(36);
     /**
      * Contains the unique "directions" I.E. In1, out2 etc
      */
@@ -96,7 +97,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      *
      * @since dev 1.0.0
      */
-    vehicle() {
+    public vehicle() {
         setPinnumbers(); //this must be done every time we create a new object
     }
 
@@ -167,8 +168,8 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      *
      * @since dev 1.0.0
      */
-    void buildDataBase() {
-        connections.clear(); //clear the old connections and uniqueconnections arraylists to avoid overlap
+    public void buildDataBase() {
+        Connections.clear(); //clear the old connections and uniqueconnections arraylists to avoid overlap
         uniqueConnections.clear();
         //Asynchronous of course
         AsyncTask.execute(() -> {
@@ -177,7 +178,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
                 String line;  //string to the store the line read by buffered reader
                 while ((line = reader.readLine()) != null) { //Until we run out of lines, read lines.
                     String[] tokens = line.toLowerCase().split(","); //split the line at commas, and lowercase everything
-                    addConnection(new connection(vehicleId, tokens[0], tokens[1],
+                    addConnection(new Connection(vehicleId, tokens[0], tokens[1],
                             tokens[2], tokens[3], tokens[4])); //build the new connection
                     if (!getUniqueConnections().contains(tokens[0])) //if we have a unique connection, then we add it to the list.
                         addUniqueconnection(tokens[0]);
@@ -237,7 +238,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * @return boolean
      * @since dev 1.0.0
      */
-    boolean checkDealer(@NonNull String dealerid) {
+    public boolean checkDealer(@NonNull String dealerid) {
         return dealers.contains(dealerid);
     }
 
@@ -248,7 +249,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * @return String
      * @since dev 1.0.0
      */
-    protected String determineComparison(@NonNull String machineid) {
+    public String determineComparison(@NonNull String machineid) {
         int maximum = Integer.MIN_VALUE;
         String toReturn = "null"; //default return if we dont match with anything
         if (machineid.length() > 0 && !vehicleIds.isEmpty()) {
@@ -300,7 +301,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * @return "Input" or "Output"
      * @since dev 1.0.0
      */
-    String inout() {
+    public String inout() {
         String temp = uniqueConnections.get(loc), toReturn;
         toReturn = (temp.contains("in") || temp.contains("In")) ? "Input" : "Output"; //ternary operator
         return toReturn;
@@ -313,8 +314,8 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      *
      * @since dev 1.0.0
      */
-    void sortConnections() {
-        Collections.sort(connections); //sort them
+    public void sortConnections() {
+        Collections.sort(Connections); //sort them
     }
 
     /**
@@ -344,67 +345,67 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * The rest of the methods here are support methods
      * Primarily get set and add methods.
      */
-    int getMap(String direction) throws NullPointerException {
+    public int getMap(String direction) throws NullPointerException {
         return pinnumbers.get(direction);
     }
 
-    void setVehicleId(String vehicleId) {
+    public void setVehicleId(String vehicleId) {
         this.vehicleId = vehicleId;
     }
 
-    int getPinCount() {
+    public int getPinCount() {
         return pinCount;
     }
 
-    void setPinCount(int pinCount) {
+    public void setPinCount(int pinCount) {
         this.pinCount = pinCount;
     }
 
-    private void addConnection(connection toAdd) {
-        this.connections.add(toAdd);
+    private void addConnection(Connection toAdd) {
+        this.Connections.add(toAdd);
     }
 
     private void addUniqueconnection(String s) {
         this.uniqueConnections.add(s.toLowerCase());
     }
 
-    ArrayList<String> getUniqueConnections() {
+    public ArrayList<String> getUniqueConnections() {
         return this.uniqueConnections;
     }
 
-    ArrayList<connection> getConnections() {
-        return connections;
+    public ArrayList<Connection> getConnections() {
+        return Connections;
     }
 
-    void setConnections(ArrayList<connection> c) {
-        connections = c;
+    public void setConnections(ArrayList<Connection> c) {
+        Connections = c;
     }
 
-    void addUniquePin(String s) {
+    public void addUniquePin(String s) {
         uniquePins.add(s.toLowerCase().trim());
     }
 
-    int getLoc() {
+    public int getLoc() {
         return loc;
     }
 
-    void setLoc(int loc) {
+    public void setLoc(int loc) {
         this.loc = loc;
     }
 
-    void setIs(InputStreamReader s) {
+    public void setIs(InputStreamReader s) {
         this.isr = s;
     }
 
     public String toString() {
-        return ("Id: " + vehicleId + "\n Connections: " + connections.size() + "\n Unique Connections: " + uniqueConnections.size());
+        return ("Id: " + vehicleId + "\n Connections: " + Connections.size() + "\n Unique Connections: " + uniqueConnections.size());
     }
 
-    ArrayList<String> getUniquePins() {
+    public ArrayList<String> getUniquePins() {
         return uniquePins;
     }
 
-    ArrayList<String> getVehicleIds() {
+    public ArrayList<String> getVehicleIds() {
         return this.vehicleIds;
     }
 }

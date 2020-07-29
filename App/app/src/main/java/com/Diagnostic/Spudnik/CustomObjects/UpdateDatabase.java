@@ -16,7 +16,7 @@
  *
  */
 
-package com.Diagnostic.Spudnik;
+package com.Diagnostic.Spudnik.CustomObjects;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -53,7 +53,7 @@ import java.io.InputStreamReader;
  * @since dev 1.0.0
  */
 
-class UpdateDatabase {
+public class UpdateDatabase {
     /**
      * Context of the app's current activity. Used to send broadcasts and communicate with the main UI thread
      */
@@ -65,7 +65,7 @@ class UpdateDatabase {
     /**
      * Action String used to filter by broadcast receivers on the main UI thread.
      */
-    public static final String action = "com.Diagnostic.Spudnik.UpdateDatabase.Update"; //this can really be anything but must be unique
+    public static final String action = "com.Diagnostic.Spudnik.CustomObjects.UpdateDatabase.Update"; //this can really be anything but must be unique
     /**
      * Used to keep track of the number of files that were updated.
      */
@@ -79,7 +79,7 @@ class UpdateDatabase {
      * @since dev 1.0.0
      */
     @SuppressLint("CommitPrefEdits")
-    UpdateDatabase(@NonNull final Context context) {
+    public UpdateDatabase(@NonNull final Context context) {
         this.context = context;
         updateDataBase(); //will automatically trigger an update upon object creation
     }

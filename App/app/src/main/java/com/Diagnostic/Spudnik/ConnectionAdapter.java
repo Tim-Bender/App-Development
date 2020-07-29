@@ -29,6 +29,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.Diagnostic.Spudnik.CustomObjects.Connection;
+import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+
 import java.util.ArrayList;
 
 /**
@@ -37,7 +40,7 @@ import java.util.ArrayList;
  * @author timothy.bender
  * @version dev 1.0.0
  * @see androidx.recyclerview.widget.RecyclerView.Adapter
- * @see selectpin
+ * @see SelectPin
  * @since dev 1.0.0
  */
 
@@ -46,7 +49,7 @@ class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolde
     /**
      * Our arraylist of connection objects that we will be building cards out of
      */
-    private ArrayList<connection> connections;
+    private ArrayList<Connection> Connections;
     /**
      * Context of the activity on the main UI thread
      */
@@ -56,8 +59,8 @@ class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolde
      */
     private vehicle myvehicle;
 
-    ConnectionAdapter(@NonNull Context context, @NonNull ArrayList<connection> connections, @NonNull vehicle vehicle) {
-        this.connections = connections;
+    ConnectionAdapter(@NonNull Context context, @NonNull ArrayList<Connection> Connections, @NonNull vehicle vehicle) {
+        this.Connections = Connections;
         this.mContext = context;
         this.myvehicle = vehicle;
     }
@@ -69,13 +72,13 @@ class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolde
 
     @Override //holds the views that are inflated. binds the view to a position
     public void onBindViewHolder(ConnectionAdapter.ViewHolder holder, int position) {
-        connection currentConnection = connections.get(position);
+        Connection currentConnection = Connections.get(position);
         holder.bindTo(currentConnection);
     }
 
     @Override //for getting the size of the list
     public int getItemCount() {
-        return connections.size();
+        return Connections.size();
     }
 
     /**
@@ -97,7 +100,7 @@ class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolde
         }
 
         @SuppressLint("SetTextI18n")
-        void bindTo(connection currentConnection) {
+        void bindTo(Connection currentConnection) {
             mTitleText.setText("Pin: " + currentConnection.getS4());
             String temp = currentConnection.getName(); //capitalize it
             String s1 = temp.substring(0, 1).toUpperCase();
@@ -112,11 +115,11 @@ class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolde
          */
         @Override
         public void onClick(View v) {
-            Intent i = new Intent(mContext.getApplicationContext(), Pindiagnostic.class);
+            Intent i = new Intent(mContext.getApplicationContext(), PinDiagnostic.class);
             i.putExtra("myvehicle", myvehicle);
             i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
             i.putExtra("loc", getAdapterPosition());
-            i.putParcelableArrayListExtra("uniqueconnections", new ArrayList<>(connections));
+            i.putParcelableArrayListExtra("uniqueconnections", new ArrayList<>(Connections));
             mContext.startActivity(i);
         }
     }

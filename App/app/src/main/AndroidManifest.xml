@@ -41,15 +41,15 @@
         android:theme="@style/AppTheme.NoActionBar"
         tools:ignore="AllowBackup">
         <activity
-            android:name=".termsofservice"
+            android:name=".TermsOfService"
             android:label="@string/title_activity_termsofservice"
             android:theme="@style/AppTheme.NoActionBar.NoActionBar"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".pintest"
+            android:name=".PinTest"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".warningscreen"
+            android:name=".WarningSreen"
             android:screenOrientation="portrait" />
         <activity
             android:name=".LoginActivity"
@@ -64,31 +64,31 @@
             android:launchMode="standard"
             tools:replace="android:launchMode" />
         <activity
-            android:name=".settings"
+            android:name=".Settings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".pinlocation"
+            android:name=".PinLocation"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".Pindiagnostic"
+            android:name=".PinDiagnostic"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".selectpin"
+            android:name=".SelectPin"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".connectorselect"
+            android:name=".ConnectorSelect"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".inputserial"
+            android:name=".InputSerial"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".home"
+            android:name=".Home"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

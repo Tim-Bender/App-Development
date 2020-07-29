@@ -39,6 +39,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
 
+import com.Diagnostic.Spudnik.CustomObjects.vehicle;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
@@ -54,7 +55,7 @@ import java.nio.charset.StandardCharsets;
  * @since dev 1.0.0
  */
 
-public class inputserial extends AppCompatActivity {
+public class InputSerial extends AppCompatActivity {
     /**
      * Vehicle object
      */
@@ -128,7 +129,7 @@ public class inputserial extends AppCompatActivity {
         dealerText.setOnKeyListener((v, keyCode, event) -> {
             //if the user presses enter, then they will be re-focused onto the input serial number edit text view
             if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                Toast.makeText(inputserial.this, "Enter A Serial Number", Toast.LENGTH_SHORT).show();
+                Toast.makeText(InputSerial.this, "Enter A Serial Number", Toast.LENGTH_SHORT).show();
                 return true;
             }
             return false;
@@ -190,7 +191,7 @@ public class inputserial extends AppCompatActivity {
             if(myvehicle.checkDealer(dealerText.getText().toString().toLowerCase().trim())) {
                 if (checkBox.isChecked())                                                           //if "Remember" toggle is enabled then we save the dealer id into sharedpreferences
                     editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());   //Important to lowercase it and trim whitespace...
-                startActivity(new Intent(getApplicationContext(), connectorselect.class)
+                startActivity(new Intent(getApplicationContext(), ConnectorSelect.class)
                         .putExtra("myvehicle", myvehicle)
                         .putParcelableArrayListExtra("connections", myvehicle.getConnections()));
             }
@@ -234,7 +235,7 @@ public class inputserial extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_settings) {       //if the settings button is pressed, we redirect them to the settings page.
-            Intent i = new Intent(getBaseContext(), settings.class);
+            Intent i = new Intent(getBaseContext(), Settings.class);
             startActivity(i);
             return true;
         }

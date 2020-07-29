@@ -27,6 +27,9 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.Diagnostic.Spudnik.CustomObjects.Connection;
+import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+
 import java.util.ArrayList;
 
 /**
@@ -36,7 +39,7 @@ import java.util.ArrayList;
  * @version dev 1.0.0
  * @since dev 1.0.0
  */
-public class warningscreen extends AppCompatActivity {
+public class WarningSreen extends AppCompatActivity {
     /**
      * Same vehicle object
      */
@@ -44,11 +47,11 @@ public class warningscreen extends AppCompatActivity {
     /**
      * Arraylist of unique connections
      */
-    private ArrayList<connection> connections;
+    private ArrayList<Connection> Connections;
     /**
      * The connection we are currently looking at
      */
-    private connection myconnection;
+    private Connection myconnection;
     private int loc;
 
     /**
@@ -63,7 +66,7 @@ public class warningscreen extends AppCompatActivity {
         setContentView(R.layout.activity_warningscreen);
 
         myvehicle = getIntent().getParcelableExtra("myvehicle");
-        connections = getIntent().getParcelableArrayListExtra("connections");
+        Connections = getIntent().getParcelableArrayListExtra("connections");
         myconnection = getIntent().getParcelableExtra("myConnection");
         loc = getIntent().getIntExtra("loc", 0);
 
@@ -80,9 +83,9 @@ public class warningscreen extends AppCompatActivity {
      * @since dev 1.0.0
      */
     public void accepted(View view) {
-        Intent i = new Intent(getApplicationContext(), pintest.class);
+        Intent i = new Intent(getApplicationContext(), PinTest.class);
         i.putExtra("myvehicle", myvehicle);
-        i.putParcelableArrayListExtra("connections", connections);
+        i.putParcelableArrayListExtra("connections", Connections);
         i.putExtra("myConnection", myconnection);
         i.putExtra("loc", loc);
         startActivity(i);
@@ -99,7 +102,7 @@ public class warningscreen extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_settings) {
-            Intent i = new Intent(getBaseContext(), settings.class);
+            Intent i = new Intent(getBaseContext(), Settings.class);
             startActivity(i);
             return true;
         }

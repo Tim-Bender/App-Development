@@ -37,6 +37,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.Diagnostic.Spudnik.CustomObjects.UpdateDatabase;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -52,7 +53,7 @@ import com.google.firebase.database.ValueEventListener;
  * @version dev 1.0.0
  * @since dev 1.0.0
  */
-public class settings extends AppCompatActivity {
+public class Settings extends AppCompatActivity {
 
     private UpdateDatabaseBroadcastReceiver broadcastReceiver;
     private String reportEmail;
@@ -93,7 +94,7 @@ public class settings extends AppCompatActivity {
             else
                 updateEmail(true);
         });
-        findViewById(R.id.settingstermsbutton).setOnClickListener((view) -> startActivity(new Intent(getBaseContext(), termsofservice.class)));
+        findViewById(R.id.settingstermsbutton).setOnClickListener((view) -> startActivity(new Intent(getBaseContext(), TermsOfService.class)));
         findViewById(R.id.settingsbluetoothbutton).setOnClickListener((view) -> startActivity(new Intent(getApplicationContext(), BluetoothTestActivity.class)));
         findViewById(R.id.settingssignoutbutton).setOnClickListener((view) -> {
             if (FirebaseAuth.getInstance().getCurrentUser() != null) {

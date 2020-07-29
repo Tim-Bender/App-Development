@@ -29,6 +29,9 @@ import android.widget.ToggleButton;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.Diagnostic.Spudnik.CustomObjects.Connection;
+import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+
 import java.util.ArrayList;
 
 /**
@@ -41,12 +44,12 @@ import java.util.ArrayList;
  * @see android.bluetooth.BluetoothGattCharacteristic
  * @since dev 1.0.0
  */
-public class pintest extends AppCompatActivity {
+public class PinTest extends AppCompatActivity {
     private SeekBar seekBar;
     private TextView pwmTextview;
     private vehicle myvehicle;
-    private ArrayList<connection> connections;
-    private connection myconnection;
+    private ArrayList<Connection> Connections;
+    private Connection myconnection;
     private int pwm = 0, loc;
 
     /**
@@ -67,7 +70,7 @@ public class pintest extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.parseColor("#ffffff"));
 
         myvehicle = getIntent().getParcelableExtra("myvehicle");
-        connections = getIntent().getParcelableArrayListExtra("connections");
+        Connections = getIntent().getParcelableArrayListExtra("connections");
         myconnection = getIntent().getParcelableExtra("myConnection");
         loc = getIntent().getIntExtra("loc", 0);
 
@@ -152,9 +155,9 @@ public class pintest extends AppCompatActivity {
     }
 
     public void nextPin(View view) {
-        if (loc != connections.size() - 1) {
+        if (loc != Connections.size() - 1) {
             loc++;
-            myconnection = connections.get(loc);
+            myconnection = Connections.get(loc);
             updateTextFields();
         }
     }
@@ -162,7 +165,7 @@ public class pintest extends AppCompatActivity {
     public void prevPin(View view) {
         if (loc != 0) {
             loc--;
-            myconnection = connections.get(loc);
+            myconnection = Connections.get(loc);
             updateTextFields();
         }
     }

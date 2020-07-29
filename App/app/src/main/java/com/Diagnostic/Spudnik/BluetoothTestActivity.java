@@ -19,15 +19,20 @@
 package com.Diagnostic.Spudnik;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
+import com.Diagnostic.Spudnik.CustomObjects.Connection;
 
 public class BluetoothTestActivity extends AppCompatActivity {
     private BluetoothLeService bluetoothService;
@@ -71,17 +76,21 @@ public class BluetoothTestActivity extends AppCompatActivity {
     }
 
     private class BluetoothBroadcastReceiver extends BroadcastReceiver {
+        @SuppressLint("SetTextI18n")
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(BluetoothLeService.ACTION_CHARACTERISTIC_READ)) {
                 byte[] bytes = intent.getByteArrayExtra("bytes");
                 if (bytes != null) {
-                    TextView textView = findViewById(R.id.bluetoothtestdatatextview);
-                     textView.setText(bytes[0] * 0x100 + bytes[1]);
-                    //bluetoothService.requestConnectorVoltage(new connection("bacon", "out1", "", "", "", ""));
+                    Handler handler = new Handler();
+                    handler.post(() -> {
+                        TextView textView = findViewById(R.id.bluetoothtestdatatextview);
+                        textView.setText((bytes[0] * 0x100 + bytes[1]) + " ");
+                        bluetoothService.requestConnectorVoltage(new Connection("bacon", "out1", "", "", "", ""));
+                    });
                 }
             } else if (intent.getAction().equals(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED)) {
-                bluetoothService.requestConnectorVoltage(new connection("bacon", "out1", "", "", "", ""));
+                bluetoothService.requestConnectorVoltage(new Connection("bacon", "out1", "", "", "", ""));
             }
         }
     }

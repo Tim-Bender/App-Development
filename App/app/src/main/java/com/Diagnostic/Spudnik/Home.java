@@ -28,6 +28,7 @@ import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.Diagnostic.Spudnik.CustomObjects.vehicle;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -40,7 +41,7 @@ import com.google.firebase.auth.FirebaseUser;
  * @since dev 1.0.0
  */
 
-public class home extends AppCompatActivity {
+public class Home extends AppCompatActivity {
     /**
      * Vehicle object. Initialized in mainactivity, and usually pre-build there as well.
      */
@@ -69,7 +70,7 @@ public class home extends AppCompatActivity {
         findViewById(R.id.homediagtoolbutton).setOnClickListener((view) -> {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get the current firebase user
             if (user != null) { //authentication is required before one can access the diagnostic tool
-                Intent i = new Intent(getBaseContext(), inputserial.class);
+                Intent i = new Intent(getBaseContext(), InputSerial.class);
                 i.putExtra("myvehicle", myvehicle); //add the myvehicle object as a parcelable extra in the intent
                 startActivity(i);
             } else
@@ -77,7 +78,7 @@ public class home extends AppCompatActivity {
         });
         findViewById(R.id.homeupdatebutton).setOnClickListener((view) -> Snackbar.make(findViewById(R.id.homeconstraintlayout), "Function Not Supported", Snackbar.LENGTH_SHORT).show());
         findViewById(R.id.homelogbutton).setOnClickListener((view) -> Snackbar.make(findViewById(R.id.homeconstraintlayout), "Function Not Supported", Snackbar.LENGTH_SHORT).show());
-        findViewById(R.id.homesettingsbutton).setOnClickListener((view) -> startActivity(new Intent(getApplicationContext(),settings.class)));
+        findViewById(R.id.homesettingsbutton).setOnClickListener((view) -> startActivity(new Intent(getApplicationContext(), Settings.class)));
     }
 
     /**
@@ -91,7 +92,7 @@ public class home extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_settings) {
-            Intent i = new Intent(getBaseContext(), settings.class);
+            Intent i = new Intent(getBaseContext(), Settings.class);
             startActivity(i);
             return true;
         }

@@ -28,6 +28,9 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.Diagnostic.Spudnik.CustomObjects.Connection;
+import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+
 import java.util.ArrayList;
 
 /**
@@ -39,12 +42,12 @@ import java.util.ArrayList;
  */
 class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapterHorizontal.ViewHolder> {
 
-    private ArrayList<connection> connections;
+    private ArrayList<Connection> Connections;
     private Context mContext;
     private vehicle myvehicle;
 
-    ConnectionAdapterHorizontal(Context context, ArrayList<connection> connections, vehicle vehicle) {
-        this.connections = connections;
+    ConnectionAdapterHorizontal(Context context, ArrayList<Connection> Connections, vehicle vehicle) {
+        this.Connections = Connections;
         this.mContext = context;
         this.myvehicle = vehicle;
     }
@@ -56,13 +59,13 @@ class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapter
 
     @Override
     public void onBindViewHolder(ConnectionAdapterHorizontal.ViewHolder holder, int position) {
-        connection currentConnection = connections.get(position);
+        Connection currentConnection = Connections.get(position);
         holder.bindTo(currentConnection);
     }
 
     @Override
     public int getItemCount() {
-        return connections.size();
+        return Connections.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -79,7 +82,7 @@ class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapter
         }
 
         @SuppressLint("SetTextI18n")
-        void bindTo(connection currentConnection) {
+        void bindTo(Connection currentConnection) {
             mTitleText.setText("Pin: " + currentConnection.getS4());
             String temp = currentConnection.getName();
             String s1 = temp.substring(0, 1).toUpperCase();
@@ -90,10 +93,10 @@ class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapter
 
         @Override
         public void onClick(View v) {
-            Intent i = new Intent(mContext, pinlocation.class);
+            Intent i = new Intent(mContext, PinLocation.class);
             i.putExtra("myvehicle", myvehicle);
             i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
-            i.putExtra("myConnection", connections.get(getAdapterPosition()));
+            i.putExtra("myConnection", Connections.get(getAdapterPosition()));
             mContext.startActivity(i);
         }
     }

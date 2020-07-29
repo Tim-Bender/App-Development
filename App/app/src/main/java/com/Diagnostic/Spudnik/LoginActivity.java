@@ -39,6 +39,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.Diagnostic.Spudnik.CustomObjects.UpdateDatabase;
+import com.Diagnostic.Spudnik.CustomObjects.vehicle;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
@@ -146,7 +148,7 @@ public class LoginActivity extends AppCompatActivity {
         });
         TextView termsOfServiceTextView = findViewById(R.id.logintermsoftersivetextview); //set an onclick listener onto the text field. This will be used to redirect them
         termsOfServiceTextView.setOnClickListener(v -> {
-            Intent toTermsOfServiceIntent = new Intent(getBaseContext(), termsofservice.class);
+            Intent toTermsOfServiceIntent = new Intent(getBaseContext(), TermsOfService.class);
             startActivity(toTermsOfServiceIntent); //send them to the terms of service activity
         });
     }
@@ -199,7 +201,7 @@ public class LoginActivity extends AppCompatActivity {
      * @since dev 1.0.0
      */
     private void goToHome() {
-        Intent i = new Intent(getBaseContext(), home.class);
+        Intent i = new Intent(getBaseContext(), Home.class);
         i.putExtra("myvehicle", myvehicle); //put the vehicle as a parcelable extra
         pressed = false;
         startActivity(i); //go to home

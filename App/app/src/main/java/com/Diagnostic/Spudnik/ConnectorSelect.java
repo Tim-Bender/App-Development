@@ -34,6 +34,7 @@ import android.widget.Spinner;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.Diagnostic.Spudnik.CustomObjects.vehicle;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
@@ -47,7 +48,7 @@ import java.util.Objects;
  * @since dev 1.0.0
  * Please see README before updating anything
  */
-public class connectorselect extends AppCompatActivity {
+public class ConnectorSelect extends AppCompatActivity {
     private vehicle myvehicle;
     private TextInputEditText connectorSelectionEdittext;
 
@@ -139,7 +140,7 @@ public class connectorselect extends AppCompatActivity {
      */
     public void next(View view) {
         if (myvehicle.getUniqueConnections().contains(connectorSelectionEdittext.getText().toString().toLowerCase())) {
-            startActivity(new Intent(getApplicationContext(),selectpin.class).putParcelableArrayListExtra("connections",myvehicle.getConnections())
+            startActivity(new Intent(getApplicationContext(), SelectPin.class).putParcelableArrayListExtra("connections",myvehicle.getConnections())
             .putExtra("myvehicle",myvehicle));
         }
     }
@@ -154,7 +155,7 @@ public class connectorselect extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_settings) {
-            Intent i = new Intent(getBaseContext(), settings.class);
+            Intent i = new Intent(getBaseContext(), Settings.class);
             startActivity(i);
             return true;
         }

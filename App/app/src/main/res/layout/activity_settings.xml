@@ -23,7 +23,7 @@
     android:id="@+id/settingsconstraintlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".settings">
+    tools:context=".Settings">
 
     <LinearLayout
         android:layout_width="match_parent"

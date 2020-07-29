@@ -40,6 +40,10 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
+import com.Diagnostic.Spudnik.CustomObjects.Connection;
+import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -53,7 +57,7 @@ import java.util.Objects;
  * @since dev 1.0.0
  */
 
-public class selectpin extends AppCompatActivity {
+public class SelectPin extends AppCompatActivity {
     /**
      * vehicle object
      */
@@ -65,7 +69,7 @@ public class selectpin extends AppCompatActivity {
     /**
      * An Arraylist of connection objects. Will be parsed, and then used by the recyclerview
      */
-    private ArrayList<connection> connections = new ArrayList<>(24);
+    private ArrayList<Connection> Connections = new ArrayList<>(24);
     /**
      * Custom adapter for our recyclerview
      */
@@ -97,7 +101,7 @@ public class selectpin extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.selectpinrecyclerview); //setup our recyclerview
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        myAdapter = new ConnectionAdapter(this, connections, myvehicle); //we will be using our custom adapter for this recyclerview
+        myAdapter = new ConnectionAdapter(this, Connections, myvehicle); //we will be using our custom adapter for this recyclerview
         recyclerView.setAdapter(myAdapter); //set the adapter
 
         ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) { //setup our itemtouchhelper
@@ -109,8 +113,8 @@ public class selectpin extends AppCompatActivity {
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 if (direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.RIGHT) { //if you swipe right or left..
-                    if (connections.size() != 1) { //and it isnt a 1 pin connection
-                        connections.remove(viewHolder.getAdapterPosition()); //then we remove the item from the arraylist
+                    if (Connections.size() != 1) { //and it isnt a 1 pin connection
+                        Connections.remove(viewHolder.getAdapterPosition()); //then we remove the item from the arraylist
                         myAdapter.notifyItemRemoved(viewHolder.getAdapterPosition()); //and we notify the adapter that there as been a change so it may animate it.
                     }
                 }
@@ -138,11 +142,11 @@ public class selectpin extends AppCompatActivity {
                 byte[] bytes = intent.getByteArrayExtra("bytes");
                 if (bytes != null) {
                     updatevalues(bytes[0] * 0x100 + bytes[1]);
-                    bluetoothService.requestConnectorVoltage(connections.get(0));
+                    bluetoothService.requestConnectorVoltage(Connections.get(0));
                 }
             }
             else if (intent.getAction().equals(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED)){
-                AsyncTask.execute(() -> bluetoothService.requestConnectorVoltage(connections.get(0)));
+                AsyncTask.execute(() -> bluetoothService.requestConnectorVoltage(Connections.get(0)));
             }
         }
     }
@@ -174,7 +178,7 @@ public class selectpin extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         myvehicle.sortConnections(); //sort the connections
-        if (connections.isEmpty()) //build them
+        if (Connections.isEmpty()) //build them
             buildConnections();
         checkPermissions();
         bluetoothService = new BluetoothLeService(this);
@@ -186,19 +190,19 @@ public class selectpin extends AppCompatActivity {
      * @since dev 1.0.0
      */
     private void buildConnections() {
-        if (connections.isEmpty()) {
+        if (Connections.isEmpty()) {
             String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc());
             int counter = 0;
-            for (connection c : myvehicle.getConnections()) {
+            for (Connection c : myvehicle.getConnections()) {
                 if (c.getDirection().contains(temp.toLowerCase())) {
                     if (!myvehicle.getUniquePins().contains(c.getDirection())) {
                         myvehicle.addUniquePin(c.getDirection());
                         myvehicle.setPinCount(myvehicle.getPinCount() + 1);
                     }
-                    if (counter > 0 && c.getS4().equals(connections.get(counter - 1).getS4()))
-                        connections.get(counter - 1).setName(connections.get(counter - 1).getName() + " / " + c.getName());
+                    if (counter > 0 && c.getS4().equals(Connections.get(counter - 1).getS4()))
+                        Connections.get(counter - 1).setName(Connections.get(counter - 1).getName() + " / " + c.getName());
                     else {
-                        connections.add(c);
+                        Connections.add(c);
                         counter++;
                     }
                 }
@@ -224,7 +228,7 @@ public class selectpin extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_settings) {
-            Intent i = new Intent(getBaseContext(), settings.class);
+            Intent i = new Intent(getBaseContext(), Settings.class);
             startActivity(i);
             return true;
         }

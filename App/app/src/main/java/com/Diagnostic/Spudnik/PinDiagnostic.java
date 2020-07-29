@@ -37,6 +37,9 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
+import com.Diagnostic.Spudnik.CustomObjects.Connection;
+import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -49,7 +52,7 @@ import java.util.Objects;
  * @see SnapHelper
  * @since dev 1.0.0
  */
-public class Pindiagnostic extends AppCompatActivity {
+public class PinDiagnostic extends AppCompatActivity {
     /**
      * Vehicle object
      */
@@ -61,11 +64,11 @@ public class Pindiagnostic extends AppCompatActivity {
     /**
      * the current connection that we are viewing
      */
-    private connection myConnection;
+    private Connection myConnection;
     /**
      * Unique connections, scrollview will be filled by this
      */
-    private ArrayList<connection> uniqueConnections;
+    private ArrayList<Connection> uniqueConnections;
     /**
      * Current position users are in the scrollview
      */
@@ -110,7 +113,7 @@ public class Pindiagnostic extends AppCompatActivity {
         recyclerView = findViewById(R.id.horizontalrecyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         myAdapter = new ConnectionAdapterHorizontal(this, uniqueConnections, myvehicle);
-        LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(Pindiagnostic.this, LinearLayoutManager.HORIZONTAL, false); //make it horizontal
+        LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(PinDiagnostic.this, LinearLayoutManager.HORIZONTAL, false); //make it horizontal
         recyclerView.setLayoutManager(horizontalLayoutManager); //set the layout manager for the recycler view
         snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(recyclerView); //attach the snaphelper to the recycler view
@@ -175,7 +178,7 @@ public class Pindiagnostic extends AppCompatActivity {
      * @since dev 1.0.0
      */
     public void viewpinloc(View view) {
-        Intent i = new Intent(getBaseContext(), pinlocation.class);
+        Intent i = new Intent(getBaseContext(), PinLocation.class);
         i.putExtra("myvehicle", myvehicle);
         i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
         i.putExtra("myConnection", myConnection);
@@ -189,7 +192,7 @@ public class Pindiagnostic extends AppCompatActivity {
      * @since dev 1.0.0
      */
     public void testMode(View view) {
-        Intent i = new Intent(getApplicationContext(), warningscreen.class);
+        Intent i = new Intent(getApplicationContext(), WarningSreen.class);
         i.putExtra("myvehicle", myvehicle);
         i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
         i.putExtra("myConnection", myConnection);
@@ -199,7 +202,7 @@ public class Pindiagnostic extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_settings) {
-            Intent i = new Intent(getBaseContext(), settings.class);
+            Intent i = new Intent(getBaseContext(), Settings.class);
             startActivity(i);
             return true;
         }

@@ -16,7 +16,7 @@
  *
  */
 
-package com.Diagnostic.Spudnik;
+package com.Diagnostic.Spudnik.CustomObjects;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -36,7 +36,7 @@ import androidx.annotation.NonNull;
  * @since dev 1.0.0
  */
 
-public class connection implements Parcelable, Comparable<connection> {
+public class Connection implements Parcelable, Comparable<Connection> {
 
     /**
      * Vehicle id
@@ -77,7 +77,7 @@ public class connection implements Parcelable, Comparable<connection> {
      * @param un   units
      * @param type type
      */
-    connection(String id, String dir, String s, String nm, String un, String type) {
+    public Connection(String id, String dir, String s, String nm, String un, String type) {
         this.id = id;
         this.direction = dir;
         this.name = nm;
@@ -93,7 +93,7 @@ public class connection implements Parcelable, Comparable<connection> {
      * @since dev 1.0.0
      */
 
-    private connection(Parcel in) {
+    private Connection(Parcel in) {
         id = in.readString();
         direction = in.readString();
         name = in.readString();
@@ -119,15 +119,15 @@ public class connection implements Parcelable, Comparable<connection> {
         dest.writeString(type);
     }
 
-    public static final Creator<connection> CREATOR = new Creator<connection>() {
+    public static final Creator<Connection> CREATOR = new Creator<Connection>() {
         @Override
-        public connection createFromParcel(Parcel in) {
-            return new connection(in);
+        public Connection createFromParcel(Parcel in) {
+            return new Connection(in);
         }
 
         @Override
-        public connection[] newArray(int size) {
-            return new connection[size];
+        public Connection[] newArray(int size) {
+            return new Connection[size];
         }
     };
 
@@ -140,7 +140,7 @@ public class connection implements Parcelable, Comparable<connection> {
      * @since dev 1.0.0
      */
     @Override
-    public int compareTo(@NonNull connection o) {
+    public int compareTo(@NonNull Connection o) {
         return Integer.compare(Integer.parseInt(s4), Integer.parseInt(o.s4));
     }
 
@@ -150,7 +150,7 @@ public class connection implements Parcelable, Comparable<connection> {
      * @return String
      * @since dev 1.0.0
      */
-    String inout() {
+    public String inout() {
         String temp = direction, toReturn;
         toReturn = (temp.contains("in") || temp.contains("In")) ? "Input" : "Output";
         return toReturn;
@@ -172,7 +172,7 @@ public class connection implements Parcelable, Comparable<connection> {
         return id;
     }
 
-    String getDirection() {
+    public String getDirection() {
         return direction;
     }
 
@@ -180,7 +180,7 @@ public class connection implements Parcelable, Comparable<connection> {
         return name;
     }
 
-    String getS4() {
+    public String getS4() {
         return s4;
     }
 

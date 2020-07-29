@@ -36,6 +36,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.Diagnostic.Spudnik.CustomObjects.Connection;
+import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,7 +51,7 @@ import java.util.Objects;
  * @version dev 1.0.0
  * @since dev 1.0.0
  */
-public class pinlocation extends AppCompatActivity {
+public class PinLocation extends AppCompatActivity {
 
     /**
      * This will keep track of which pin we are currently looking at
@@ -57,7 +60,7 @@ public class pinlocation extends AppCompatActivity {
     /**
      * The connection we are currently looking at
      */
-    private connection myConnection;
+    private Connection myConnection;
     /**
      * Vehicle object
      */
@@ -340,7 +343,7 @@ public class pinlocation extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_settings) {
-            Intent i = new Intent(getBaseContext(), settings.class);
+            Intent i = new Intent(getBaseContext(), Settings.class);
             startActivity(i);
             return true;
         }
