@@ -29,7 +29,9 @@ public enum BroadcastActionConstants {
     ACTION_CHARACTERISTIC_WRITE( "com.Diagnostic.Spudnik.le.ACTION_CHARACTERISTIC_WRITE"),
     ACTION_CHARACTERISTIC__WRITE_FAILURE( "com.Diagnostic.Spudnik.le.ACTION_CHARACTERISTIC_WRITE_FAILURE"),
     ACTION_AUTORECONNECT_COMPLETE("com.Diagnostic.Spudnik.le.ACTION_AUTORECONNECT_COMPLETE"),
-    ACTION_AUTORECONNECT_FAILURE("com.Diagnostic.Spudnik.le.ACTION_AUTORECONNECT_FAILURE");
+    ACTION_AUTORECONNECT_FAILURE("com.Diagnostic.Spudnik.le.ACTION_AUTORECONNECT_FAILURE"),
+    ACTION_SCANNING("com.Diagnostic.Spudnik.le.ACTION_SCANNING"),
+    ACTION_WEAK_SIGNAL("com.Diagnostic.Spudnik.le.ACTION_WEAK_SIGNAL");
 
 
     public final String string;

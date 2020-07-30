@@ -29,7 +29,7 @@ import java.util.Queue;
 
 public class OperationManager {
 
-    private Queue<Operation> operations = new LinkedList<>();
+    private final Queue<Operation> operations = new LinkedList<>();
     private Operation currentOp;
     private BluetoothGatt server;
     private BluetoothGattService service;
@@ -70,6 +70,8 @@ public class OperationManager {
             server.close();
         } else if (currentOp.getOPERATION() == Operation.REQUEST_MTU) {
             server.requestMtu(GATT_MTU_SIZE);
+        } else if(currentOp.getOPERATION() == Operation.READ_RSSI){
+            server.readRemoteRssi();
         }
     }
 

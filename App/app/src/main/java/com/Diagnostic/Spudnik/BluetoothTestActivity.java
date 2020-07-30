@@ -21,34 +21,47 @@ package com.Diagnostic.Spudnik;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
 import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
 import com.Diagnostic.Spudnik.CustomObjects.Connection;
+import com.google.android.material.snackbar.Snackbar;
 
 public class BluetoothTestActivity extends AppCompatActivity {
-    private BluetoothLeService bluetoothService;
-    private BluetoothBroadcastReceiver receiver;
 
+    private BluetoothBroadcastReceiver receiver;
+    private BluetoothLeService mServer;
+    private boolean bounded = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_test);
+
+        Toolbar myToolBar = findViewById(R.id.topAppBar); //typical toolbar setup
+        setSupportActionBar(myToolBar);
+        setTitle("BluetoothTest");
+        myToolBar.setTitleTextColor(Color.WHITE);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
+        getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
+
         checkPermissions();
-        bluetoothService = new BluetoothLeService(this);
-        findViewById(R.id.bluetoothteststartscanbutton).setOnClickListener(v -> bluetoothService.scanLeDevice(true));
-        findViewById(R.id.bluetoothteststopscanbutton).setOnClickListener(v -> bluetoothService.scanLeDevice(false));
         IntentFilter filter = new IntentFilter();
-        filter.addAction(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString());
-        filter.addAction(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString());
+        for(BroadcastActionConstants b : BroadcastActionConstants.values())
+            filter.addAction(b.getString());
         receiver = new BluetoothTestActivity.BluetoothBroadcastReceiver();
         registerReceiver(receiver, filter);
     }
@@ -64,15 +77,17 @@ public class BluetoothTestActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        bluetoothService.scanLeDevice(false);
         unregisterReceiver(receiver);
-        bluetoothService.disconnect(true);
+        if(bounded)
+            unbindService(mConnection);
         super.onDestroy();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        Intent mIntent = new Intent(this, BluetoothLeService.class);
+        bindService(mIntent,mConnection,BIND_AUTO_CREATE);
     }
 
     private class BluetoothBroadcastReceiver extends BroadcastReceiver {
@@ -85,11 +100,34 @@ public class BluetoothTestActivity extends AppCompatActivity {
                     TextView textView = findViewById(R.id.bluetoothtestdatatextview);
                     float f = ((bytes[0] << 8) + bytes[1]) / 100f;
                     textView.setText(f + " ");
-                    bluetoothService.requestConnectorVoltage(new Connection("bacon", "1", "", "", "", "none"));
+                    getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
+                    mServer.requestConnectorVoltage(new Connection("bacon", "ou1", "", "", "", "none"));
                 }
             } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString())) {
-                bluetoothService.requestConnectorVoltage(new Connection("bacon", "1", "", "", "", "none"));
-            }
+                mServer.requestConnectorVoltage(new Connection("bacon", "out1", "", "", "", "none"));
+            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())){
+                getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
+                Snackbar.make(findViewById(R.id.bluetoothtestconstraintlayout),"Bluetooth Disconnected",Snackbar.LENGTH_SHORT).show();
+            } else if(intent.getAction().equals(BroadcastActionConstants.ACTION_SCANNING.getString())){
+                getSupportActionBar().setIcon(R.drawable.bluetoothsearching);
+            } else if(intent.getAction().equals(BroadcastActionConstants.ACTION_WEAK_SIGNAL.getString()))
+                Snackbar.make(findViewById(R.id.bluetoothtestconstraintlayout),"Weak Bluetooth Signal",Snackbar.LENGTH_SHORT).show();
         }
     }
+    ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            System.out.println("SERVICE CONNECTED");
+            BluetoothLeService.LocalBinder mLocalBinder = ((BluetoothLeService.LocalBinder)service);
+            mServer = mLocalBinder.getServerInstance();
+            bounded = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            System.out.println("SERVICE DISCONNECTED");
+            mServer = null;
+            bounded = false;
+        }
+    };
 }

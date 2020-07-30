@@ -21,13 +21,15 @@ package com.Diagnostic.Spudnik;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -44,6 +46,7 @@ import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
 import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
 import com.Diagnostic.Spudnik.CustomObjects.Connection;
 import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -76,9 +79,9 @@ public class SelectPin extends AppCompatActivity {
      */
     private ConnectionAdapter myAdapter;
 
-    private BluetoothLeService bluetoothService;
     private BluetoothBroadcastReceiver receiver;
-
+    private BluetoothLeService mServer;
+    private boolean bounded = false;
     /**
      * Some interesting stuff going on in this onCreate. First we setup our recycler view. and then we setupon an itemtouchhelper which allows
      * for the "deleting" of elements by swiping them off the screen.
@@ -124,8 +127,8 @@ public class SelectPin extends AppCompatActivity {
         });
         helper.attachToRecyclerView(recyclerView); //attach the helper above to our recyclerview
         IntentFilter filter = new IntentFilter();
-        filter.addAction(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString());
-        filter.addAction(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString());
+        for(BroadcastActionConstants b : BroadcastActionConstants.values())
+            filter.addAction(b.getString());
         receiver = new BluetoothBroadcastReceiver();
         registerReceiver(receiver, filter);
     }
@@ -143,12 +146,20 @@ public class SelectPin extends AppCompatActivity {
                 byte[] bytes = intent.getByteArrayExtra("bytes");
                 if (bytes != null) {
                     updatevalues(((bytes[0] << 8) + bytes[1]) / 100f);
-                    bluetoothService.requestConnectorVoltage(Connections.get(0));
+                    getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
+                    mServer.requestConnectorVoltage(Connections.get(0));
                 }
             }
             else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString())){
-                bluetoothService.requestConnectorVoltage(Connections.get(0));
+                    mServer.requestConnectorVoltage(Connections.get(0));
             }
+            else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())){
+                getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
+                Snackbar.make(findViewById(R.id.selectpinconstraintlayout),"Bluetooth Disconnected",Snackbar.LENGTH_SHORT).show();
+            } else if(intent.getAction().equals(BroadcastActionConstants.ACTION_SCANNING.getString())){
+                getSupportActionBar().setIcon(R.drawable.bluetoothsearching);
+            }  else if(intent.getAction().equals(BroadcastActionConstants.ACTION_WEAK_SIGNAL.getString()))
+                Snackbar.make(findViewById(R.id.selectpinconstraintlayout),"Weak Bluetooth Signal",Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -167,9 +178,14 @@ public class SelectPin extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         unregisterReceiver(receiver);
-        AsyncTask.execute(() -> bluetoothService.disconnect(true));
+        //AsyncTask.execute(() -> bluetoothService.disconnect(true));
+        if(bounded){
+            unbindService(mConnection);
+            bounded = false;
+        }
         super.onDestroy();
     }
+
 
     /**
      * We will sort our connections by s4 number and then pass them to buildconnections
@@ -183,9 +199,28 @@ public class SelectPin extends AppCompatActivity {
         if (Connections.isEmpty()) //build them
             buildConnections();
         checkPermissions();
-        bluetoothService = new BluetoothLeService(this);
-        bluetoothService.resetKilledProcess();
+        Intent mIntent = new Intent(this, BluetoothLeService.class);
+        bindService(mIntent,mConnection,BIND_AUTO_CREATE);
+        //bluetoothService = new BluetoothLeService(this);
+        //bluetoothService.resetKilledProcess();
     }
+
+    ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            System.out.println("SERVICE CONNECTED");
+            BluetoothLeService.LocalBinder mLocalBinder = ((BluetoothLeService.LocalBinder)service);
+            mServer = mLocalBinder.getServerInstance();
+            bounded = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            System.out.println("SERVICE DISCONNECTED");
+            mServer = null;
+            bounded = false;
+        }
+    };
 
     /**
      * This method will parse the connections further and fill our arraylists.

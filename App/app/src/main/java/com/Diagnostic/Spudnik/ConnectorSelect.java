@@ -126,6 +126,7 @@ public class ConnectorSelect extends AppCompatActivity {
                 myvehicle.setLoc(myvehicle.getUniqueConnections().size() - 1);
             connectorSelectionEdittext.setText(capitalize(myvehicle.getUniqueConnections().get(myvehicle.getLoc())));
         });
+
     }
 
     private String capitalize(String s) {

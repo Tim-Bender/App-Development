@@ -39,7 +39,7 @@ import java.util.ArrayList;
  * @version dev 1.0.0
  * @since dev 1.0.0
  */
-public class WarningSreen extends AppCompatActivity {
+public class WarningScreen extends AppCompatActivity {
     /**
      * Same vehicle object
      */

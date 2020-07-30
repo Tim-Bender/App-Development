@@ -42,6 +42,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
 import com.Diagnostic.Spudnik.CustomObjects.Connection;
 import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -114,8 +115,8 @@ public class PinLocation extends AppCompatActivity {
         loc = Integer.parseInt(Objects.requireNonNull(myConnection).getS4()); //get the current location from parcelable intent
         fillHashMap(); //fill the hashmap of orientations
         IntentFilter filter = new IntentFilter();
-        filter.addAction(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString());
-        filter.addAction(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString());
+        for(BroadcastActionConstants b : BroadcastActionConstants.values())
+            filter.addAction(b.getString());
         receiver = new PinLocation.BluetoothBroadcastReceiver();
         registerReceiver(receiver, filter);
     }
@@ -161,7 +162,15 @@ public class PinLocation extends AppCompatActivity {
                 if (bytes != null) {
                     updateValues(((bytes[0] << 8) + bytes[1]) / 100f);
                 }
+                getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
             }
+            else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())){
+                getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
+                Snackbar.make(findViewById(R.id.pinlocationconstraintlayout),"Bluetooth Disconnected",Snackbar.LENGTH_SHORT).show();
+            } else if(intent.getAction().equals(BroadcastActionConstants.ACTION_SCANNING.getString())){
+                getSupportActionBar().setIcon(R.drawable.bluetoothsearching);
+            }  else if(intent.getAction().equals(BroadcastActionConstants.ACTION_WEAK_SIGNAL.getString()))
+                Snackbar.make(findViewById(R.id.pinlocationconstraintlayout),"Weak Bluetooth Signal",Snackbar.LENGTH_SHORT).show();
         }
     }
     /**

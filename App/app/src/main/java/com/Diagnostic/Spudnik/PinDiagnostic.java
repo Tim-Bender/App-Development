@@ -21,11 +21,14 @@ package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -40,9 +43,11 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
+import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
 import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
 import com.Diagnostic.Spudnik.CustomObjects.Connection;
 import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -91,6 +96,9 @@ public class PinDiagnostic extends AppCompatActivity {
     private RecyclerView recyclerView;
 
     private PinDiagnostic.BluetoothBroadcastReceiver receiver;
+
+    private BluetoothLeService mServer;
+    private boolean bounded = false;
     /**
      * Typical onCreate, we do setup the recyclerview with its scrolllistener and snaphelper
      *
@@ -132,8 +140,8 @@ public class PinDiagnostic extends AppCompatActivity {
         recyclerView.setAdapter(myAdapter); //set the adapter to our recyclerview, pulls objects from our arraylist
         updateValues(0f);
         IntentFilter filter = new IntentFilter();
-        filter.addAction(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString());
-        filter.addAction(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString());
+        for(BroadcastActionConstants b : BroadcastActionConstants.values())
+            filter.addAction(b.getString());
         receiver = new PinDiagnostic.BluetoothBroadcastReceiver();
         registerReceiver(receiver, filter);
     }
@@ -147,11 +155,15 @@ public class PinDiagnostic extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         recyclerView.scrollToPosition(loc); //snap to the correct position when the page is first loaded
+        Intent mIntent = new Intent(this, BluetoothLeService.class);
+        bindService(mIntent,mConnection,BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onDestroy(){
         unregisterReceiver(receiver);
+        if(bounded)
+            unbindService(mConnection);
         super.onDestroy();
     }
 
@@ -179,7 +191,14 @@ public class PinDiagnostic extends AppCompatActivity {
                 if (bytes != null) {
                     updateValues(((bytes[0] << 8) + bytes[1]) / 100f);
                 }
-            }
+                getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
+            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())){
+                getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
+                Snackbar.make(findViewById(R.id.pindiagnosticconstraintlayout),"Bluetooth Disconnected",Snackbar.LENGTH_SHORT).show();
+            } else if(intent.getAction().equals(BroadcastActionConstants.ACTION_SCANNING.getString())){
+                getSupportActionBar().setIcon(R.drawable.bluetoothsearching);
+            }  else if(intent.getAction().equals(BroadcastActionConstants.ACTION_WEAK_SIGNAL.getString()))
+                Snackbar.make(findViewById(R.id.pindiagnosticconstraintlayout),"Weak Bluetooth Signal",Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -212,6 +231,23 @@ public class PinDiagnostic extends AppCompatActivity {
         startActivity(i);
     }
 
+    ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            System.out.println("SERVICE CONNECTED");
+            BluetoothLeService.LocalBinder mLocalBinder = ((BluetoothLeService.LocalBinder)service);
+            mServer = mLocalBinder.getServerInstance();
+            bounded = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            System.out.println("SERVICE DISCONNECTED");
+            mServer = null;
+            bounded = false;
+        }
+    };
+
     /**
      * Button redirect to send users towards the pintestmode, will pass to warningscreen activity
      *
@@ -219,7 +255,7 @@ public class PinDiagnostic extends AppCompatActivity {
      * @since dev 1.0.0
      */
     public void testMode(View view) {
-        Intent i = new Intent(getApplicationContext(), WarningSreen.class);
+        Intent i = new Intent(getApplicationContext(), WarningScreen.class);
         i.putExtra("myvehicle", myvehicle);
         i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
         i.putExtra("myConnection", myConnection);

@@ -19,8 +19,15 @@
 package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -29,8 +36,11 @@ import android.widget.ToggleButton;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
+import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
 import com.Diagnostic.Spudnik.CustomObjects.Connection;
 import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 
@@ -51,6 +61,10 @@ public class PinTest extends AppCompatActivity {
     private ArrayList<Connection> Connections;
     private Connection myconnection;
     private int pwm = 0, loc;
+
+    private BluetoothLeService mServer;
+    private boolean bounded = false;
+    private PinTest.BluetoothBroadcastReceiver receiver;
 
     /**
      * Simple oncreate. Nothing special
@@ -76,6 +90,11 @@ public class PinTest extends AppCompatActivity {
 
         pwmTextview = findViewById(R.id.pintestpwmdisplay);
         seekBar = findViewById(R.id.pintestseekbar);
+        IntentFilter filter = new IntentFilter();
+        for(BroadcastActionConstants b : BroadcastActionConstants.values())
+            filter.addAction(b.getString());
+        receiver = new PinTest.BluetoothBroadcastReceiver();
+        registerReceiver(receiver, filter);
     }
 
     /**
@@ -124,7 +143,54 @@ public class PinTest extends AppCompatActivity {
             pwm = (pwm < 96) ? pwm + 5 : 100;
             updatePwmStatus();
         });
+        Intent mIntent = new Intent(this, BluetoothLeService.class);
+        bindService(mIntent,mConnection,BIND_AUTO_CREATE);
         updateTextFields();
+    }
+
+    @Override
+    protected void onDestroy(){
+        unregisterReceiver(receiver);
+        if(bounded)
+            unbindService(mConnection);
+        super.onDestroy();
+    }
+
+
+    ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            System.out.println("SERVICE CONNECTED");
+            BluetoothLeService.LocalBinder mLocalBinder = ((BluetoothLeService.LocalBinder)service);
+            mServer = mLocalBinder.getServerInstance();
+            bounded = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            System.out.println("SERVICE DISCONNECTED");
+            mServer = null;
+            bounded = false;
+        }
+    };
+    private class BluetoothBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString())) {
+                byte[] bytes = intent.getByteArrayExtra("bytes");
+                //if (bytes != null) {
+                    //updateValues(((bytes[0] << 8) + bytes[1]) / 100f);
+                //}
+                getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
+            }
+            else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())){
+                getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
+                Snackbar.make(findViewById(R.id.pintestconstraintlayout),"Bluetooth Disconnected",Snackbar.LENGTH_SHORT).show();
+            } else if(intent.getAction().equals(BroadcastActionConstants.ACTION_SCANNING.getString())){
+                getSupportActionBar().setIcon(R.drawable.bluetoothsearching);
+            }  else if(intent.getAction().equals(BroadcastActionConstants.ACTION_WEAK_SIGNAL.getString()))
+                Snackbar.make(findViewById(R.id.pintestconstraintlayout),"Weak Bluetooth Signal",Snackbar.LENGTH_SHORT).show();
+        }
     }
 
     /**

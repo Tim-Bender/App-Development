@@ -45,11 +45,14 @@
             android:label="@string/title_activity_termsofservice"
             android:theme="@style/AppTheme.NoActionBar.NoActionBar"
             android:screenOrientation="portrait"/>
+        <service android:name=".Bluetooth.BluetoothLeService"
+            tools:ignore="Instantiatable" />
+
         <activity
             android:name=".PinTest"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".WarningSreen"
+            android:name=".WarningScreen"
             android:screenOrientation="portrait" />
         <activity
             android:name=".LoginActivity"

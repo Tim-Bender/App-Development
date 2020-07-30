@@ -45,6 +45,7 @@ import java.io.File;
  */
 public class TermsOfService extends AppCompatActivity {
 
+    private TermsOfService.UpdateDatabaseBroadcastReceiver receiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,8 +58,8 @@ public class TermsOfService extends AppCompatActivity {
 
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(UpdateDatabase.action);
-        UpdateDatabaseBroadcastReceiver broadcastReceiver = new UpdateDatabaseBroadcastReceiver();
-        registerReceiver(broadcastReceiver, filter);
+        receiver = new UpdateDatabaseBroadcastReceiver();
+        registerReceiver(receiver, filter);
         loadPdf();
 
     }
@@ -87,6 +88,13 @@ public class TermsOfService extends AppCompatActivity {
                     .load(); //load the pdf
         else
             new UpdateDatabase(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if(receiver != null)
+            unregisterReceiver(receiver);
+        super.onDestroy();
     }
 
     /**

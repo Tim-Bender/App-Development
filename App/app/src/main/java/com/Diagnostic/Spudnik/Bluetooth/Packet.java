@@ -24,17 +24,14 @@ public class Packet {
 
     private final byte[] packet;
 
-    @SuppressWarnings("unused")
     Packet(@NonNull byte[] PACKET) {
         packet = PACKET;
     }
 
-    @SuppressWarnings("unused")
     public byte[] getPacket() {
         return packet;
     }
 
-    @SuppressWarnings("unused")
     public void SetSensorType(@NonNull byte TYPE) {
         if (packet != null)
             packet[0] = TYPE;

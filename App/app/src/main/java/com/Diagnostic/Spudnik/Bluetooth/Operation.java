@@ -23,12 +23,13 @@ import androidx.annotation.Nullable;
 
 import java.util.UUID;
 
-public class Operation {
+public class Operation implements Comparable<Operation> {
 
     private final UUID operationUUID;
     private final int OPERATION;
     private final Packet writeValue;
-    public final static int DISCOVER_SERVICES = 0, READ_CHARACTERISTIC = 1, WRITE_CHARACTERISTIC = 2, DISCONNECT = 3, CLOSE_CONNECTION = 4, REQUEST_MTU = 5;
+    public final static int DISCOVER_SERVICES = 0, READ_CHARACTERISTIC = 1, WRITE_CHARACTERISTIC = 2,
+            DISCONNECT = 3, CLOSE_CONNECTION = 4, REQUEST_MTU = 5, READ_RSSI = 6;
 
     public Operation(@Nullable UUID uuid, @NonNull int operation, @Nullable Packet writeValue) {
         operationUUID = uuid;
@@ -46,5 +47,19 @@ public class Operation {
 
     public Packet getWriteValue() {
         return writeValue;
+    }
+
+    @Override
+    public int compareTo(Operation o) {
+        if (o != null) {
+            if (OPERATION == o.getOPERATION()) {
+                if (operationUUID.equals(o.getOperationUUID())) {
+                    if (writeValue.getPacket().length == o.getWriteValue().getPacket().length) {
+                        return 0;
+                    }
+                }
+            }
+        }
+        return -1;
     }
 }
