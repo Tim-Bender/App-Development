@@ -36,7 +36,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.Diagnostic.Spudnik.CustomObjects.UpdateDatabase;
-import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -46,7 +46,7 @@ import com.google.firebase.auth.FirebaseUser;
  *
  * @author timothy.bender
  * @version dev 1.0.0
- * @see vehicle
+ * @see Vehicle
  * @see UpdateDatabase
  * @see Glide
  * @since dev 1.0.0
@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Initial initiation of vehicle object. This object is used to hold all information, in concordance with the connection object about the machine we are diagnosing.
      */
-    private vehicle myvehicle;
+    private Vehicle myvehicle;
     /**
      * Broadcast Receiver object. Defined below. Captures broadcasts from UpdateDatabase.class
      */
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView textView = findViewById(R.id.textView3); //set the version name dynamically. This will be the version_name that is packaged during apk building.
         textView.setText(BuildConfig.VERSION_NAME); //set the text for version name
-        myvehicle = new vehicle(); //create the first vehicle object.
+        myvehicle = new Vehicle(); //create the first vehicle object.
     }
 
     /**

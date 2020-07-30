@@ -45,8 +45,8 @@ import androidx.recyclerview.widget.SnapHelper;
 
 import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
 import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
-import com.Diagnostic.Spudnik.CustomObjects.Connection;
-import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.Diagnostic.Spudnik.CustomObjects.Pin;
+import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ public class PinDiagnostic extends AppCompatActivity {
     /**
      * Vehicle object
      */
-    private vehicle myvehicle;
+    private Vehicle myvehicle;
     /**
      * Our two textviews that will need to be kept updated
      */
@@ -73,11 +73,11 @@ public class PinDiagnostic extends AppCompatActivity {
     /**
      * the current connection that we are viewing
      */
-    private Connection myConnection;
+    private Pin myPin;
     /**
      * Unique connections, scrollview will be filled by this
      */
-    private ArrayList<Connection> uniqueConnections;
+    private ArrayList<Pin> uniquePins;
     /**
      * Current position users are in the scrollview
      */
@@ -111,21 +111,22 @@ public class PinDiagnostic extends AppCompatActivity {
         setContentView(R.layout.content_pindiagnostic);
         //get all of our objects
         myvehicle = getIntent().getParcelableExtra("myvehicle");
-        Objects.requireNonNull(this.myvehicle).setConnections(getIntent().getParcelableArrayListExtra("connections"));
+        Objects.requireNonNull(this.myvehicle).setPins(getIntent().getParcelableArrayListExtra("connections"));
         loc = getIntent().getIntExtra("loc", 0);
-        uniqueConnections = getIntent().getParcelableArrayListExtra("uniqueconnections");
+        uniquePins = getIntent().getParcelableArrayListExtra("uniqueconnections");
         //setup the toolbar as usual
-        myConnection = uniqueConnections.get(this.loc);
+        myPin = uniquePins.get(this.loc);
         Toolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
+        getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
 
         direction = findViewById(R.id.direction);
         connectorinformation = findViewById(R.id.connectorinformation);
         //setup the recyclerview
         recyclerView = findViewById(R.id.horizontalrecyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        myAdapter = new ConnectionAdapterHorizontal(this, uniqueConnections, myvehicle);
+        myAdapter = new ConnectionAdapterHorizontal(this, uniquePins, myvehicle);
         LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(PinDiagnostic.this, LinearLayoutManager.HORIZONTAL, false); //make it horizontal
         recyclerView.setLayoutManager(horizontalLayoutManager); //set the layout manager for the recycler view
         snapHelper = new PagerSnapHelper();
@@ -174,12 +175,12 @@ public class PinDiagnostic extends AppCompatActivity {
      */
     @SuppressLint("SetTextI18n")
     private void updateValues(float f) {
-        myConnection = uniqueConnections.get(loc);
-        String temp = myConnection.getDirection();
+        myPin = uniquePins.get(loc);
+        String temp = myPin.getDirection();
         String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
         direction.setText(s1 + temp.substring(1));
-        connectorinformation.setText(myvehicle.getMap(myConnection.getDirection().toLowerCase()) + " " + myConnection.inout() + " Connector\nConnectorVoltage\n" + f +"v");
-        setTitle("Viewing Pin:" + myConnection.getS4());
+        connectorinformation.setText(myvehicle.getMap(myPin.getDirection().toLowerCase()) + " " + myPin.inout() + " Connector\nConnectorVoltage\n" + f +"v");
+        setTitle("Viewing Pin:" + myPin.getS4());
         //myAdapter.notifyDataSetChanged();
     }
 
@@ -226,8 +227,8 @@ public class PinDiagnostic extends AppCompatActivity {
     public void viewpinloc(View view) {
         Intent i = new Intent(getBaseContext(), PinLocation.class);
         i.putExtra("myvehicle", myvehicle);
-        i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
-        i.putExtra("myConnection", myConnection);
+        i.putParcelableArrayListExtra("connections", myvehicle.getPins());
+        i.putExtra("myConnection", myPin);
         startActivity(i);
     }
 
@@ -257,8 +258,8 @@ public class PinDiagnostic extends AppCompatActivity {
     public void testMode(View view) {
         Intent i = new Intent(getApplicationContext(), WarningScreen.class);
         i.putExtra("myvehicle", myvehicle);
-        i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
-        i.putExtra("myConnection", myConnection);
+        i.putParcelableArrayListExtra("connections", myvehicle.getPins());
+        i.putExtra("myConnection", myPin);
         startActivity(i);
     }
 

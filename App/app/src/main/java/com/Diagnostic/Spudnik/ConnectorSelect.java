@@ -34,7 +34,7 @@ import android.widget.Spinner;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
@@ -49,7 +49,7 @@ import java.util.Objects;
  * Please see README before updating anything
  */
 public class ConnectorSelect extends AppCompatActivity {
-    private vehicle myvehicle;
+    private Vehicle myvehicle;
     private TextInputEditText connectorSelectionEdittext;
 
     /**
@@ -67,7 +67,7 @@ public class ConnectorSelect extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE);
         setTitle("Connector Selection");
         myvehicle = getIntent().getParcelableExtra("myvehicle"); //get our vehicle object as a parcelable extra
-        Objects.requireNonNull(this.myvehicle).setConnections(getIntent().getParcelableArrayListExtra("connections")); //get our list of connections as a parcelable extra
+        Objects.requireNonNull(this.myvehicle).setPins(getIntent().getParcelableArrayListExtra("connections")); //get our list of connections as a parcelable extra
     }
 
 
@@ -141,7 +141,7 @@ public class ConnectorSelect extends AppCompatActivity {
      */
     public void next(View view) {
         if (myvehicle.getUniqueConnections().contains(connectorSelectionEdittext.getText().toString().toLowerCase())) {
-            startActivity(new Intent(getApplicationContext(), SelectPin.class).putParcelableArrayListExtra("connections",myvehicle.getConnections())
+            startActivity(new Intent(getApplicationContext(), SelectPin.class).putParcelableArrayListExtra("connections",myvehicle.getPins())
             .putExtra("myvehicle",myvehicle));
         }
     }

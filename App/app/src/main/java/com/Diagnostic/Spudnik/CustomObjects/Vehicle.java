@@ -47,10 +47,10 @@ import java.util.Map;
  * @author timothy.bender
  * @version dev 1.0.0
  * @see android.os.Parcelable
- * @see Connection
+ * @see Pin
  * @since dev 1.0.0
  */
-public class vehicle implements Parcelable { //Parcelable implementation allows cross Activity passing of this object
+public class Vehicle implements Parcelable { //Parcelable implementation allows cross Activity passing of this object
     /**
      * Vehicle id string
      */
@@ -58,7 +58,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
     /**
      * Stores all connections. Is build inside of buildDataBase() method
      */
-    private ArrayList<Connection> Connections = new ArrayList<>(36);
+    private ArrayList<Pin> pins = new ArrayList<>(36);
     /**
      * Contains the unique "directions" I.E. In1, out2 etc
      */
@@ -97,7 +97,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      *
      * @since dev 1.0.0
      */
-    public vehicle() {
+    public Vehicle() {
         setPinnumbers(); //this must be done every time we create a new object
     }
 
@@ -108,7 +108,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * @param in Parcel in
      */
 
-    private vehicle(Parcel in) {
+    private Vehicle(Parcel in) {
         vehicleId = in.readString();
         uniqueConnections = in.createStringArrayList();
         loc = in.readInt();
@@ -139,15 +139,15 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
     /**
      * Creator of the parcelable object. Just don't touch it
      */
-    public static final Creator<vehicle> CREATOR = new Creator<vehicle>() {
+    public static final Creator<Vehicle> CREATOR = new Creator<Vehicle>() {
         @Override
-        public vehicle createFromParcel(Parcel in) {
-            return new vehicle(in);
+        public Vehicle createFromParcel(Parcel in) {
+            return new Vehicle(in);
         }
 
         @Override
-        public vehicle[] newArray(int size) {
-            return new vehicle[size];
+        public Vehicle[] newArray(int size) {
+            return new Vehicle[size];
         }
     };
 
@@ -169,7 +169,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * @since dev 1.0.0
      */
     public void buildDataBase() {
-        Connections.clear(); //clear the old connections and uniqueconnections arraylists to avoid overlap
+        pins.clear(); //clear the old connections and uniqueconnections arraylists to avoid overlap
         uniqueConnections.clear();
         //Asynchronous of course
         AsyncTask.execute(() -> {
@@ -178,7 +178,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
                 String line;  //string to the store the line read by buffered reader
                 while ((line = reader.readLine()) != null) { //Until we run out of lines, read lines.
                     String[] tokens = line.toLowerCase().split(","); //split the line at commas, and lowercase everything
-                    addConnection(new Connection(vehicleId, tokens[0], tokens[1],
+                    addConnection(new Pin(vehicleId, tokens[0], tokens[1],
                             tokens[2], tokens[3], tokens[4])); //build the new connection
                     if (!getUniqueConnections().contains(tokens[0])) //if we have a unique connection, then we add it to the list.
                         addUniqueconnection(tokens[0]);
@@ -315,7 +315,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
      * @since dev 1.0.0
      */
     public void sortConnections() {
-        Collections.sort(Connections); //sort them
+        Collections.sort(pins); //sort them
     }
 
     /**
@@ -361,8 +361,8 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
         this.pinCount = pinCount;
     }
 
-    private void addConnection(Connection toAdd) {
-        this.Connections.add(toAdd);
+    private void addConnection(Pin toAdd) {
+        this.pins.add(toAdd);
     }
 
     private void addUniqueconnection(String s) {
@@ -373,12 +373,12 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
         return this.uniqueConnections;
     }
 
-    public ArrayList<Connection> getConnections() {
-        return Connections;
+    public ArrayList<Pin> getPins() {
+        return pins;
     }
 
-    public void setConnections(ArrayList<Connection> c) {
-        Connections = c;
+    public void setPins(ArrayList<Pin> c) {
+        pins = c;
     }
 
     public void addUniquePin(String s) {
@@ -398,7 +398,7 @@ public class vehicle implements Parcelable { //Parcelable implementation allows 
     }
 
     public String toString() {
-        return ("Id: " + vehicleId + "\n Connections: " + Connections.size() + "\n Unique Connections: " + uniqueConnections.size());
+        return ("Id: " + vehicleId + "\n Connections: " + pins.size() + "\n Unique Connections: " + uniqueConnections.size());
     }
 
     public ArrayList<String> getUniquePins() {

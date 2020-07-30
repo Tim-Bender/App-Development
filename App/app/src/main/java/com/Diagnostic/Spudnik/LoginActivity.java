@@ -40,7 +40,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.Diagnostic.Spudnik.CustomObjects.UpdateDatabase;
-import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
@@ -53,7 +53,7 @@ import com.google.firebase.auth.FirebaseUser;
  * @version dev 1.0.0
  * @see UpdateDatabase
  * @see FirebaseAuth
- * @see vehicle
+ * @see Vehicle
  * @since dev 1.0.0
  */
 
@@ -78,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * Vehicle object. Will be prebuild and passed to home later.
      */
-    private vehicle myvehicle;
+    private Vehicle myvehicle;
     /**
      * Control flow boolean, if we are logging in from the Settings page this becomes true and changes behavior upon exit.
      */
@@ -245,7 +245,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (fromSettings)
                         finish(); //if they logged in from the settings page we will just close this page and send them back there
                     //otherwise they came from the loading screen.
-                    myvehicle = new vehicle(); //create a new vehicle, since it couldn't have been done on loading
+                    myvehicle = new Vehicle(); //create a new vehicle, since it couldn't have been done on loading
                     myvehicle.preBuildVehicleObject(getApplicationContext()); //prebuild the vehicle
                     updateLoadingView(LOGGING_IN_COMPLETE);
                     goToHome(); //go to the home activity

@@ -24,19 +24,19 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 /**
- * Hold data about individual connections.
+ * Hold data about individual pins.
  * <p>
  * Comparable is also implemented here to allow for easy sorting via the vehicle sort method.
  *
  * @author timothy.bender
  * @version dev 1.0.0
- * @see vehicle
+ * @see Vehicle
  * @see android.os.Parcelable
  * @see java.lang.Comparable
  * @since dev 1.0.0
  */
 
-public class Connection implements Parcelable, Comparable<Connection> {
+public class Pin implements Parcelable, Comparable<Pin> {
 
     /**
      * Vehicle id
@@ -78,7 +78,7 @@ public class Connection implements Parcelable, Comparable<Connection> {
      * @param un   units
      * @param type type
      */
-    public Connection(String id, String dir, String s, String nm, String un, String type) {
+    public Pin(String id, String dir, String s, String nm, String un, String type) {
         this.id = id;
         this.direction = dir;
         this.name = nm;
@@ -94,7 +94,7 @@ public class Connection implements Parcelable, Comparable<Connection> {
      * @since dev 1.0.0
      */
 
-    private Connection(Parcel in) {
+    private Pin(Parcel in) {
         id = in.readString();
         direction = in.readString();
         name = in.readString();
@@ -120,15 +120,15 @@ public class Connection implements Parcelable, Comparable<Connection> {
         dest.writeString(type);
     }
 
-    public static final Creator<Connection> CREATOR = new Creator<Connection>() {
+    public static final Creator<Pin> CREATOR = new Creator<Pin>() {
         @Override
-        public Connection createFromParcel(Parcel in) {
-            return new Connection(in);
+        public Pin createFromParcel(Parcel in) {
+            return new Pin(in);
         }
 
         @Override
-        public Connection[] newArray(int size) {
-            return new Connection[size];
+        public Pin[] newArray(int size) {
+            return new Pin[size];
         }
     };
 
@@ -137,11 +137,11 @@ public class Connection implements Parcelable, Comparable<Connection> {
      *
      * @param o Connection
      * @return int
-     * @see vehicle
+     * @see Vehicle
      * @since dev 1.0.0
      */
     @Override
-    public int compareTo(@NonNull Connection o) {
+    public int compareTo(@NonNull Pin o) {
         return Integer.compare(Integer.parseInt(s4), Integer.parseInt(o.s4));
     }
 

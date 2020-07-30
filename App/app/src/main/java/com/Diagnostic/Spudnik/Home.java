@@ -28,7 +28,7 @@ import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -45,7 +45,7 @@ public class Home extends AppCompatActivity {
     /**
      * Vehicle object. Initialized in mainactivity, and usually pre-build there as well.
      */
-    private vehicle myvehicle;
+    private Vehicle myvehicle;
 
     /**
      * Nothing special in this onCreate. There is a check whether or not the vehicle object's id's have been constructed or not

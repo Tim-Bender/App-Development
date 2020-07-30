@@ -28,8 +28,8 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.Diagnostic.Spudnik.CustomObjects.Connection;
-import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.Diagnostic.Spudnik.CustomObjects.Pin;
+import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 
 import java.util.ArrayList;
 
@@ -42,12 +42,12 @@ import java.util.ArrayList;
  */
 class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapterHorizontal.ViewHolder> {
 
-    private ArrayList<Connection> Connections;
+    private ArrayList<Pin> pins;
     private Context mContext;
-    private vehicle myvehicle;
+    private Vehicle myvehicle;
 
-    ConnectionAdapterHorizontal(Context context, ArrayList<Connection> Connections, vehicle vehicle) {
-        this.Connections = Connections;
+    ConnectionAdapterHorizontal(Context context, ArrayList<Pin> pins, Vehicle vehicle) {
+        this.pins = pins;
         this.mContext = context;
         this.myvehicle = vehicle;
     }
@@ -59,13 +59,13 @@ class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapter
 
     @Override
     public void onBindViewHolder(ConnectionAdapterHorizontal.ViewHolder holder, int position) {
-        Connection currentConnection = Connections.get(position);
-        holder.bindTo(currentConnection);
+        Pin currentPin = pins.get(position);
+        holder.bindTo(currentPin);
     }
 
     @Override
     public int getItemCount() {
-        return Connections.size();
+        return pins.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -82,9 +82,9 @@ class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapter
         }
 
         @SuppressLint("SetTextI18n")
-        void bindTo(Connection currentConnection) {
-            mTitleText.setText("Pin: " + currentConnection.getS4());
-            String temp = currentConnection.getName();
+        void bindTo(Pin currentPin) {
+            mTitleText.setText("Pin: " + currentPin.getS4());
+            String temp = currentPin.getName();
             String s1 = temp.substring(0, 1).toUpperCase();
             mInfoText.setText(s1 + temp.substring(1));
             voltage.setText("6.6 mA");
@@ -95,8 +95,8 @@ class ConnectionAdapterHorizontal extends RecyclerView.Adapter<ConnectionAdapter
         public void onClick(View v) {
             Intent i = new Intent(mContext, PinLocation.class);
             i.putExtra("myvehicle", myvehicle);
-            i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
-            i.putExtra("myConnection", Connections.get(getAdapterPosition()));
+            i.putParcelableArrayListExtra("connections", myvehicle.getPins());
+            i.putExtra("myConnection", pins.get(getAdapterPosition()));
             mContext.startActivity(i);
         }
     }

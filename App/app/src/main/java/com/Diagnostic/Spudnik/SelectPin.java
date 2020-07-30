@@ -44,8 +44,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
 import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
-import com.Diagnostic.Spudnik.CustomObjects.Connection;
-import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.Diagnostic.Spudnik.CustomObjects.Pin;
+import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ import java.util.Objects;
  *
  * @author timothy.bender
  * @version dev 1.0.0
- * @see vehicle
+ * @see Vehicle
  * @see ItemTouchHelper
  * @since dev 1.0.0
  */
@@ -65,7 +65,7 @@ public class SelectPin extends AppCompatActivity {
     /**
      * vehicle object
      */
-    private vehicle myvehicle;
+    private Vehicle myvehicle;
     /**
      * Will be used to update textviews
      */
@@ -73,7 +73,7 @@ public class SelectPin extends AppCompatActivity {
     /**
      * An Arraylist of connection objects. Will be parsed, and then used by the recyclerview
      */
-    private ArrayList<Connection> Connections = new ArrayList<>(24);
+    private ArrayList<Pin> pins = new ArrayList<>(24);
     /**
      * Custom adapter for our recyclerview
      */
@@ -100,12 +100,12 @@ public class SelectPin extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE);
 
         myvehicle = getIntent().getParcelableExtra("myvehicle");
-        Objects.requireNonNull(myvehicle).setConnections(getIntent().getParcelableArrayListExtra("connections"));
+        Objects.requireNonNull(myvehicle).setPins(getIntent().getParcelableArrayListExtra("connections"));
         textView = findViewById(R.id.connectorid);
 
         RecyclerView recyclerView = findViewById(R.id.selectpinrecyclerview); //setup our recyclerview
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        myAdapter = new ConnectionAdapter(this, Connections, myvehicle); //we will be using our custom adapter for this recyclerview
+        myAdapter = new ConnectionAdapter(this, pins, myvehicle); //we will be using our custom adapter for this recyclerview
         recyclerView.setAdapter(myAdapter); //set the adapter
 
         ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) { //setup our itemtouchhelper
@@ -117,8 +117,8 @@ public class SelectPin extends AppCompatActivity {
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 if (direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.RIGHT) { //if you swipe right or left..
-                    if (Connections.size() != 1) { //and it isnt a 1 pin connection
-                        Connections.remove(viewHolder.getAdapterPosition()); //then we remove the item from the arraylist
+                    if (pins.size() != 1) { //and it isnt a 1 pin connection
+                        pins.remove(viewHolder.getAdapterPosition()); //then we remove the item from the arraylist
                         myAdapter.notifyItemRemoved(viewHolder.getAdapterPosition()); //and we notify the adapter that there as been a change so it may animate it.
                     }
                 }
@@ -147,11 +147,11 @@ public class SelectPin extends AppCompatActivity {
                 if (bytes != null) {
                     updatevalues(((bytes[0] << 8) + bytes[1]) / 100f);
                     getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
-                    mServer.requestConnectorVoltage(Connections.get(0));
+                    mServer.requestConnectorVoltage(pins.get(0));
                 }
             }
             else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString())){
-                    mServer.requestConnectorVoltage(Connections.get(0));
+                    mServer.requestConnectorVoltage(pins.get(0));
             }
             else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())){
                 getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
@@ -196,7 +196,7 @@ public class SelectPin extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         myvehicle.sortConnections(); //sort the connections
-        if (Connections.isEmpty()) //build them
+        if (pins.isEmpty()) //build them
             buildConnections();
         checkPermissions();
         Intent mIntent = new Intent(this, BluetoothLeService.class);
@@ -228,19 +228,19 @@ public class SelectPin extends AppCompatActivity {
      * @since dev 1.0.0
      */
     private void buildConnections() {
-        if (Connections.isEmpty()) {
+        if (pins.isEmpty()) {
             String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc());
             int counter = 0;
-            for (Connection c : myvehicle.getConnections()) {
+            for (Pin c : myvehicle.getPins()) {
                 if (c.getDirection().contains(temp.toLowerCase())) {
                     if (!myvehicle.getUniquePins().contains(c.getDirection())) {
                         myvehicle.addUniquePin(c.getDirection());
                         myvehicle.setPinCount(myvehicle.getPinCount() + 1);
                     }
-                    if (counter > 0 && c.getS4().equals(Connections.get(counter - 1).getS4()))
-                        Connections.get(counter - 1).setName(Connections.get(counter - 1).getName() + " / " + c.getName());
+                    if (counter > 0 && c.getS4().equals(pins.get(counter - 1).getS4()))
+                        pins.get(counter - 1).setName(pins.get(counter - 1).getName() + " / " + c.getName());
                     else {
-                        Connections.add(c);
+                        pins.add(c);
                         counter++;
                     }
                 }

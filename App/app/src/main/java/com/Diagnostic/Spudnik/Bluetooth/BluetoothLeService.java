@@ -34,12 +34,11 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.Diagnostic.Spudnik.CustomObjects.Connection;
+import com.Diagnostic.Spudnik.CustomObjects.Pin;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -69,19 +68,7 @@ public class BluetoothLeService extends Service {
         System.out.println("ON CREATE SERVICE");
         context = this;
         USER_DISCONNECT = false;
-        leScanCallback = (device, rssi, scanRecord) -> {
-            if (device.getName() != null && !connecting) {
-                String deviceName = device.getName().toLowerCase();
-                if (deviceName.contains("s4") || deviceName.contains("spud") || deviceName.contains("diag")) {
-                    System.out.println("RSSI " + rssi);
-                    connecting = true;
-                    System.out.println("Connecting to: " + device.getName());
-                    scanLeDevice(false);
-                    device.connectGatt(context, false, gattCallback);
 
-                }
-            }
-        };
         if (checkBluetoothCompatible()) {
             setUpBluetooth();
             scanLeDevice(true);
@@ -108,17 +95,43 @@ public class BluetoothLeService extends Service {
     public final byte FREQUENCYTYPE = 0x04;
     public final byte COUNTSTYPE = 0x05;
     public final byte PULSEWIDTHTYPE = 0x08;
-    public Connection connection;
+    public Pin pin;
 
     private static boolean USER_DISCONNECT = false;
     private static boolean WRITTEN = false;
+
+    private final static int SCAN_TIMEOUT_DURATION = 30000;
+    private final static Handler myHandler = new Handler();
+    private final Runnable connectionTimeoutRunnable = () -> {
+        if (server == null) {
+            if (adapter != null)
+                scanLeDevice(false);
+            System.out.println("SCAN TIMEOUT");
+        }
+    };
+    private final Runnable closeServerDelayRunnable = () -> {
+        if (server != null)
+            server.close();
+    };
 
     private static
     int WEAK_SIGNAL_BUFFER = 0;
     private final static int WEAK_SIGNAL_MAXIMUM_BUFFER = 4;
 
     public BluetoothLeService() {
+        leScanCallback = (device, rssi, scanRecord) -> {
+            if (device.getName() != null && !connecting) {
+                String deviceName = device.getName().toLowerCase();
+                if (deviceName.contains("s4") || deviceName.contains("spud") || deviceName.contains("diag")) {
+                    System.out.println("RSSI " + rssi);
+                    connecting = true;
+                    System.out.println("Connecting to: " + device.getName());
+                    scanLeDevice(false);
+                    device.connectGatt(context, false, gattCallback);
 
+                }
+            }
+        };
     }
 
     private void setUpBluetooth() {
@@ -145,6 +158,8 @@ public class BluetoothLeService extends Service {
             broadcastUpdate(BroadcastActionConstants.ACTION_SCANNING.getString());
             adapter.startLeScan(leScanCallback);
             System.out.println("SCAN STARTED");
+            myHandler.removeCallbacks(closeServerDelayRunnable,connectionTimeoutRunnable);
+            myHandler.postDelayed(connectionTimeoutRunnable, SCAN_TIMEOUT_DURATION);
         } else {
             adapter.stopLeScan(leScanCallback);
             SCANNING = false;
@@ -159,6 +174,7 @@ public class BluetoothLeService extends Service {
                 if (status == BluetoothGatt.GATT_SUCCESS && operationManager != null) {
                     System.out.println("MTU CHANGED TO: " + mtu);
                     refreshDeviceCache(gatt);
+                    myHandler.removeCallbacks(connectionTimeoutRunnable);
                     operationManager.request(new Operation(null, Operation.DISCOVER_SERVICES, null));
                 } else {
                     System.out.println("MTU REQUEST FAILURE");
@@ -179,6 +195,7 @@ public class BluetoothLeService extends Service {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     server = gatt;
                     operationManager = new OperationManager(gatt);
+                    myHandler.removeCallbacks(connectionTimeoutRunnable);
                     broadcastUpdate(BroadcastActionConstants.ACTION_GATT_CONNECTED.getString());
                     System.out.println("CONNECTION STATE Connected");
                     refreshDeviceCache(gatt);
@@ -320,11 +337,11 @@ public class BluetoothLeService extends Service {
         context.sendBroadcast(intent);
     }
 
-    public void requestConnectorVoltage(@NonNull Connection c) {
+    public void requestConnectorVoltage(@NonNull Pin c) {
         //first write the type, then pull data
         Packet myPacket = new Packet(getDefaultPacket(c).getBytes());
-        if (connection == null)
-            connection = c;
+        if (pin == null)
+            pin = c;
         ArrayList<UUIDConstants> uuids = getUuidSet(c);
         myPacket.SetSensorType(getType(c));
         System.out.println("TYPE: " + getType(c));
@@ -336,7 +353,7 @@ public class BluetoothLeService extends Service {
         operationManager.request(new Operation(uuids.get(1).getFromString(), Operation.READ_CHARACTERISTIC, null));
     }
 
-    private PacketConstants getDefaultPacket(@NonNull Connection c) {
+    private PacketConstants getDefaultPacket(@NonNull Pin c) {
         if (c.inout().equals("Input"))
             return PacketConstants.WRITE_SENSOR_CONFIGURATION;
         else if (c.getConnectionNumber() < 4 || c.getDirection().trim().contains("exp"))
@@ -346,7 +363,7 @@ public class BluetoothLeService extends Service {
         }
     }
 
-    private byte getType(@NonNull Connection c) {
+    private byte getType(@NonNull Pin c) {
         if (c.inout().equals("Input")) {
             switch (c.getType().toLowerCase().trim()) {
                 case "curr":
@@ -377,7 +394,7 @@ public class BluetoothLeService extends Service {
         }
     }
 
-    private ArrayList<UUIDConstants> getUuidSet(@NonNull final Connection c) {
+    private ArrayList<UUIDConstants> getUuidSet(@NonNull final Pin c) {
         final int connectorNumber = c.getConnectionNumber();
         ArrayList<UUIDConstants> mySet = new ArrayList<>(2);
         if (c.inout().equals("Output")) {
@@ -409,15 +426,12 @@ public class BluetoothLeService extends Service {
 
     private synchronized void autoReconnect() {
         try {
+            System.out.println("ATTEMPTING AUTO RECONNECT");
             if (!USER_DISCONNECT) {
+                myHandler.removeCallbacks(connectionTimeoutRunnable);
                 if (server != null) {
                     server.disconnect();
-                    Looper.prepare();
-                    Handler handler = new Handler();
-                    handler.postDelayed(() -> {
-                        if (server != null)
-                            server.close();
-                    }, 600);
+                    myHandler.postDelayed(closeServerDelayRunnable, 600);
                 }
                 if (operationManager != null) {
                     operationManager.reset();
@@ -444,7 +458,7 @@ public class BluetoothLeService extends Service {
     }
 
     @SuppressWarnings("JavaReflectionMemberAccess")
-    private void refreshDeviceCache(BluetoothGatt bluetoothGatt) {
+    private void refreshDeviceCache(@NonNull BluetoothGatt bluetoothGatt) {
         try {
             Method hiddenClearCacheMethod = bluetoothGatt.getClass().getMethod("refresh");
 

@@ -27,8 +27,8 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.Diagnostic.Spudnik.CustomObjects.Connection;
-import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.Diagnostic.Spudnik.CustomObjects.Pin;
+import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 
 import java.util.ArrayList;
 
@@ -43,15 +43,15 @@ public class WarningScreen extends AppCompatActivity {
     /**
      * Same vehicle object
      */
-    private vehicle myvehicle;
+    private Vehicle myvehicle;
     /**
      * Arraylist of unique connections
      */
-    private ArrayList<Connection> Connections;
+    private ArrayList<Pin> pins;
     /**
      * The connection we are currently looking at
      */
-    private Connection myconnection;
+    private Pin myconnection;
     private int loc;
 
     /**
@@ -66,7 +66,7 @@ public class WarningScreen extends AppCompatActivity {
         setContentView(R.layout.activity_warningscreen);
 
         myvehicle = getIntent().getParcelableExtra("myvehicle");
-        Connections = getIntent().getParcelableArrayListExtra("connections");
+        pins = getIntent().getParcelableArrayListExtra("connections");
         myconnection = getIntent().getParcelableExtra("myConnection");
         loc = getIntent().getIntExtra("loc", 0);
 
@@ -85,7 +85,7 @@ public class WarningScreen extends AppCompatActivity {
     public void accepted(View view) {
         Intent i = new Intent(getApplicationContext(), PinTest.class);
         i.putExtra("myvehicle", myvehicle);
-        i.putParcelableArrayListExtra("connections", Connections);
+        i.putParcelableArrayListExtra("connections", pins);
         i.putExtra("myConnection", myconnection);
         i.putExtra("loc", loc);
         startActivity(i);

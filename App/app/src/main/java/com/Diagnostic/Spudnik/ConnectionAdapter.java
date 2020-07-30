@@ -29,8 +29,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.Diagnostic.Spudnik.CustomObjects.Connection;
-import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.Diagnostic.Spudnik.CustomObjects.Pin;
+import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 
 import java.util.ArrayList;
 
@@ -49,7 +49,7 @@ class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolde
     /**
      * Our arraylist of connection objects that we will be building cards out of
      */
-    private ArrayList<Connection> Connections;
+    private ArrayList<Pin> pins;
     /**
      * Context of the activity on the main UI thread
      */
@@ -57,10 +57,10 @@ class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolde
     /**
      * vehicle object, we will need some methods from it
      */
-    private vehicle myvehicle;
+    private Vehicle myvehicle;
 
-    ConnectionAdapter(@NonNull Context context, @NonNull ArrayList<Connection> Connections, @NonNull vehicle vehicle) {
-        this.Connections = Connections;
+    ConnectionAdapter(@NonNull Context context, @NonNull ArrayList<Pin> pins, @NonNull Vehicle vehicle) {
+        this.pins = pins;
         this.mContext = context;
         this.myvehicle = vehicle;
     }
@@ -72,13 +72,13 @@ class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolde
 
     @Override //holds the views that are inflated. binds the view to a position
     public void onBindViewHolder(ConnectionAdapter.ViewHolder holder, int position) {
-        Connection currentConnection = Connections.get(position);
-        holder.bindTo(currentConnection);
+        Pin currentPin = pins.get(position);
+        holder.bindTo(currentPin);
     }
 
     @Override //for getting the size of the list
     public int getItemCount() {
-        return Connections.size();
+        return pins.size();
     }
 
     /**
@@ -100,9 +100,9 @@ class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolde
         }
 
         @SuppressLint("SetTextI18n")
-        void bindTo(Connection currentConnection) {
-            mTitleText.setText("Pin: " + currentConnection.getS4());
-            String temp = currentConnection.getName(); //capitalize it
+        void bindTo(Pin currentPin) {
+            mTitleText.setText("Pin: " + currentPin.getS4());
+            String temp = currentPin.getName(); //capitalize it
             String s1 = temp.substring(0, 1).toUpperCase();
             mInfoText.setText(s1 + temp.substring(1));
 
@@ -117,9 +117,9 @@ class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.ViewHolde
         public void onClick(View v) {
             Intent i = new Intent(mContext.getApplicationContext(), PinDiagnostic.class);
             i.putExtra("myvehicle", myvehicle);
-            i.putParcelableArrayListExtra("connections", myvehicle.getConnections());
+            i.putParcelableArrayListExtra("connections", myvehicle.getPins());
             i.putExtra("loc", getAdapterPosition());
-            i.putParcelableArrayListExtra("uniqueconnections", new ArrayList<>(Connections));
+            i.putParcelableArrayListExtra("uniqueconnections", new ArrayList<>(pins));
             mContext.startActivity(i);
         }
     }

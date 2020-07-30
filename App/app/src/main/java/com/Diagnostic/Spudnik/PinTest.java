@@ -38,8 +38,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
 import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
-import com.Diagnostic.Spudnik.CustomObjects.Connection;
-import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.Diagnostic.Spudnik.CustomObjects.Pin;
+import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -50,16 +50,16 @@ import java.util.ArrayList;
  * @author timothy.bender
  * @version dev 1.0.0
  * @see android.bluetooth.BluetoothGatt
- * @see vehicle
+ * @see Vehicle
  * @see android.bluetooth.BluetoothGattCharacteristic
  * @since dev 1.0.0
  */
 public class PinTest extends AppCompatActivity {
     private SeekBar seekBar;
     private TextView pwmTextview;
-    private vehicle myvehicle;
-    private ArrayList<Connection> Connections;
-    private Connection myconnection;
+    private Vehicle myvehicle;
+    private ArrayList<Pin> pins;
+    private Pin myconnection;
     private int pwm = 0, loc;
 
     private BluetoothLeService mServer;
@@ -81,10 +81,11 @@ public class PinTest extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
         setTitle("Input Serial Number");
-        toolbar.setTitleTextColor(Color.parseColor("#ffffff"));
+        toolbar.setTitleTextColor(Color.WHITE);
+        getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
 
         myvehicle = getIntent().getParcelableExtra("myvehicle");
-        Connections = getIntent().getParcelableArrayListExtra("connections");
+        pins = getIntent().getParcelableArrayListExtra("connections");
         myconnection = getIntent().getParcelableExtra("myConnection");
         loc = getIntent().getIntExtra("loc", 0);
 
@@ -221,9 +222,9 @@ public class PinTest extends AppCompatActivity {
     }
 
     public void nextPin(View view) {
-        if (loc != Connections.size() - 1) {
+        if (loc != pins.size() - 1) {
             loc++;
-            myconnection = Connections.get(loc);
+            myconnection = pins.get(loc);
             updateTextFields();
         }
     }
@@ -231,7 +232,7 @@ public class PinTest extends AppCompatActivity {
     public void prevPin(View view) {
         if (loc != 0) {
             loc--;
-            myconnection = Connections.get(loc);
+            myconnection = pins.get(loc);
             updateTextFields();
         }
     }

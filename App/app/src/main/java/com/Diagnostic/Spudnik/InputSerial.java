@@ -39,7 +39,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
 
-import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
@@ -59,7 +59,7 @@ public class InputSerial extends AppCompatActivity {
     /**
      * Vehicle object
      */
-    public vehicle myvehicle;
+    public Vehicle myvehicle;
     private TextInputEditText serialNumberText;
     private TextInputEditText dealerText;
     private ImageView imageView;
@@ -193,7 +193,7 @@ public class InputSerial extends AppCompatActivity {
                     editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());   //Important to lowercase it and trim whitespace...
                 startActivity(new Intent(getApplicationContext(), ConnectorSelect.class)
                         .putExtra("myvehicle", myvehicle)
-                        .putParcelableArrayListExtra("connections", myvehicle.getConnections()));
+                        .putParcelableArrayListExtra("connections", myvehicle.getPins()));
             }
             else
                 dealerText.setError("Invalid");

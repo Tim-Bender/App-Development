@@ -37,7 +37,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
 import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
-import com.Diagnostic.Spudnik.CustomObjects.Connection;
+import com.Diagnostic.Spudnik.CustomObjects.Pin;
 import com.google.android.material.snackbar.Snackbar;
 
 public class BluetoothTestActivity extends AppCompatActivity {
@@ -101,10 +101,10 @@ public class BluetoothTestActivity extends AppCompatActivity {
                     float f = ((bytes[0] << 8) + bytes[1]) / 100f;
                     textView.setText(f + " ");
                     getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
-                    mServer.requestConnectorVoltage(new Connection("bacon", "ou1", "", "", "", "none"));
+                    mServer.requestConnectorVoltage(new Pin("bacon", "ou1", "", "", "", "none"));
                 }
             } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString())) {
-                mServer.requestConnectorVoltage(new Connection("bacon", "out1", "", "", "", "none"));
+                mServer.requestConnectorVoltage(new Pin("bacon", "out1", "", "", "", "none"));
             } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())){
                 getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
                 Snackbar.make(findViewById(R.id.bluetoothtestconstraintlayout),"Bluetooth Disconnected",Snackbar.LENGTH_SHORT).show();

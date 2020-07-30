@@ -40,8 +40,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
-import com.Diagnostic.Spudnik.CustomObjects.Connection;
-import com.Diagnostic.Spudnik.CustomObjects.vehicle;
+import com.Diagnostic.Spudnik.CustomObjects.Pin;
+import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -65,11 +65,11 @@ public class PinLocation extends AppCompatActivity {
     /**
      * The connection we are currently looking at
      */
-    private Connection myConnection;
+    private Pin myPin;
     /**
      * Vehicle object
      */
-    private vehicle myvehicle;
+    private Vehicle myvehicle;
     /**
      * Map used to map the connection to on board orientation. Aka out1 is vertical
      */
@@ -106,13 +106,13 @@ public class PinLocation extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
         setTitle("Pin Location");
-        toolbar.setTitleTextColor(Color.WHITE);
+        getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
 
         myvehicle = getIntent().getParcelableExtra("myvehicle"); //retrieve the vehicle object from parcelable intent
-        Objects.requireNonNull(myvehicle).setConnections(getIntent().getParcelableArrayListExtra("connections")); //retrieve the list of connections from parcelable intent
+        Objects.requireNonNull(myvehicle).setPins(getIntent().getParcelableArrayListExtra("connections")); //retrieve the list of connections from parcelable intent
         myvehicle.sortConnections(); //sort the connections for good measure
-        myConnection = getIntent().getParcelableExtra("myConnection"); //get the current connection from parcelable intent
-        loc = Integer.parseInt(Objects.requireNonNull(myConnection).getS4()); //get the current location from parcelable intent
+        myPin = getIntent().getParcelableExtra("myConnection"); //get the current connection from parcelable intent
+        loc = Integer.parseInt(Objects.requireNonNull(myPin).getS4()); //get the current location from parcelable intent
         fillHashMap(); //fill the hashmap of orientations
         IntentFilter filter = new IntentFilter();
         for(BroadcastActionConstants b : BroadcastActionConstants.values())
@@ -146,7 +146,7 @@ public class PinLocation extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     private void updateValues(float f) {
         TextView textView = findViewById(R.id.pinlocationdirection);
-        String temp = myConnection.getDirection();
+        String temp = myPin.getDirection();
         String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
         textView.setText(s1 + temp.substring(1));  //concatenate them together
         textView = findViewById(R.id.pinlocationconnectorinformation);
@@ -182,8 +182,8 @@ public class PinLocation extends AppCompatActivity {
      */
     @SuppressLint("SetTextI18n")
     private void buildLayout() {
-        int pinnumber = myvehicle.getMap(myConnection.getDirection()); //get all the views we will need to be editing
-        orientation = orientations.get(myConnection.getDirection());
+        int pinnumber = myvehicle.getMap(myPin.getDirection()); //get all the views we will need to be editing
+        orientation = orientations.get(myPin.getDirection());
 
         Space topspace = findViewById(R.id.topspacepinlocation); //the 4 spaces will allow us to "squish" our layout depending on which orientation we are in
         Space bottomspace = findViewById(R.id.bottomspacepinlocation);
