@@ -21,20 +21,24 @@ package com.Diagnostic.Spudnik;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
 import com.Diagnostic.Spudnik.CustomObjects.UpdateDatabase;
 import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 import com.bumptech.glide.Glide;
@@ -62,10 +66,6 @@ public class MainActivity extends AppCompatActivity {
      */
     private FirebaseUser user;
     /**
-     * Initial initiation of vehicle object. This object is used to hold all information, in concordance with the connection object about the machine we are diagnosing.
-     */
-    private Vehicle myvehicle;
-    /**
      * Broadcast Receiver object. Defined below. Captures broadcasts from UpdateDatabase.class
      */
     private UpdateDatabaseBroadcastReceiver broadcastReceiver;
@@ -73,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
      * Boolean value used to make this activity thread safe, prevents an issue during handler delay causing activity split.
      */
     private boolean updateBegun = false;
+
+    private boolean bounded = false;
+
 
     /**
      * Setup the toolbar, this will be the same across all activities, and will thus only be mentioned here.
@@ -101,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
 
         TextView textView = findViewById(R.id.textView3); //set the version name dynamically. This will be the version_name that is packaged during apk building.
         textView.setText(BuildConfig.VERSION_NAME); //set the text for version name
-        myvehicle = new Vehicle(); //create the first vehicle object.
     }
 
     /**
@@ -125,7 +127,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();//if user is null, they are not logged in
-        new UpdateDatabase(getApplicationContext()); //attempt the database update
+        Intent startUpdateIntent = new Intent(this, UpdateDatabase.class);
+        startService(startUpdateIntent);
+        checkPermissions();
+        Intent mIntent = new Intent(this, BluetoothLeService.class);
+        bindService(mIntent, mConnection, BIND_AUTO_CREATE);
+    }
+
+    public void checkPermissions() {
+        if (!(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
     }
 
     /**
@@ -136,6 +148,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         unregisterReceiver(broadcastReceiver); //unregister the receiver
+        if (bounded) {
+            unbindService(mConnection);
+            bounded = false;
+        }
         super.onDestroy();
     }
 
@@ -147,15 +163,24 @@ public class MainActivity extends AppCompatActivity {
     private void go() {
         if (!(checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED))
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-        Intent i;
-        if (user != null) { //if the user is already logged in, then we send them to the home screen
-            i = new Intent(getBaseContext(), Home.class);
-            i.putExtra("myvehicle", myvehicle); //attach the machine object to be passed to home activity
-        } else //otherwise they get passed over to login
-            i = new Intent(getBaseContext(), LoginActivity.class);
+        Intent i = (user != null) ? new Intent(getApplicationContext(),Home.class) : new Intent(getApplicationContext(),LoginActivity.class);
         startActivity(i); //start the selected activity
         finish(); //if the user tries to go back to this activity, close and exit the app
     }
+
+    ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            System.out.println("SERVICE CONNECTED");
+            bounded = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            System.out.println("SERVICE DISCONNECTED");
+            bounded = false;
+        }
+    };
 
     /**
      * Here's our broadcast receiver to receive updates from Updatedatabase.java
@@ -169,8 +194,7 @@ public class MainActivity extends AppCompatActivity {
                 if (intent.getIntExtra("data", 0) == UpdateDatabase.UPDATE_COMPLETE)
                     updateBegun = true; //protection against multiple threads branching off, resulting in multiple home screens
                 else if (!updateBegun) { //else, if there isnt already a thread running here then we delay moving to the home screen for now.
-                    handler.postDelayed(MainActivity.this::go,2000);
-                    myvehicle.preBuildVehicleObject(getApplicationContext());//during the delay we will pre-build the vehicle object
+                    handler.postDelayed(MainActivity.this::go, 2000);
                 }
             }
         }

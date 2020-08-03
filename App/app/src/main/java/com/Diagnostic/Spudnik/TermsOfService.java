@@ -46,6 +46,7 @@ import java.io.File;
 public class TermsOfService extends AppCompatActivity {
 
     private TermsOfService.UpdateDatabaseBroadcastReceiver receiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,13 +87,15 @@ public class TermsOfService extends AppCompatActivity {
                     .spacing(0)
                     .pageFitPolicy(FitPolicy.WIDTH) //width justification is preferred, it will fill vertical anyway
                     .load(); //load the pdf
-        else
-            new UpdateDatabase(this);
+        else {
+            Intent startUpdateIntent = new Intent(this, UpdateDatabase.class);
+            startService(startUpdateIntent);
+        }
     }
 
     @Override
     protected void onDestroy() {
-        if(receiver != null)
+        if (receiver != null)
             unregisterReceiver(receiver);
         super.onDestroy();
     }

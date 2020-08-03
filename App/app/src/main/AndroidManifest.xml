@@ -47,6 +47,7 @@
             android:screenOrientation="portrait"/>
         <service android:name=".Bluetooth.BluetoothLeService"
             tools:ignore="Instantiatable" />
+        <service android:name=".CustomObjects.UpdateDatabase"/>
 
         <activity
             android:name=".PinTest"

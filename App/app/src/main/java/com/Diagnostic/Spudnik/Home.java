@@ -28,7 +28,6 @@ import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -42,11 +41,6 @@ import com.google.firebase.auth.FirebaseUser;
  */
 
 public class Home extends AppCompatActivity {
-    /**
-     * Vehicle object. Initialized in mainactivity, and usually pre-build there as well.
-     */
-    private Vehicle myvehicle;
-
     /**
      * Nothing special in this onCreate. There is a check whether or not the vehicle object's id's have been constructed or not
      *
@@ -64,14 +58,10 @@ public class Home extends AppCompatActivity {
         myToolBar.setTitleTextColor(Color.WHITE);
 
         Snackbar.make(findViewById(R.id.homeconstraintlayout), "Welcome", Snackbar.LENGTH_SHORT).show();
-        myvehicle = getIntent().getParcelableExtra("myvehicle"); //get out parcelabled vehicle object
-        if (myvehicle.getVehicleIds().isEmpty())
-            myvehicle.preBuildVehicleObject(this); //try again to prebuild the vehicle ids and dealer names.
         findViewById(R.id.homediagtoolbutton).setOnClickListener((view) -> {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get the current firebase user
             if (user != null) { //authentication is required before one can access the diagnostic tool
                 Intent i = new Intent(getBaseContext(), InputSerial.class);
-                i.putExtra("myvehicle", myvehicle); //add the myvehicle object as a parcelable extra in the intent
                 startActivity(i);
             } else
                 Snackbar.make(findViewById(R.id.homeconstraintlayout), "Please Sign In", Snackbar.LENGTH_SHORT).show();

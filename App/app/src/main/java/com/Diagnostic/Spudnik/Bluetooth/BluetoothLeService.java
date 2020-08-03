@@ -68,23 +68,17 @@ public class BluetoothLeService extends Service {
         System.out.println("ON CREATE SERVICE");
         context = this;
         USER_DISCONNECT = false;
-
         if (checkBluetoothCompatible()) {
             setUpBluetooth();
             scanLeDevice(true);
         }
     }
 
-    @Override
-    public void onDestroy() {
-        AsyncTask.execute(() -> disconnect(true));
-    }
-
 
     private Context context;
     private BluetoothAdapter adapter;
     private static OperationManager operationManager;
-    public static BluetoothAdapter.LeScanCallback leScanCallback;
+    private static BluetoothAdapter.LeScanCallback leScanCallback;
     private BluetoothGatt server;
     private boolean connecting = false;
 
@@ -97,26 +91,24 @@ public class BluetoothLeService extends Service {
     public final byte PULSEWIDTHTYPE = 0x08;
     public Pin pin;
 
+    public final static int SEARCHING = 1;
+
+    public static int STATUS;
+
     private static boolean USER_DISCONNECT = false;
     private static boolean WRITTEN = false;
+    private static boolean broadcasting = false;
 
-    private final static int SCAN_TIMEOUT_DURATION = 30000;
     private final static Handler myHandler = new Handler();
-    private final Runnable connectionTimeoutRunnable = () -> {
-        if (server == null) {
-            if (adapter != null)
-                scanLeDevice(false);
-            System.out.println("SCAN TIMEOUT");
-        }
-    };
     private final Runnable closeServerDelayRunnable = () -> {
         if (server != null)
             server.close();
     };
 
-    private static
-    int WEAK_SIGNAL_BUFFER = 0;
-    private final static int WEAK_SIGNAL_MAXIMUM_BUFFER = 4;
+    private static int WEAK_SIGNAL_BUFFER = 0;
+    private final static int WEAK_SIGNAL_MAXIMUM_BUFFER = 6;
+    private static int FAILED_PACKET_BUFFER = 0;
+    private final static int FAILED_PACKET_MAXIMUM_BUFFER = 4;
 
     public BluetoothLeService() {
         leScanCallback = (device, rssi, scanRecord) -> {
@@ -150,31 +142,27 @@ public class BluetoothLeService extends Service {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
-    public static boolean SCANNING = false;
-
     public synchronized void scanLeDevice(final boolean enable) {
-        if (enable) {
-            SCANNING = true;
-            broadcastUpdate(BroadcastActionConstants.ACTION_SCANNING.getString());
-            adapter.startLeScan(leScanCallback);
-            System.out.println("SCAN STARTED");
-            myHandler.removeCallbacks(closeServerDelayRunnable,connectionTimeoutRunnable);
-            myHandler.postDelayed(connectionTimeoutRunnable, SCAN_TIMEOUT_DURATION);
-        } else {
-            adapter.stopLeScan(leScanCallback);
-            SCANNING = false;
-        }
+        AsyncTask.execute(() -> {
+            if (enable) {
+                STATUS = SEARCHING;
+                broadcastUpdate(BroadcastActionConstants.ACTION_SCANNING.getString());
+                adapter.startLeScan(leScanCallback);
+                System.out.println("SCAN STARTED");
+            } else {
+                adapter.stopLeScan(leScanCallback);
+                STATUS = SEARCHING;
+            }
+        });
     }
 
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
-
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             try {
                 if (status == BluetoothGatt.GATT_SUCCESS && operationManager != null) {
                     System.out.println("MTU CHANGED TO: " + mtu);
                     refreshDeviceCache(gatt);
-                    myHandler.removeCallbacks(connectionTimeoutRunnable);
                     operationManager.request(new Operation(null, Operation.DISCOVER_SERVICES, null));
                 } else {
                     System.out.println("MTU REQUEST FAILURE");
@@ -195,7 +183,6 @@ public class BluetoothLeService extends Service {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     server = gatt;
                     operationManager = new OperationManager(gatt);
-                    myHandler.removeCallbacks(connectionTimeoutRunnable);
                     broadcastUpdate(BroadcastActionConstants.ACTION_GATT_CONNECTED.getString());
                     System.out.println("CONNECTION STATE Connected");
                     refreshDeviceCache(gatt);
@@ -248,6 +235,7 @@ public class BluetoothLeService extends Service {
             try {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     System.out.println("CHARACTERISTIC READ SUCCESS");
+                    FAILED_PACKET_BUFFER = 0;
                     long[] l = new long[characteristic.getValue().length];
                     for (int i = 0; i < characteristic.getValue().length; i++) {
                         l[i] = characteristic.getValue()[i] % 0xFFFFFFFFL;
@@ -255,14 +243,20 @@ public class BluetoothLeService extends Service {
                     System.out.println("VALUE: " + Arrays.toString(l));
                     broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString(), characteristic);
                 } else {
-                    System.out.println("CHARACTERISTIC READ FAILURE");
-                    broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ_FAILURE.getString());
-                    autoReconnect();
+                    FAILED_PACKET_BUFFER++;
+                    if (FAILED_PACKET_BUFFER == FAILED_PACKET_MAXIMUM_BUFFER) {
+                        System.out.println("CHARACTERISTIC READ FAILURE");
+                        broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ_FAILURE.getString());
+                        autoReconnect();
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ_FAILURE.getString());
-                autoReconnect();
+                FAILED_PACKET_BUFFER++;
+                if (FAILED_PACKET_BUFFER == FAILED_PACKET_MAXIMUM_BUFFER) {
+                    broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ_FAILURE.getString());
+                    autoReconnect();
+                }
             } finally {
                 if (operationManager != null) {
                     operationManager.operationCompleted();
@@ -276,17 +270,24 @@ public class BluetoothLeService extends Service {
             try {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     WRITTEN = true;
+                    FAILED_PACKET_BUFFER = 0;
                     System.out.println("WRITE CHARACTERISTIC SUCCESS");
                     broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC_WRITE.getString());
                     operationManager.request(new Operation(null, Operation.READ_RSSI, null));
                 } else {
-                    System.out.println("WRITE CHARACTERSTISTIC FAILURE");
-                    broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC__WRITE_FAILURE.getString());
-                    autoReconnect();
+                    FAILED_PACKET_BUFFER++;
+                    if (FAILED_PACKET_BUFFER == FAILED_PACKET_MAXIMUM_BUFFER) {
+                        System.out.println("WRITE CHARACTERSTISTIC FAILURE");
+                        broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC__WRITE_FAILURE.getString());
+                        autoReconnect();
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                autoReconnect();
+                FAILED_PACKET_BUFFER++;
+                if (FAILED_PACKET_BUFFER == FAILED_PACKET_MAXIMUM_BUFFER) {
+                    autoReconnect();
+                }
             } finally {
                 if (operationManager != null) {
                     operationManager.operationCompleted();
@@ -320,21 +321,32 @@ public class BluetoothLeService extends Service {
                 System.out.println("RSSI REQUEST ERROR");
                 e.printStackTrace();
             } finally {
-                operationManager.operationCompleted();
+                if (operationManager != null)
+                    operationManager.operationCompleted();
             }
         }
     };
 
 
-    private void broadcastUpdate(final String action) {
-        final Intent intent = new Intent(action);
-        context.sendBroadcast(intent);
+    private synchronized void broadcastUpdate(final String action) {
+        broadcastUpdate(action, null);
     }
 
-    private void broadcastUpdate(@NonNull final String action, @NonNull final BluetoothGattCharacteristic characteristic) {
-        final Intent intent = new Intent(action);
-        intent.putExtra("bytes", characteristic.getValue());
-        context.sendBroadcast(intent);
+    private synchronized void broadcastUpdate(@NonNull final String action, @NonNull final BluetoothGattCharacteristic characteristic) {
+        if (!broadcasting) {
+            broadcasting = true;
+            final Intent intent = new Intent(action);
+            if (characteristic != null)
+                intent.putExtra("bytes", characteristic.getValue());
+            context.sendBroadcast(intent);
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                broadcasting = false;
+            }
+        }
     }
 
     public void requestConnectorVoltage(@NonNull Pin c) {
@@ -428,7 +440,6 @@ public class BluetoothLeService extends Service {
         try {
             System.out.println("ATTEMPTING AUTO RECONNECT");
             if (!USER_DISCONNECT) {
-                myHandler.removeCallbacks(connectionTimeoutRunnable);
                 if (server != null) {
                     server.disconnect();
                     myHandler.postDelayed(closeServerDelayRunnable, 600);
@@ -444,7 +455,7 @@ public class BluetoothLeService extends Service {
                 Thread.sleep(500);
                 checkBluetoothCompatible();
                 setUpBluetooth();
-                if (!SCANNING)
+                if (STATUS != SEARCHING)
                     scanLeDevice(true);
             } else {
                 System.out.println("USER DISCONNECT: AUTO RECONNECT ABORT");

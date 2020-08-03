@@ -83,8 +83,10 @@ public class Settings extends AppCompatActivity {
         registerReceiver(broadcastReceiver, filter);
         findViewById(R.id.settingsprogressbar).setVisibility(View.GONE);
         findViewById(R.id.settingsupdatedatabasebutton).setOnClickListener((view) -> {
-            if (FirebaseAuth.getInstance().getCurrentUser() != null)
-                new UpdateDatabase(this);
+            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                Intent startUpdateIntent = new Intent(this, UpdateDatabase.class);
+                startService(startUpdateIntent);
+            }
             else
                 Snackbar.make(findViewById(R.id.settingsconstraintlayout), "Please Sign In", Snackbar.LENGTH_SHORT).show();
         });

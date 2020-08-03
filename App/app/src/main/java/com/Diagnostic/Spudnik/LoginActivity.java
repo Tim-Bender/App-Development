@@ -76,10 +76,6 @@ public class LoginActivity extends AppCompatActivity {
      */
     private TextInputEditText passwordEditText;
     /**
-     * Vehicle object. Will be prebuild and passed to home later.
-     */
-    private Vehicle myvehicle;
-    /**
      * Control flow boolean, if we are logging in from the Settings page this becomes true and changes behavior upon exit.
      */
     private boolean fromSettings;
@@ -178,8 +174,10 @@ public class LoginActivity extends AppCompatActivity {
                 updateLoadingView(LOGGING_IN_BEGUN);
                 auth.signInWithEmailAndPassword(emailEditText.getText().toString().trim(), passwordEditText.getText().toString().trim()) //pass the information into an authentication request
                         .addOnCompleteListener(task -> {
-                            if (task.isSuccessful())  //if the task is successful, we begin a database update/
-                                new UpdateDatabase(LoginActivity.this);
+                            if (task.isSuccessful()) {  //if the task is successful, we begin a database update/
+                                Intent startUpdateIntent = new Intent(this, UpdateDatabase.class);
+                                startService(startUpdateIntent);
+                            }
                             else {
                                 //otherwise we inform them that authentication has failed.
                                 updateLoadingView(LOGGING_IN_FAILURE);
@@ -202,7 +200,6 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void goToHome() {
         Intent i = new Intent(getBaseContext(), Home.class);
-        i.putExtra("myvehicle", myvehicle); //put the vehicle as a parcelable extra
         pressed = false;
         startActivity(i); //go to home
         finish();
@@ -245,8 +242,6 @@ public class LoginActivity extends AppCompatActivity {
                     if (fromSettings)
                         finish(); //if they logged in from the settings page we will just close this page and send them back there
                     //otherwise they came from the loading screen.
-                    myvehicle = new Vehicle(); //create a new vehicle, since it couldn't have been done on loading
-                    myvehicle.preBuildVehicleObject(getApplicationContext()); //prebuild the vehicle
                     updateLoadingView(LOGGING_IN_COMPLETE);
                     goToHome(); //go to the home activity
                 } else if (intent.getIntExtra("data", 2) == UpdateDatabase.UPDATE_FAILED)  //update the ui accordingly

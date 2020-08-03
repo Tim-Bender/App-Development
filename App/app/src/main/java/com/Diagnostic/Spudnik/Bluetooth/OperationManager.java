@@ -40,11 +40,25 @@ public class OperationManager {
     }
 
     public synchronized void request(@NonNull Operation operation) {
-        operations.add(operation);
+        insertIntoQueue(operation);
         if (currentOp == null) {
             currentOp = operations.poll();
             performOperation();
         }
+    }
+
+    private void insertIntoQueue(@NonNull Operation operation) {
+        for (Operation o : operations) {
+            if (operation.getOPERATION() == o.getOPERATION() && operation.getOperationUUID() == o.getOperationUUID()) {
+                if(operation.getWriteValue() != null && o.getWriteValue() != null) {
+                    if (operation.getWriteValue().getPacket().length == o.getWriteValue().getPacket().length) {
+                        o.setWriteValue(operation.getWriteValue());
+                        return;
+                    }
+                }
+            }
+        }
+        operations.add(operation);
     }
 
     public synchronized void operationCompleted() {
@@ -70,7 +84,7 @@ public class OperationManager {
             server.close();
         } else if (currentOp.getOPERATION() == Operation.REQUEST_MTU) {
             server.requestMtu(GATT_MTU_SIZE);
-        } else if(currentOp.getOPERATION() == Operation.READ_RSSI){
+        } else if (currentOp.getOPERATION() == Operation.READ_RSSI) {
             server.readRemoteRssi();
         }
     }

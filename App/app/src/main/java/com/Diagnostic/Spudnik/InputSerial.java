@@ -19,7 +19,10 @@
 package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -35,6 +38,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
@@ -46,6 +50,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * Receive user input (machine id and dealer id) verify them, pull data about the selected machine and then pass to next activity.
@@ -54,6 +59,26 @@ import java.nio.charset.StandardCharsets;
  * @version dev 1.0.0
  * @since dev 1.0.0
  */
+
+@SuppressWarnings("unused")
+enum DealerIds{
+    GENAG("GENAG"),
+    HJVPEI("HJVPEI"),
+    HJVNB("HJVNB"),
+    AFE("AFE"),
+    GROWERS("GROWERS"),
+    RDO("RDO"),
+    LENCOW("LENCOW"),
+    SGRAF("SGRAF"),
+    SHEYB("SHEYD"),
+    SBLACK("SBLACK"),
+    SPRESQ("SPRESQ"),
+    SPUD("SPUD");
+    public String dealer;
+    DealerIds(String dealer) {
+        this.dealer = dealer;
+    }
+}
 
 public class InputSerial extends AppCompatActivity {
     /**
@@ -68,6 +93,8 @@ public class InputSerial extends AppCompatActivity {
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
     private CheckBox checkBox;
+    private InputSerial.BuildVehicleBroadcastListener receiver;
+    private String[] vehicleIds;
 
     /**
      * Oncreate will do its typical tasks, of assigning instance fields to values, and setting up the toolbar.
@@ -90,10 +117,14 @@ public class InputSerial extends AppCompatActivity {
         textView.setVisibility(View.GONE);
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = preferences.edit();
-        checkBox =  findViewById(R.id.rememberdealeridcheckbox);
+        checkBox = findViewById(R.id.rememberdealeridcheckbox);
         //FINAL PRE-DATABASE CHECK ON THE VEHICLE OBJECT
-        myvehicle = getIntent().getParcelableExtra("myvehicle");
-        myvehicle.preBuildVehicleObject(this); //final prebuild attempt...
+        //myvehicle = getIntent().getParcelableExtra("myvehicle");
+        myvehicle = new Vehicle();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Vehicle.buildDoneAction);
+        receiver = new InputSerial.BuildVehicleBroadcastListener();
+        registerReceiver(receiver, filter);
     }
 
     /**
@@ -107,7 +138,8 @@ public class InputSerial extends AppCompatActivity {
      */
     @Override
     protected void onStart() {
-        super.onStart();
+        vehicleIds = preferences.getString("machineIds","").split(",");
+        System.out.println("VEHICLE IDS: " + Arrays.toString(vehicleIds));
         //When a user makes a change to the inputid edit text view, then we will check if the new value is a valid id, and if it is, then we attempt to build our database of connections
         serialNumberText = findViewById(R.id.inputid);
         serialNumberText.setOnKeyListener((v, keyCode, event) -> {
@@ -116,11 +148,6 @@ public class InputSerial extends AppCompatActivity {
                 go(getCurrentFocus());
                 return true;
             }
-            //any other keystroke will lead to an attempt to build the database
-            else if (event.getAction() != KeyEvent.ACTION_DOWN)
-                tryBuildDataBaseObject();
-
-
             return false;
         });
 
@@ -176,29 +203,19 @@ public class InputSerial extends AppCompatActivity {
                 spudnikelectrical.setVisibility(View.VISIBLE);
             }
         });
+        findViewById(R.id.inputserialnextbutton).setOnClickListener(this::go);
+        super.onStart();
     }
 
     /**
      * This method will navigate the user to the connector select screen. It will also ensure that all necessary database objects are constructed.
      * In addition the validity of user inputs is checked here using abstracted methods.
      *
-     * @param view view
      * @since dev 1.0.0
      */
     @SuppressLint("SetTextI18n")
     public void go(View view) {
-        if (!(serialNumberText.getText().length() < 3)) {
-            if(myvehicle.checkDealer(dealerText.getText().toString().toLowerCase().trim())) {
-                if (checkBox.isChecked())                                                           //if "Remember" toggle is enabled then we save the dealer id into sharedpreferences
-                    editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());   //Important to lowercase it and trim whitespace...
-                startActivity(new Intent(getApplicationContext(), ConnectorSelect.class)
-                        .putExtra("myvehicle", myvehicle)
-                        .putParcelableArrayListExtra("connections", myvehicle.getPins()));
-            }
-            else
-                dealerText.setError("Invalid");
-        } else
-            serialNumberText.setError("Invalid");
+        tryBuildDataBaseObject();
     }
 
     /**
@@ -207,22 +224,31 @@ public class InputSerial extends AppCompatActivity {
      *
      * @since dev 1.0.0
      */
-    public void tryBuildDataBaseObject() {
-        AsyncTask.execute(() -> { //Begin a new thread
+    public synchronized void tryBuildDataBaseObject() {
+        AsyncTask.execute(() -> {
             try {
                 final String vehicleId = serialNumberText.getText().toString().toLowerCase().trim(); //get their inputted vehicle id
                 if (vehicleId.length() > 2) {          //It has to be at least 3 long for us to accept it
-                    final String determined = myvehicle.determineComparison(vehicleId); //Determine the most likely vehicle id to match with. See myvehicle's documentation for this function.
+                    final String determined = determineVehicleFile(vehicleId); //Determine the most likely vehicle id to match with. See myvehicle's documentation for this function.
+                    System.out.println("DETERMINED " + determined);
                     File localFile = new File(new File(getFilesDir(), "database"), "_" + determined + ".csv"); //We need to re-add the _ and .csv to the name of the file. Pointer to file we will reading from
                     FileInputStream fis2 = new FileInputStream(localFile);//our fileinputstream
                     is = new InputStreamReader(fis2, StandardCharsets.UTF_8); //new inputstreamreader
                     myvehicle.setIs(is);        //give the inputstreamreader to our vehicle object
                     myvehicle.setVehicleId(vehicleId.toLowerCase().trim());     //set the vehicle id
-                    myvehicle.buildDataBase();      //initiate database construction
+                    myvehicle.buildDataBase(getApplicationContext());      //initiate database construction
                 }
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (receiver != null)
+            unregisterReceiver(receiver);
+        super.onDestroy();
     }
 
     /**
@@ -240,6 +266,71 @@ public class InputSerial extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public boolean checkDealer(@NonNull String dealerid) {
+        for(DealerIds d: DealerIds.values()){
+            if(dealerid.equals(d.dealer.toLowerCase().trim()))
+                return true;
+        }
+        return false;
+    }
+
+    private class BuildVehicleBroadcastListener extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getIntExtra("success", 0) == Vehicle.BUILD_SUCCESSFUL) {
+                if (!(serialNumberText.getText().length() < 3)) {
+                    if (checkDealer(dealerText.getText().toString().toLowerCase().trim())) {
+                        if (checkBox.isChecked())                                                           //if "Remember" toggle is enabled then we save the dealer id into sharedpreferences
+                            editor.putString("dealerid", dealerText.getText().toString().toLowerCase().trim());   //Important to lowercase it and trim whitespace...
+                        startActivity(new Intent(getApplicationContext(), ConnectorSelect.class)
+                                .putExtra("myvehicle", myvehicle)
+                                .putParcelableArrayListExtra("connections", myvehicle.getPins()));
+                    } else
+                        dealerText.setError("Invalid");
+                } else
+                    serialNumberText.setError("Invalid");
+            }
+        }
+    }
+
+
+    /**
+     * This method will determine the closest match vehicle id from the id that was entered. It will then return that id.
+     *
+     * @param machineid MachineId
+     * @return String
+     * @since dev 1.0.0
+     */
+    public String determineVehicleFile(@NonNull String machineid) {
+        System.out.println("VEHICLE ID LENGTHS: " + vehicleIds.length);
+        String toReturn = "null"; //default return if we dont match with anything
+        int maximum = Integer.MIN_VALUE;
+        if (machineid.length() > 0 && vehicleIds.length != 0) {
+            for (String id : vehicleIds) { //we will iterate through the ids
+                char[] storage = machineid.toCharArray(), //cast the two into char arrays
+                        idCharArray = id.toCharArray();
+                int points = 0; //higher points of comparison the better for the id
+                if (idCharArray[0] != storage[0] || storage.length != idCharArray.length) //if the first letters are not the same, or they aren't the same length. Skip it
+                    continue;
+                for (int i = 0; i < idCharArray.length; i++) { //iterate through every character
+                    if (i < storage.length) {
+                        if (storage[i] == idCharArray[i]) //if theres a character match the id earns a point
+                            points++;
+                        else if (idCharArray[i] != 'x' && idCharArray[i] != 'X') //if they dont match, but we are comparing against an x or an X then they don't lose a point
+                            points--; //take a point away.
+                    }
+                }
+                if (maximum < points) { //if we have a new maximum match set the variables
+                    maximum = points;
+                    toReturn = id;
+                }
+            }
+            if (maximum <= 0) //if we have 0 or fewer comparison points, then there was no match
+                return toReturn;
+        }
+        return toReturn;
     }
 
     /**

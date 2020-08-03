@@ -148,7 +148,6 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="10dp"
                 android:layout_weight=".4"
-                android:onClick="go"
                 android:text="@string/next"
                 android:textSize="18sp" />
         </LinearLayout>
@@ -157,7 +156,7 @@
             android:id="@+id/helptoggle"
             style="@style/MySwitchStyle"
             android:layout_width="wrap_content"
-            android:layout_height="0px"
+            android:layout_height="0dp"
             android:layout_marginStart="20dp"
             android:layout_weight=".5"
             android:buttonTint="#FF0000"

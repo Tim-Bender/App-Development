@@ -18,7 +18,6 @@
 
 package com.Diagnostic.Spudnik;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -26,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -82,6 +80,7 @@ public class SelectPin extends AppCompatActivity {
     private BluetoothBroadcastReceiver receiver;
     private BluetoothLeService mServer;
     private boolean bounded = false;
+
     /**
      * Some interesting stuff going on in this onCreate. First we setup our recycler view. and then we setupon an itemtouchhelper which allows
      * for the "deleting" of elements by swiping them off the screen.
@@ -98,6 +97,7 @@ public class SelectPin extends AppCompatActivity {
         setSupportActionBar(toolbar);
         setTitle("Pin Selection");
         toolbar.setTitleTextColor(Color.WHITE);
+        getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
 
         myvehicle = getIntent().getParcelableExtra("myvehicle");
         Objects.requireNonNull(myvehicle).setPins(getIntent().getParcelableArrayListExtra("connections"));
@@ -127,16 +127,10 @@ public class SelectPin extends AppCompatActivity {
         });
         helper.attachToRecyclerView(recyclerView); //attach the helper above to our recyclerview
         IntentFilter filter = new IntentFilter();
-        for(BroadcastActionConstants b : BroadcastActionConstants.values())
+        for (BroadcastActionConstants b : BroadcastActionConstants.values())
             filter.addAction(b.getString());
         receiver = new BluetoothBroadcastReceiver();
         registerReceiver(receiver, filter);
-    }
-
-    public void checkPermissions() {
-        if (!(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
     }
 
     private class BluetoothBroadcastReceiver extends BroadcastReceiver {
@@ -144,22 +138,21 @@ public class SelectPin extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString())) {
                 byte[] bytes = intent.getByteArrayExtra("bytes");
+                getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
                 if (bytes != null) {
                     updatevalues(((bytes[0] << 8) + bytes[1]) / 100f);
                     getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
                     mServer.requestConnectorVoltage(pins.get(0));
                 }
-            }
-            else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString())){
-                    mServer.requestConnectorVoltage(pins.get(0));
-            }
-            else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())){
+            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString())) {
+                mServer.requestConnectorVoltage(pins.get(0));
+            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())) {
                 getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
-                Snackbar.make(findViewById(R.id.selectpinconstraintlayout),"Bluetooth Disconnected",Snackbar.LENGTH_SHORT).show();
-            } else if(intent.getAction().equals(BroadcastActionConstants.ACTION_SCANNING.getString())){
+                Snackbar.make(findViewById(R.id.selectpinconstraintlayout), "Bluetooth Disconnected", Snackbar.LENGTH_SHORT).show();
+            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_SCANNING.getString())) {
                 getSupportActionBar().setIcon(R.drawable.bluetoothsearching);
-            }  else if(intent.getAction().equals(BroadcastActionConstants.ACTION_WEAK_SIGNAL.getString()))
-                Snackbar.make(findViewById(R.id.selectpinconstraintlayout),"Weak Bluetooth Signal",Snackbar.LENGTH_SHORT).show();
+            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_WEAK_SIGNAL.getString()))
+                Snackbar.make(findViewById(R.id.selectpinconstraintlayout), "Weak Bluetooth Signal", Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -176,10 +169,9 @@ public class SelectPin extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         unregisterReceiver(receiver);
-        //AsyncTask.execute(() -> bluetoothService.disconnect(true));
-        if(bounded){
+        if (bounded) {
             unbindService(mConnection);
             bounded = false;
         }
@@ -198,18 +190,15 @@ public class SelectPin extends AppCompatActivity {
         myvehicle.sortConnections(); //sort the connections
         if (pins.isEmpty()) //build them
             buildConnections();
-        checkPermissions();
         Intent mIntent = new Intent(this, BluetoothLeService.class);
-        bindService(mIntent,mConnection,BIND_AUTO_CREATE);
-        //bluetoothService = new BluetoothLeService(this);
-        //bluetoothService.resetKilledProcess();
+        bindService(mIntent, mConnection, BIND_AUTO_CREATE);
     }
 
     ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             System.out.println("SERVICE CONNECTED");
-            BluetoothLeService.LocalBinder mLocalBinder = ((BluetoothLeService.LocalBinder)service);
+            BluetoothLeService.LocalBinder mLocalBinder = ((BluetoothLeService.LocalBinder) service);
             mServer = mLocalBinder.getServerInstance();
             bounded = true;
         }
@@ -260,7 +249,7 @@ public class SelectPin extends AppCompatActivity {
         String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
         textView.setText(s1 + temp.substring(1));
         textView = findViewById(R.id.numberofpinstextfield);
-        textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections().get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector\n Connector Voltage\n=" + voltage+"v");
+        textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections().get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector\n Connector Voltage\n=" + voltage + "v");
     }
 
     @Override
