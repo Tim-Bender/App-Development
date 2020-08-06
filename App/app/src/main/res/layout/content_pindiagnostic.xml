@@ -61,29 +61,74 @@
                 android:layout_weight=".6"
                 android:background="@drawable/back"
                 android:gravity="center"
-                android:textSize="22sp" />
+                android:textSize="16sp" />
 
         </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/horizontalrecyclerview"
-            android:layout_width="match_parent"
-            android:layout_height="8dp"
-            android:layout_gravity="center"
-            android:layout_weight="6.75"
-            android:scrollbars="horizontal">
-
-        </androidx.recyclerview.widget.RecyclerView>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1.5"
+            android:layout_margin="15dp"
+            android:layout_weight="6"
+            android:background="@drawable/back"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/pindiagnosticpinnumber"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:layout_weight=".25"
+                android:gravity="center"
+                android:text="TextView"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/pindiagnosticpinname"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:layout_weight=".25"
+                android:gravity="center"
+                android:text="TextView"
+                android:textSize="22sp"
+                android:textStyle="italic" />
+
+            <TextView
+                android:id="@+id/pindiagnosticpwm"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="10dp"
+                android:layout_weight=".25"
+                android:gravity="center"
+                android:text="TextView"
+                android:textSize="36sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/pindiagnosticvdc"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="10dp"
+                android:layout_weight=".25"
+                android:gravity="center"
+                android:text="TextView"
+                android:textSize="22sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.15"
             android:orientation="horizontal">
 
             <Button
+                android:id="@+id/pindiagnostictestmodebutton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:onClick="testMode"
                 android:text="Pin Test Mode"
@@ -91,11 +136,32 @@
 
             <Button
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:onClick="viewpinloc"
                 android:text="Pin Location"
                 android:textSize="20sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.15"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/pindiagnosticprevpinbutton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/prev_pin" />
+
+            <Button
+                android:id="@+id/pindiagnosticnextpinbutton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/next_pin" />
         </LinearLayout>
 
     </LinearLayout>

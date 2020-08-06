@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Menu;
@@ -35,11 +36,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SnapHelper;
 
@@ -82,29 +82,20 @@ public class PinDiagnostic extends AppCompatActivity {
      * Current position users are in the scrollview
      */
     private int loc;
-    /**
-     * Custom view adapter for the recyclerview
-     */
-    private ConnectionAdapterHorizontal myAdapter;
-    /**
-     * Will allow us to "snap" to items in the horizontal scrollview
-     */
-    private SnapHelper snapHelper;
-    /**
-     * Our recyclerview object, will be in horizontal orientation
-     */
-    private RecyclerView recyclerView;
 
     private PinDiagnostic.BluetoothBroadcastReceiver receiver;
 
     private BluetoothLeService mServer;
     private boolean bounded = false;
+    private boolean shouldReadCharacteristic = true;
+
     /**
      * Typical onCreate, we do setup the recyclerview with its scrolllistener and snaphelper
      *
      * @param savedInstanceState Bundle
      * @since dev 1.0.0
      */
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,49 +114,57 @@ public class PinDiagnostic extends AppCompatActivity {
 
         direction = findViewById(R.id.direction);
         connectorinformation = findViewById(R.id.connectorinformation);
-        //setup the recyclerview
-        recyclerView = findViewById(R.id.horizontalrecyclerview);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        myAdapter = new ConnectionAdapterHorizontal(this, uniquePins, myvehicle);
-        LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(PinDiagnostic.this, LinearLayoutManager.HORIZONTAL, false); //make it horizontal
-        recyclerView.setLayoutManager(horizontalLayoutManager); //set the layout manager for the recycler view
-        snapHelper = new PagerSnapHelper();
-        snapHelper.attachToRecyclerView(recyclerView); //attach the snaphelper to the recycler view
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                updateSnapPosition(recyclerView, dx, dy); //when users scroll using the horizontal recyclerview we update the snap position
-            }
+        updateValues(null);
+        setUpUi();
+        findViewById(R.id.pindiagnosticnextpinbutton).setOnClickListener((view) -> {
+            loc = (loc++ == uniquePins.size()-1) ? 0 : loc++; //ternary operator. Determine if we have overflowed list
+            myPin = uniquePins.get(loc);
+            updateValues(null);
         });
-        recyclerView.setAdapter(myAdapter); //set the adapter to our recyclerview, pulls objects from our arraylist
-        updateValues(0f);
+        findViewById(R.id.pindiagnosticprevpinbutton).setOnClickListener((view) -> {
+            loc = (loc == 0) ? uniquePins.size()-1 : --loc; //ternary operator. Determine if we have underflowed list
+            myPin = uniquePins.get(loc);
+            updateValues(null);
+        });
         IntentFilter filter = new IntentFilter();
-        for(BroadcastActionConstants b : BroadcastActionConstants.values())
+        for (BroadcastActionConstants b : BroadcastActionConstants.values())
             filter.addAction(b.getString());
         receiver = new PinDiagnostic.BluetoothBroadcastReceiver();
         registerReceiver(receiver, filter);
-    }
-
-    /**
-     * This method will be used to snap to the correct position in the recyclerview when the page is first loaded
-     *
-     * @since dev 1.0.0
-     */
-    @Override
-    protected void onStart() {
-        super.onStart();
-        recyclerView.scrollToPosition(loc); //snap to the correct position when the page is first loaded
         Intent mIntent = new Intent(this, BluetoothLeService.class);
-        bindService(mIntent,mConnection,BIND_AUTO_CREATE);
+        bindService(mIntent, mConnection, BIND_AUTO_CREATE);
     }
 
     @Override
-    protected void onDestroy(){
+    protected void onResume() {
+        shouldReadCharacteristic = true;
+        if (mServer != null)
+            mServer.requestConnectorVoltage(uniquePins);
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        shouldReadCharacteristic = false;
+        super.onPause();
+    }
+
+
+    @Override
+    protected void onDestroy() {
         unregisterReceiver(receiver);
-        if(bounded)
+        if (bounded)
             unbindService(mConnection);
         super.onDestroy();
+    }
+
+    private void setUpUi() {
+        String dir = uniquePins.get(0).inout();
+        if (dir.equals("Input")) {
+            findViewById(R.id.pindiagnosticvdc).setVisibility(View.GONE);
+            findViewById(R.id.pindiagnostictestmodebutton).setVisibility(View.GONE);
+
+        }
     }
 
     /**
@@ -173,48 +172,71 @@ public class PinDiagnostic extends AppCompatActivity {
      *
      * @since dev 1.0.0
      */
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("SetTextI18n")
-    private void updateValues(float f) {
-        myPin = uniquePins.get(loc);
-        String temp = myPin.getDirection();
-        String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
-        direction.setText(s1 + temp.substring(1));
-        connectorinformation.setText(myvehicle.getMap(myPin.getDirection().toLowerCase()) + " " + myPin.inout() + " Connector\nConnectorVoltage\n" + f +"v");
-        setTitle("Viewing Pin:" + myPin.getS4());
-        //myAdapter.notifyDataSetChanged();
+    private void updateValues(@Nullable byte[] bytes) {
+        String dir = myPin.inout();
+        if(dir.equals("Output")) {
+            float supplyV = 0,pwmFreq = 0;
+            if (bytes != null) {
+                int[] ints = new int[4];
+                for(int i = 0; i < 4; i++){
+                    ints[i] = (bytes[i] < 0) ? bytes[i] + 256 : bytes[i];
+                }
+                supplyV = ((ints[0] << 8) + ints[1]) / 100f;
+                pwmFreq = (ints[2] << 8) + ints[3];
+            }
+            myPin = uniquePins.get(loc);
+            String temp = myPin.getDirection();
+            String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
+            direction.setText(s1 + temp.substring(1));
+            connectorinformation.setText(myvehicle.getPinCount(myPin.getDirection().toLowerCase()) + " " + myPin.inout() + " Connector\nSupply Voltage = " + supplyV + " VDC\n" + "PWM Frequency = "+pwmFreq +" HZ" );
+            setTitle("Viewing Pin:" + myPin.getS4());
+            TextView textView = findViewById(R.id.pindiagnosticpinnumber);
+            textView.setText("Pin " + myPin.getS4());
+            textView = findViewById(R.id.pindiagnosticpinname);
+            textView.setText(myPin.getName());
+        }
+        else{
+            float f = 0;
+            if (bytes != null) {
+                f = ((bytes[0] << 8) + bytes[1]) / 100f;
+            }
+            myPin = uniquePins.get(loc);
+            String temp = myPin.getDirection();
+            String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
+            direction.setText(s1 + temp.substring(1));
+            connectorinformation.setText(myvehicle.getPinCount(myPin.getDirection().toLowerCase()) + " " + myPin.inout() + " Connector\nConnectorVoltage\n" + f + "v");
+            setTitle("Viewing Pin:" + myPin.getS4());
+            TextView textView = findViewById(R.id.pindiagnosticpinnumber);
+            textView.setText("Pin " + myPin.getS4());
+            textView = findViewById(R.id.pindiagnosticpinname);
+            textView.setText(myPin.getName());
+        }
     }
 
     private class BluetoothBroadcastReceiver extends BroadcastReceiver {
+        @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString())) {
                 byte[] bytes = intent.getByteArrayExtra("bytes");
                 if (bytes != null) {
-                    updateValues(((bytes[0] << 8) + bytes[1]) / 100f);
+                    updateValues(bytes);
+                    //do the formatty stuffs
+                    if (shouldReadCharacteristic && mServer != null)
+                        mServer.requestConnectorVoltage(uniquePins);
                 }
                 getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
-            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())){
+            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())) {
                 getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
-                Snackbar.make(findViewById(R.id.pindiagnosticconstraintlayout),"Bluetooth Disconnected",Snackbar.LENGTH_SHORT).show();
-            } else if(intent.getAction().equals(BroadcastActionConstants.ACTION_SCANNING.getString())){
+                Snackbar.make(findViewById(R.id.pindiagnosticconstraintlayout), "Bluetooth Disconnected", Snackbar.LENGTH_SHORT).show();
+            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_SCANNING.getString())) {
                 getSupportActionBar().setIcon(R.drawable.bluetoothsearching);
-            }  else if(intent.getAction().equals(BroadcastActionConstants.ACTION_WEAK_SIGNAL.getString()))
-                Snackbar.make(findViewById(R.id.pindiagnosticconstraintlayout),"Weak Bluetooth Signal",Snackbar.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * Here the "loc" variable is updated and then the textviews will be updated. called whenever the user scrolls.
-     *
-     * @param recyclerView our recyclerview
-     * @param dx           x position
-     * @param dy           y position
-     * @since dev 1.0.0
-     */
-    private void updateSnapPosition(@NonNull RecyclerView recyclerView, @NonNull int dx, @NonNull int dy) {
-        int newSnapPosition = snapHelper.findTargetSnapPosition(recyclerView.getLayoutManager(), dx, dy);
-        if (newSnapPosition != loc && newSnapPosition > -1) { //dont update if it hasn't moved, or is less than 0
-            loc = newSnapPosition;
+            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_WEAK_SIGNAL.getString()))
+                Snackbar.make(findViewById(R.id.pindiagnosticconstraintlayout), "Weak Bluetooth Signal", Snackbar.LENGTH_SHORT).show();
+            else if(intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString()))
+                mServer.requestConnectorVoltage(uniquePins);
         }
     }
 
@@ -236,8 +258,9 @@ public class PinDiagnostic extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             System.out.println("SERVICE CONNECTED");
-            BluetoothLeService.LocalBinder mLocalBinder = ((BluetoothLeService.LocalBinder)service);
+            BluetoothLeService.LocalBinder mLocalBinder = ((BluetoothLeService.LocalBinder) service);
             mServer = mLocalBinder.getServerInstance();
+            mServer.requestConnectorVoltage(uniquePins);
             bounded = true;
         }
 

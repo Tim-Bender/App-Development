@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Menu;
@@ -34,6 +35,8 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -65,10 +68,6 @@ public class SelectPin extends AppCompatActivity {
      */
     private Vehicle myvehicle;
     /**
-     * Will be used to update textviews
-     */
-    private TextView textView;
-    /**
      * An Arraylist of connection objects. Will be parsed, and then used by the recyclerview
      */
     private ArrayList<Pin> pins = new ArrayList<>(24);
@@ -80,6 +79,7 @@ public class SelectPin extends AppCompatActivity {
     private BluetoothBroadcastReceiver receiver;
     private BluetoothLeService mServer;
     private boolean bounded = false;
+    private boolean shouldReadCharacteristic = true;
 
     /**
      * Some interesting stuff going on in this onCreate. First we setup our recycler view. and then we setupon an itemtouchhelper which allows
@@ -101,7 +101,6 @@ public class SelectPin extends AppCompatActivity {
 
         myvehicle = getIntent().getParcelableExtra("myvehicle");
         Objects.requireNonNull(myvehicle).setPins(getIntent().getParcelableArrayListExtra("connections"));
-        textView = findViewById(R.id.connectorid);
 
         RecyclerView recyclerView = findViewById(R.id.selectpinrecyclerview); //setup our recyclerview
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -134,18 +133,20 @@ public class SelectPin extends AppCompatActivity {
     }
 
     private class BluetoothBroadcastReceiver extends BroadcastReceiver {
+        @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString())) {
                 byte[] bytes = intent.getByteArrayExtra("bytes");
                 getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
                 if (bytes != null) {
-                    updatevalues(((bytes[0] << 8) + bytes[1]) / 100f);
+                    updatevalues(bytes);
                     getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
-                    mServer.requestConnectorVoltage(pins.get(0));
+                    if (shouldReadCharacteristic)
+                        mServer.requestConnectorVoltage(pins);
                 }
-            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString())) {
-                mServer.requestConnectorVoltage(pins.get(0));
+            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString()) && shouldReadCharacteristic) {
+                mServer.requestConnectorVoltage(pins);
             } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())) {
                 getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
                 Snackbar.make(findViewById(R.id.selectpinconstraintlayout), "Bluetooth Disconnected", Snackbar.LENGTH_SHORT).show();
@@ -161,23 +162,33 @@ public class SelectPin extends AppCompatActivity {
      *
      * @since dev 1.0.0
      */
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onResume() {
         super.onResume();
+        shouldReadCharacteristic = true;
+        if (mServer != null)
+            mServer.requestConnectorVoltage(pins);
         myAdapter.notifyDataSetChanged(); //notify that the dataset has changed
-        updatevalues(0);
+        updatevalues(null);
     }
 
     @Override
     protected void onDestroy() {
         unregisterReceiver(receiver);
         if (bounded) {
+            BluetoothLeService.WRITTEN = false;
             unbindService(mConnection);
             bounded = false;
         }
         super.onDestroy();
     }
 
+    @Override
+    protected void onPause() {
+        shouldReadCharacteristic = false;
+        super.onPause();
+    }
 
     /**
      * We will sort our connections by s4 number and then pass them to buildconnections
@@ -200,6 +211,10 @@ public class SelectPin extends AppCompatActivity {
             System.out.println("SERVICE CONNECTED");
             BluetoothLeService.LocalBinder mLocalBinder = ((BluetoothLeService.LocalBinder) service);
             mServer = mLocalBinder.getServerInstance();
+            if (BluetoothLeService.STATUS != BluetoothLeService.SEARCHING && BluetoothLeService.STATUS != BluetoothLeService.CONNECTED)
+                mServer.initiate();
+            else
+                mServer.requestConnectorVoltage(pins);
             bounded = true;
         }
 
@@ -243,13 +258,41 @@ public class SelectPin extends AppCompatActivity {
      *
      * @since dev 1.0.0
      */
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("SetTextI18n")
-    private void updatevalues(float voltage) {
-        String temp = myvehicle.getUniqueConnections().get(myvehicle.getLoc());
-        String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
-        textView.setText(s1 + temp.substring(1));
-        textView = findViewById(R.id.numberofpinstextfield);
-        textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections().get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector\n Connector Voltage\n=" + voltage + "v");
+    private void updatevalues(@Nullable byte[] bytes) {
+        Pin myPin = pins.get(0);
+        String dir = myPin.inout();
+        if(dir.equals("Output")) {
+            float supplyV = 0,pwmFreq = 0;
+            if (bytes != null) {
+                int[] ints = new int[4];
+                for(int i = 0; i < 4; i++){
+                    ints[i] = (bytes[i] < 0) ? bytes[i] + 256 : bytes[i];
+                }
+                supplyV = ((ints[0] << 8) + ints[1]) / 100f;
+                pwmFreq = (ints[2] << 8) + ints[3];
+            }
+            String temp = myPin.getDirection();
+            String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
+            TextView direction = findViewById(R.id.connectorid);
+            direction.setText(s1 + temp.substring(1));
+            TextView connectorinformation = findViewById(R.id.numberofpinstextfield);
+            connectorinformation.setText(myvehicle.getPinCount(myPin.getDirection().toLowerCase()) + " " + myPin.inout() + " Connector\nSupply Voltage = " + supplyV + " VDC\n" + "PWM Frequency = "+ (int)pwmFreq +" HZ" );
+        }
+        else{
+            float f = 0;
+            if (bytes != null) {
+                f = ((bytes[0] << 8) + bytes[1]) / 100f;
+            }
+            myPin = pins.get(0);
+            String temp = myPin.getDirection();
+            String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
+            TextView direction = findViewById(R.id.connectorid);
+            direction.setText(s1 + temp.substring(1));
+            TextView connectorinformation = findViewById(R.id.numberofpinstextfield);
+            connectorinformation.setText(myvehicle.getPinCount(myPin.getDirection().toLowerCase()) + " " + myPin.inout() + " Connector\nConnectorVoltage\n" + f + "v");
+        }
     }
 
     @Override

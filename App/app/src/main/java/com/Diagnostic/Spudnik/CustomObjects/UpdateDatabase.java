@@ -113,13 +113,11 @@ public class UpdateDatabase extends Service {
                     StorageReference reference = FirebaseStorage.getInstance().getReference().getRoot().child("DataBase"); //Storage reference to firebase bucket, at its child "Database"
                     broadcastUpdate(UPDATE_BEGUN); //send a broadcast that we have begun the update
                     STATUS = UPDATE_BEGUN;
-                    editor.putString(key,"");
+                    editor.putString(key, "");
                     editor.commit();
                     final File rootpath = new File(this.getFilesDir(), "database"); //Rootpath to local database folder
-
                     if (!rootpath.exists())  //if the rootpath doesn't exist, we create the folder. This is necessary on first boot
                         rootpath.mkdirs();
-                    new File(rootpath, "machineids").delete();    //delete the current list of machine id's.
                     final int[] fileTotalNumber = new int[1]; // will be used to track the number of total files in the firebase bucket, so we can broadcast when are done
                     final int[] fileNumber = new int[]{0}; //will be used to track which file we are current at in the list. when we reach the end we know we are done
                     //get all the items in at the firebase reference location
@@ -146,7 +144,7 @@ public class UpdateDatabase extends Service {
                                         }
                                         fileNumber[0]++; //iterate up to the next file
                                         numberOfFilesUpdated++; //iterate up
-                                        if (fileNumber[0] == fileTotalNumber[0]) { //if we have downloaded our final file then we are done
+                                        if (fileNumber[0] == fileTotalNumber[0]) {
                                             broadcastUpdate(UPDATE_COMPLETE);
                                             closeService();
                                         }//broadcast then that the update is complete
@@ -163,7 +161,7 @@ public class UpdateDatabase extends Service {
                                         editor.apply();
                                     }
                                     fileNumber[0]++; //iterate up
-                                    if (fileNumber[0] == fileTotalNumber[0]) { //if we have iterated to the last file then we are done
+                                    if (fileNumber[0] == fileTotalNumber[0]) {
                                         broadcastUpdate(UPDATE_COMPLETE);
                                         closeService();
                                     }//update that the update is complete
@@ -197,7 +195,7 @@ public class UpdateDatabase extends Service {
     }
 
     private synchronized String getMachineIdString(StorageReference item) {
-        return item.getName().toLowerCase().replace(".csv", "").replace("_","").trim() + ",";
+        return item.getName().toLowerCase().replace(".csv", "").replace("_", "").trim() + ",";
     }
 
     /**
@@ -206,17 +204,13 @@ public class UpdateDatabase extends Service {
      *
      * @since dev 1.0.0
      */
-    private boolean broadcasting = false;
     private void broadcastUpdate(@NonNull final int result) {
-        if(!broadcasting) {
-            broadcasting = true;
-            Intent intent = new Intent(); //an intent will be broadcasted
-            intent.setAction(action); //set the action for later filtering
-            intent.putExtra("data", result); //attach the result of the update
-            if (result == UPDATE_COMPLETE)
-                intent.putExtra("updatedfiles", numberOfFilesUpdated);//if the update is complete we include the number of files that were updated in the broadcast
-            sendBroadcast(intent); //send the broadcast
-        }
+        Intent intent = new Intent(); //an intent will be broadcasted
+        intent.setAction(action); //set the action for later filtering
+        intent.putExtra("data", result); //attach the result of the update
+        if (result == UPDATE_COMPLETE)
+            intent.putExtra("updatedfiles", numberOfFilesUpdated);//if the update is complete we include the number of files that were updated in the broadcast
+        sendBroadcast(intent); //send the broadcast
     }
 
     private void closeService() {

@@ -63,7 +63,7 @@
                 android:layout_weight=".6"
                 android:background="@drawable/back"
                 android:gravity="center"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
         </LinearLayout>
 
@@ -119,10 +119,12 @@
             android:layout_weight="1" />
 
         <LinearLayout
+            android:id="@+id/pinlocationbottomlinearlayout"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="1"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            tools:visibility="gone">
 
             <Button
                 android:layout_width="0px"
@@ -130,7 +132,8 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:onClick="prevPin"
-                android:text="@string/prev_pin" />
+                android:text="@string/prev_pin"
+                tools:visibility="gone" />
 
             <Button
                 android:layout_width="0px"
@@ -138,7 +141,8 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:onClick="nextPin"
-                android:text="@string/next_pin" />
+                android:text="@string/next_pin"
+                tools:visibility="gone" />
         </LinearLayout>
 
     </LinearLayout>

@@ -30,8 +30,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Parcelable container of all information partaining to a machine.
@@ -49,6 +47,7 @@ import java.util.Map;
  * @since dev 1.0.0
  */
 public class Vehicle implements Parcelable { //Parcelable implementation allows cross Activity passing of this object
+
     /**
      * Vehicle id string
      */
@@ -80,17 +79,15 @@ public class Vehicle implements Parcelable { //Parcelable implementation allows 
     /**
      * Map used to match connections with their pin arrangement number. I.E. Out1 is a 24pin connector....
      */
-    private Map<String, Integer> pinnumbers = new HashMap<>(15);
     public final static String buildDoneAction = "com.Diagnostic.Spundik.buildDoneAction";
     public final static int BUILD_SUCCESSFUL = 1;
 
     /**
-     * Constructor, not very interesting. The pinnumber map must be filled, so we call the method which completes that.
+     * Constructor, not very interesting
      *
      * @since dev 1.0.0
      */
     public Vehicle() {
-        setPinnumbers(); //this must be done every time we create a new object
     }
 
 
@@ -106,7 +103,6 @@ public class Vehicle implements Parcelable { //Parcelable implementation allows 
         loc = in.readInt();
         pinCount = in.readInt();
         uniquePins = in.createStringArrayList();
-        setPinnumbers(); //pinnumbers map must be refilled each time
     }
 
     /**
@@ -161,24 +157,22 @@ public class Vehicle implements Parcelable { //Parcelable implementation allows 
             if (isr != null) {
                 pins.clear(); //clear the old connections and uniqueconnections arraylists to avoid overlap
                 uniqueConnections.clear();
-                //Asynchronous of course
-                AsyncTask.execute(() -> {
-                    try {
-                        BufferedReader reader = new BufferedReader(isr); //Reader
-                        String line;  //string to the store the line read by buffered reader
-                        while ((line = reader.readLine()) != null) { //Until we run out of lines, read lines.
-                            String[] tokens = line.toLowerCase().split(","); //split the line at commas, and lowercase everything
+                try {
+                    BufferedReader reader = new BufferedReader(isr); //Reader
+                    String line;  //string to the store the line read by buffered reader
+                    while ((line = reader.readLine()) != null) { //Until we run out of lines, read lines.
+                        String[] tokens = line.toLowerCase().split(","); //split the line at commas, and lowercase everything
+                        if (tokens.length == 5)
                             addConnection(new Pin(vehicleId, tokens[0], tokens[1],
                                     tokens[2], tokens[3], tokens[4])); //build the new connection
-                            if (!getUniqueConnections().contains(tokens[0])) //if we have a unique connection, then we add it to the list.
-                                addUniqueconnection(tokens[0]);
-                        }
-                        context.sendBroadcast(new Intent(buildDoneAction).putExtra("success", BUILD_SUCCESSFUL));
-                        reader.close();
-                        isr.close();
-                    } catch (Exception ignored) {
+                        if (!getUniqueConnections().contains(tokens[0])) //if we have a unique connection, then we add it to the list.
+                            addUniqueconnection(tokens[0]);
                     }
-                });
+                    context.sendBroadcast(new Intent(buildDoneAction).putExtra("success", BUILD_SUCCESSFUL));
+                    reader.close();
+                    isr.close();
+                } catch (Exception ignored) {
+                }
             }
         });
     }
@@ -208,34 +202,30 @@ public class Vehicle implements Parcelable { //Parcelable implementation allows 
     }
 
     /**
-     * This method will fill the pinnumbers hashmap. This map is used to map connectors to their total pin numbers.
-     *
-     * @since dev 1.0.0
-     */
-    private void setPinnumbers() {
-        pinnumbers.put("in1", 14);
-        pinnumbers.put("in2", 14);
-        pinnumbers.put("in3", 22);
-        pinnumbers.put("in4", 22);
-        pinnumbers.put("out1", 24);
-        pinnumbers.put("out2", 24);
-        pinnumbers.put("out3", 24);
-        pinnumbers.put("out4", 2);
-        pinnumbers.put("out5", 2);
-        pinnumbers.put("out6", 2);
-        pinnumbers.put("out7", 2);
-        pinnumbers.put("out8", 2);
-        pinnumbers.put("out9", 2);
-        pinnumbers.put("exp11_out", 24);
-        pinnumbers.put("exp11_in", 22);
-    }
-
-    /**
      * The rest of the methods here are support methods
      * Primarily get set and add methods.
      */
-    public int getMap(String direction) throws NullPointerException {
-        return pinnumbers.get(direction);
+    public int getPinCount(String direction) throws NullPointerException {
+        if (!direction.contains("exp")) {
+            int number = Integer.parseInt(String.valueOf(direction.charAt(direction.length() - 1)));
+            if (direction.contains("in")) {
+                if (number < 3)
+                    return 14;
+                else
+                    return 22;
+            } else if (direction.contains("out")) {
+                if (number < 4)
+                    return 24;
+                else
+                    return 2;
+            }
+        } else {
+            if (direction.contains("in"))
+                return 22;
+            else
+                return 24;
+        }
+        return 0;
     }
 
     public void setVehicleId(String vehicleId) {
@@ -292,5 +282,8 @@ public class Vehicle implements Parcelable { //Parcelable implementation allows 
 
     public ArrayList<String> getUniquePins() {
         return uniquePins;
+    }
+    public String getVehicleId() {
+        return vehicleId;
     }
 }

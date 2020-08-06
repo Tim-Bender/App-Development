@@ -20,13 +20,16 @@ package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -43,6 +46,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
 
+import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
 import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -50,7 +54,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 /**
  * Receive user input (machine id and dealer id) verify them, pull data about the selected machine and then pass to next activity.
@@ -61,7 +64,7 @@ import java.util.Arrays;
  */
 
 @SuppressWarnings("unused")
-enum DealerIds{
+enum DealerIds {
     GENAG("GENAG"),
     HJVPEI("HJVPEI"),
     HJVNB("HJVNB"),
@@ -75,6 +78,7 @@ enum DealerIds{
     SPRESQ("SPRESQ"),
     SPUD("SPUD");
     public String dealer;
+
     DealerIds(String dealer) {
         this.dealer = dealer;
     }
@@ -94,7 +98,7 @@ public class InputSerial extends AppCompatActivity {
     private SharedPreferences.Editor editor;
     private CheckBox checkBox;
     private InputSerial.BuildVehicleBroadcastListener receiver;
-    private String[] vehicleIds;
+    private boolean bounded = false;
 
     /**
      * Oncreate will do its typical tasks, of assigning instance fields to values, and setting up the toolbar.
@@ -118,8 +122,6 @@ public class InputSerial extends AppCompatActivity {
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = preferences.edit();
         checkBox = findViewById(R.id.rememberdealeridcheckbox);
-        //FINAL PRE-DATABASE CHECK ON THE VEHICLE OBJECT
-        //myvehicle = getIntent().getParcelableExtra("myvehicle");
         myvehicle = new Vehicle();
         IntentFilter filter = new IntentFilter();
         filter.addAction(Vehicle.buildDoneAction);
@@ -138,8 +140,6 @@ public class InputSerial extends AppCompatActivity {
      */
     @Override
     protected void onStart() {
-        vehicleIds = preferences.getString("machineIds","").split(",");
-        System.out.println("VEHICLE IDS: " + Arrays.toString(vehicleIds));
         //When a user makes a change to the inputid edit text view, then we will check if the new value is a valid id, and if it is, then we attempt to build our database of connections
         serialNumberText = findViewById(R.id.inputid);
         serialNumberText.setOnKeyListener((v, keyCode, event) -> {
@@ -204,6 +204,8 @@ public class InputSerial extends AppCompatActivity {
             }
         });
         findViewById(R.id.inputserialnextbutton).setOnClickListener(this::go);
+        Intent mIntent = new Intent(this, BluetoothLeService.class);
+        bindService(mIntent, mConnection, BIND_AUTO_CREATE);
         super.onStart();
     }
 
@@ -230,7 +232,6 @@ public class InputSerial extends AppCompatActivity {
                 final String vehicleId = serialNumberText.getText().toString().toLowerCase().trim(); //get their inputted vehicle id
                 if (vehicleId.length() > 2) {          //It has to be at least 3 long for us to accept it
                     final String determined = determineVehicleFile(vehicleId); //Determine the most likely vehicle id to match with. See myvehicle's documentation for this function.
-                    System.out.println("DETERMINED " + determined);
                     File localFile = new File(new File(getFilesDir(), "database"), "_" + determined + ".csv"); //We need to re-add the _ and .csv to the name of the file. Pointer to file we will reading from
                     FileInputStream fis2 = new FileInputStream(localFile);//our fileinputstream
                     is = new InputStreamReader(fis2, StandardCharsets.UTF_8); //new inputstreamreader
@@ -244,10 +245,29 @@ public class InputSerial extends AppCompatActivity {
         });
     }
 
+    ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            System.out.println("SERVICE CONNECTED");
+            //BluetoothLeService.LocalBinder mLocalBinder = ((BluetoothLeService.LocalBinder) service);
+            bounded = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            System.out.println("SERVICE DISCONNECTED");
+            bounded = false;
+        }
+    };
+
     @Override
     protected void onDestroy() {
         if (receiver != null)
             unregisterReceiver(receiver);
+        if (bounded) {
+            unbindService(mConnection);
+            bounded = false;
+        }
         super.onDestroy();
     }
 
@@ -269,8 +289,8 @@ public class InputSerial extends AppCompatActivity {
     }
 
     public boolean checkDealer(@NonNull String dealerid) {
-        for(DealerIds d: DealerIds.values()){
-            if(dealerid.equals(d.dealer.toLowerCase().trim()))
+        for (DealerIds d : DealerIds.values()) {
+            if (dealerid.equals(d.dealer.toLowerCase().trim()))
                 return true;
         }
         return false;
@@ -304,7 +324,7 @@ public class InputSerial extends AppCompatActivity {
      * @since dev 1.0.0
      */
     public String determineVehicleFile(@NonNull String machineid) {
-        System.out.println("VEHICLE ID LENGTHS: " + vehicleIds.length);
+        String[] vehicleIds= preferences.getString("machineIds", "").split(",");
         String toReturn = "null"; //default return if we dont match with anything
         int maximum = Integer.MIN_VALUE;
         if (machineid.length() > 0 && vehicleIds.length != 0) {

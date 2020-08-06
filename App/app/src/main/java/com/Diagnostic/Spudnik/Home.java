@@ -71,6 +71,7 @@ public class Home extends AppCompatActivity {
         findViewById(R.id.homesettingsbutton).setOnClickListener((view) -> startActivity(new Intent(getApplicationContext(), Settings.class)));
     }
 
+
     /**
      * The next two methods will create the toolbar menu item on the top right, this will be on every
      * activity that contains this shortcut.

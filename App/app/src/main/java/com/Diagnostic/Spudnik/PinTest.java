@@ -210,7 +210,7 @@ public class PinTest extends AppCompatActivity {
         TextView direction = findViewById(R.id.connectorid);
         direction.setText(s1 + temp.substring(1));
         TextView pinDescription = findViewById(R.id.pintestpindescription);
-        pinDescription.setText(myvehicle.getMap(myconnection.getDirection()) + "p Analog\n" + myvehicle.inout() + " Connector");
+        pinDescription.setText(myvehicle.getPinCount(myconnection.getDirection()) + "p Analog\n" + myvehicle.inout() + " Connector");
     }
 
     public void onOff(View view) {

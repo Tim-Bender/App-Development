@@ -55,10 +55,6 @@ public class Pin implements Parcelable, Comparable<Pin> {
      */
     private String units;
     /**
-     * Connector plug
-     */
-    private String plug;
-    /**
      * Connector s4 pin number
      */
     private String s4;
@@ -99,7 +95,6 @@ public class Pin implements Parcelable, Comparable<Pin> {
         direction = in.readString();
         name = in.readString();
         units = in.readString();
-        plug = in.readString();
         s4 = in.readString();
         type = in.readString();
     }
@@ -115,7 +110,6 @@ public class Pin implements Parcelable, Comparable<Pin> {
         dest.writeString(direction);
         dest.writeString(name);
         dest.writeString(units);
-        dest.writeString(plug);
         dest.writeString(s4);
         dest.writeString(type);
     }

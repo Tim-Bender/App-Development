@@ -20,11 +20,14 @@ package com.Diagnostic.Spudnik;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,17 +39,17 @@ import android.widget.Space;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
 import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
 import com.Diagnostic.Spudnik.CustomObjects.Pin;
 import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -71,10 +74,6 @@ public class PinLocation extends AppCompatActivity {
      */
     private Vehicle myvehicle;
     /**
-     * Map used to map the connection to on board orientation. Aka out1 is vertical
-     */
-    private Map<String, Integer> orientations = new HashMap<>();
-    /**
      * A vertical orientation is defined as a 1
      */
     private static final int VERTICAL = 1;
@@ -89,9 +88,13 @@ public class PinLocation extends AppCompatActivity {
     /**
      * Current orientation we are in
      */
+    private ArrayList<Pin> pins;
     private int orientation;
-
     private PinLocation.BluetoothBroadcastReceiver receiver;
+    private boolean bounded = false;
+    private boolean shouldReadCharacteristic = true;
+    private BluetoothLeService mServer;
+
     /**
      * Normal uninteresting oncreate method
      *
@@ -109,16 +112,16 @@ public class PinLocation extends AppCompatActivity {
         getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
 
         myvehicle = getIntent().getParcelableExtra("myvehicle"); //retrieve the vehicle object from parcelable intent
-        Objects.requireNonNull(myvehicle).setPins(getIntent().getParcelableArrayListExtra("connections")); //retrieve the list of connections from parcelable intent
+        pins = getIntent().getParcelableArrayListExtra("connections"); //retrieve the list of connections from parcelable intent
         myvehicle.sortConnections(); //sort the connections for good measure
         myPin = getIntent().getParcelableExtra("myConnection"); //get the current connection from parcelable intent
         loc = Integer.parseInt(Objects.requireNonNull(myPin).getS4()); //get the current location from parcelable intent
-        fillHashMap(); //fill the hashmap of orientations
         IntentFilter filter = new IntentFilter();
-        for(BroadcastActionConstants b : BroadcastActionConstants.values())
+        for (BroadcastActionConstants b : BroadcastActionConstants.values())
             filter.addAction(b.getString());
         receiver = new PinLocation.BluetoothBroadcastReceiver();
         registerReceiver(receiver, filter);
+        findViewById(R.id.pinlocationbottomlinearlayout).setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -128,30 +131,85 @@ public class PinLocation extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Intent mIntent = new Intent(this, BluetoothLeService.class);
+        bindService(mIntent, mConnection, BIND_AUTO_CREATE);
         if (!built)
             buildLayout(); //build the layout
-        updateValues(0f); //update the textviews
+        updateValues(null); //update the textviews
     }
 
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         unregisterReceiver(receiver);
+        if (bounded)
+            unbindService(mConnection);
         super.onDestroy();
     }
+    @Override
+    protected void onPause() {
+        shouldReadCharacteristic = false;
+        super.onPause();
+    }
+    @Override
+    protected void onResume() {
+        shouldReadCharacteristic = true;
+        if (mServer != null)
+            mServer.requestConnectorVoltage(pins);
+        super.onResume();
+    }
+
+    ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            System.out.println("SERVICE CONNECTED");
+            BluetoothLeService.LocalBinder mLocalBinder = ((BluetoothLeService.LocalBinder) service);
+            mServer = mLocalBinder.getServerInstance();
+            mServer.requestConnectorVoltage(pins);
+            bounded = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            System.out.println("SERVICE DISCONNECTED");
+            mServer = null;
+            bounded = false;
+        }
+    };
 
     /**
      * @since dev 1.0.0
      * Used to update the textviews
      */
     @SuppressLint("SetTextI18n")
-    private void updateValues(float f) {
-        TextView textView = findViewById(R.id.pinlocationdirection);
-        String temp = myPin.getDirection();
-        String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
-        textView.setText(s1 + temp.substring(1));  //concatenate them together
-        textView = findViewById(R.id.pinlocationconnectorinformation);
-        textView.setText(myvehicle.getMap(myvehicle.getUniqueConnections()
-                .get(myvehicle.getLoc())) + "p " + myvehicle.inout() + " Connector\nConnectorVoltage\n" + f +"v"); //put it all together
+    private void updateValues(@Nullable byte[] bytes) {
+        String dir = myPin.inout();
+        TextView connectorinformation = findViewById(R.id.pinlocationconnectorinformation);
+        TextView direction = findViewById(R.id.pinlocationdirection);
+        if(dir.equals("Output")) {
+            float supplyV = 0,pwmFreq = 0;
+            if (bytes != null) {
+                int[] ints = new int[4];
+                for(int i = 0; i < 4; i++){
+                    ints[i] = (bytes[i] < 0) ? bytes[i] + 256 : bytes[i];
+                }
+                supplyV = ((ints[0] << 8) + ints[1]) / 100f;
+                pwmFreq = (ints[2] << 8) + ints[3];
+            }
+            String temp = myPin.getDirection();
+            String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
+            direction.setText(s1 + temp.substring(1));
+            connectorinformation.setText(myvehicle.getPinCount(myPin.getDirection().toLowerCase()) + " " + myPin.inout() + " Connector\nSupply Voltage = " + supplyV + " VDC\n" + "PWM Frequency = "+pwmFreq +" HZ" );
+        }
+        else{
+            float f = 0;
+            if (bytes != null) {
+                f = ((bytes[0] << 8) + bytes[1]) / 100f;
+            }
+            String temp = myPin.getDirection();
+            String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
+            direction.setText(s1 + temp.substring(1));
+            connectorinformation.setText(myvehicle.getPinCount(myPin.getDirection().toLowerCase()) + " " + myPin.inout() + " Connector\nConnectorVoltage\n" + f + "v");
+        }
     }
 
     private class BluetoothBroadcastReceiver extends BroadcastReceiver {
@@ -160,19 +218,21 @@ public class PinLocation extends AppCompatActivity {
             if (intent.getAction().equals(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString())) {
                 byte[] bytes = intent.getByteArrayExtra("bytes");
                 if (bytes != null) {
-                    updateValues(((bytes[0] << 8) + bytes[1]) / 100f);
+                    updateValues(bytes);
+                    if(shouldReadCharacteristic)
+                        mServer.requestConnectorVoltage(pins);
                 }
                 getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
-            }
-            else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())){
+            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())) {
                 getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
-                Snackbar.make(findViewById(R.id.pinlocationconstraintlayout),"Bluetooth Disconnected",Snackbar.LENGTH_SHORT).show();
-            } else if(intent.getAction().equals(BroadcastActionConstants.ACTION_SCANNING.getString())){
+                Snackbar.make(findViewById(R.id.pinlocationconstraintlayout), "Bluetooth Disconnected", Snackbar.LENGTH_SHORT).show();
+            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_SCANNING.getString())) {
                 getSupportActionBar().setIcon(R.drawable.bluetoothsearching);
-            }  else if(intent.getAction().equals(BroadcastActionConstants.ACTION_WEAK_SIGNAL.getString()))
-                Snackbar.make(findViewById(R.id.pinlocationconstraintlayout),"Weak Bluetooth Signal",Snackbar.LENGTH_SHORT).show();
+            } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_WEAK_SIGNAL.getString()))
+                Snackbar.make(findViewById(R.id.pinlocationconstraintlayout), "Weak Bluetooth Signal", Snackbar.LENGTH_SHORT).show();
         }
     }
+
     /**
      * This method is used to create the gridlayout depending on the orientation, number of pins and other factors.
      * It is a polymorphic mess that i hope to replace with a grid layout in the future. Since i hope to replace it,
@@ -182,8 +242,8 @@ public class PinLocation extends AppCompatActivity {
      */
     @SuppressLint("SetTextI18n")
     private void buildLayout() {
-        int pinnumber = myvehicle.getMap(myPin.getDirection()); //get all the views we will need to be editing
-        orientation = orientations.get(myPin.getDirection());
+        int pinnumber = myvehicle.getPinCount(myPin.getDirection()); //get all the views we will need to be editing
+        orientation = getOrientation(myPin.getDirection());
 
         Space topspace = findViewById(R.id.topspacepinlocation); //the 4 spaces will allow us to "squish" our layout depending on which orientation we are in
         Space bottomspace = findViewById(R.id.bottomspacepinlocation);
@@ -238,8 +298,8 @@ public class PinLocation extends AppCompatActivity {
             rightspace.setVisibility(View.GONE);
             rightspace.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
 
-            topspace.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 2.25f)); //squish from the top and the bottom
-            bottomspace.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 2.25f));
+            topspace.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 3.3f)); //squish from the top and the bottom
+            bottomspace.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 3.3f));
 
             outsidelayout.setOrientation(LinearLayout.VERTICAL); //ensure that the layout's are in the correct orientations
             outsidelayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -351,25 +411,10 @@ public class PinLocation extends AppCompatActivity {
      *
      * @since dev 1.0.0
      */
-    private void fillHashMap() {
-        orientations.put("out1", 1);
-        orientations.put("out2", 1);
-        orientations.put("out3", 1);
-        orientations.put("out4", 1);
-        orientations.put("out5", 1);
-        orientations.put("out6", 1);
-        orientations.put("out7", 1);
-        orientations.put("out8", 1);
-        orientations.put("out9", 1);
-
-        orientations.put("in1", 1);
-        orientations.put("in2", 1);
-
-        orientations.put("in3", 2);
-        orientations.put("in4", 2);
-
-        orientations.put("exp11out", 1);
-        orientations.put("exp11in", 2);
+    private int getOrientation(@NonNull String connnector) {
+        if ((connnector.toLowerCase().trim().contains("in3") || connnector.toLowerCase().trim().contains("in4")) && !connnector.toLowerCase().trim().contains("exp"))
+            return 2;
+        return VERTICAL;
     }
 
     @Override

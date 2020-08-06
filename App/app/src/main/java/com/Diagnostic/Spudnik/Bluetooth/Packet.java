@@ -32,8 +32,4 @@ public class Packet {
         return packet;
     }
 
-    public void SetSensorType(@NonNull byte TYPE) {
-        if (packet != null)
-            packet[0] = TYPE;
-    }
 }

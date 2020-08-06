@@ -33,38 +33,25 @@ public class OperationManager {
     private Operation currentOp;
     private BluetoothGatt server;
     private BluetoothGattService service;
-    private final static int GATT_MTU_SIZE = 64;
+    private final static int GATT_MTU_SIZE = 128;
 
     public OperationManager(@NonNull BluetoothGatt gatt) {
         server = gatt;
     }
 
     public synchronized void request(@NonNull Operation operation) {
-        insertIntoQueue(operation);
+        operations.add(operation);
         if (currentOp == null) {
             currentOp = operations.poll();
             performOperation();
         }
     }
 
-    private void insertIntoQueue(@NonNull Operation operation) {
-        for (Operation o : operations) {
-            if (operation.getOPERATION() == o.getOPERATION() && operation.getOperationUUID() == o.getOperationUUID()) {
-                if(operation.getWriteValue() != null && o.getWriteValue() != null) {
-                    if (operation.getWriteValue().getPacket().length == o.getWriteValue().getPacket().length) {
-                        o.setWriteValue(operation.getWriteValue());
-                        return;
-                    }
-                }
-            }
-        }
-        operations.add(operation);
-    }
-
     public synchronized void operationCompleted() {
         currentOp = null;
         if (operations.peek() != null) {
             currentOp = operations.poll();
+            System.out.println("PERFORMING " + currentOp.getOPERATION());
             performOperation();
         }
     }

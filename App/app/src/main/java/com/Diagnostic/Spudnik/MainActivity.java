@@ -21,24 +21,20 @@ package com.Diagnostic.Spudnik;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
 import com.Diagnostic.Spudnik.CustomObjects.UpdateDatabase;
 import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
 import com.bumptech.glide.Glide;
@@ -73,8 +69,6 @@ public class MainActivity extends AppCompatActivity {
      * Boolean value used to make this activity thread safe, prevents an issue during handler delay causing activity split.
      */
     private boolean updateBegun = false;
-
-    private boolean bounded = false;
 
 
     /**
@@ -129,16 +123,8 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();//if user is null, they are not logged in
         Intent startUpdateIntent = new Intent(this, UpdateDatabase.class);
         startService(startUpdateIntent);
-        checkPermissions();
-        Intent mIntent = new Intent(this, BluetoothLeService.class);
-        bindService(mIntent, mConnection, BIND_AUTO_CREATE);
     }
 
-    public void checkPermissions() {
-        if (!(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
-    }
 
     /**
      * Unregister the broadcast receiver on destroy to avoid memory leak
@@ -148,10 +134,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         unregisterReceiver(broadcastReceiver); //unregister the receiver
-        if (bounded) {
-            unbindService(mConnection);
-            bounded = false;
-        }
         super.onDestroy();
     }
 
@@ -168,19 +150,6 @@ public class MainActivity extends AppCompatActivity {
         finish(); //if the user tries to go back to this activity, close and exit the app
     }
 
-    ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            System.out.println("SERVICE CONNECTED");
-            bounded = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            System.out.println("SERVICE DISCONNECTED");
-            bounded = false;
-        }
-    };
 
     /**
      * Here's our broadcast receiver to receive updates from Updatedatabase.java

@@ -28,6 +28,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.widget.TextView;
@@ -37,7 +38,6 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.Diagnostic.Spudnik.Bluetooth.BluetoothLeService;
 import com.Diagnostic.Spudnik.Bluetooth.BroadcastActionConstants;
-import com.Diagnostic.Spudnik.CustomObjects.Pin;
 import com.google.android.material.snackbar.Snackbar;
 
 public class BluetoothTestActivity extends AppCompatActivity {
@@ -73,6 +73,9 @@ public class BluetoothTestActivity extends AppCompatActivity {
         if (!(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
+        LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        boolean gpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        System.out.println("GPS STATUS: " + gpsStatus);
     }
 
     @Override
@@ -101,10 +104,8 @@ public class BluetoothTestActivity extends AppCompatActivity {
                     float f = ((bytes[0] << 8) + bytes[1]) / 100f;
                     textView.setText(f + " ");
                     getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
-                    mServer.requestConnectorVoltage(new Pin("bacon", "ou1", "", "", "", "none"));
                 }
             } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString())) {
-                mServer.requestConnectorVoltage(new Pin("bacon", "out1", "", "", "", "none"));
             } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())){
                 getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
                 Snackbar.make(findViewById(R.id.bluetoothtestconstraintlayout),"Bluetooth Disconnected",Snackbar.LENGTH_SHORT).show();
