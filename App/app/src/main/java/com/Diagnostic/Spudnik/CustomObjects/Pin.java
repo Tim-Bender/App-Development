@@ -50,6 +50,7 @@ public class Pin implements Parcelable, Comparable<Pin> {
      * Connector name
      */
     private String name;
+
     /**
      * Connector units
      */
@@ -180,6 +181,10 @@ public class Pin implements Parcelable, Comparable<Pin> {
 
     public String toString() {
         return (id + " " + direction + " " + name + " " + units + " " + units + " " + type);
+    }
+
+    public String getUnits() {
+        return units;
     }
 
     public String getType() {

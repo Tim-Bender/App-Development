@@ -93,7 +93,7 @@
                 android:textStyle="bold" />
 
             <ToggleButton
-                android:id="@+id/toggleButton"
+                android:id="@+id/pintesttogglebutton"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginTop="10dp"
@@ -101,7 +101,6 @@
                 android:layout_weight=".6"
                 android:background="#FF0000"
                 android:checked="false"
-                android:onClick="onOff"
                 android:text="@string/togglebutton"
                 android:textSize="28sp" />
 
@@ -180,6 +179,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
+                android:onClick="prevPin"
                 android:text="@string/prev_pin" />
 
             <Button
@@ -187,6 +187,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
+                android:onClick="nextPin"
                 android:text="@string/next_pin" />
         </LinearLayout>
     </LinearLayout>

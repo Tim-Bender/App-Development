@@ -142,11 +142,12 @@ public class SelectPin extends AppCompatActivity {
                 if (bytes != null) {
                     updatevalues(bytes);
                     getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);
-                    if (shouldReadCharacteristic)
+                    if (shouldReadCharacteristic && pins != null)
                         mServer.requestConnectorVoltage(pins);
                 }
             } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_SERVICES_DISCOVERED.getString()) && shouldReadCharacteristic) {
-                mServer.requestConnectorVoltage(pins);
+                if (mServer != null && pins != null)
+                    mServer.requestConnectorVoltage(pins);
             } else if (intent.getAction().equals(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString())) {
                 getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
                 Snackbar.make(findViewById(R.id.selectpinconstraintlayout), "Bluetooth Disconnected", Snackbar.LENGTH_SHORT).show();
@@ -263,11 +264,11 @@ public class SelectPin extends AppCompatActivity {
     private void updatevalues(@Nullable byte[] bytes) {
         Pin myPin = pins.get(0);
         String dir = myPin.inout();
-        if(dir.equals("Output")) {
-            float supplyV = 0,pwmFreq = 0;
+        if (dir.equals("Output")) {
+            float supplyV = 0, pwmFreq = 0;
             if (bytes != null) {
                 int[] ints = new int[4];
-                for(int i = 0; i < 4; i++){
+                for (int i = 0; i < 4; i++) {
                     ints[i] = (bytes[i] < 0) ? bytes[i] + 256 : bytes[i];
                 }
                 supplyV = ((ints[0] << 8) + ints[1]) / 100f;
@@ -278,9 +279,8 @@ public class SelectPin extends AppCompatActivity {
             TextView direction = findViewById(R.id.connectorid);
             direction.setText(s1 + temp.substring(1));
             TextView connectorinformation = findViewById(R.id.numberofpinstextfield);
-            connectorinformation.setText(myvehicle.getPinCount(myPin.getDirection().toLowerCase()) + " " + myPin.inout() + " Connector\nSupply Voltage = " + supplyV + " VDC\n" + "PWM Frequency = "+ (int)pwmFreq +" HZ" );
-        }
-        else{
+            connectorinformation.setText(myvehicle.getPinCount(myPin.getDirection().toLowerCase()) + " " + myPin.inout() + " Connector\nSupply Voltage = " + supplyV + " VDC\n" + "PWM Frequency = " + (int) pwmFreq + " HZ");
+        } else {
             float f = 0;
             if (bytes != null) {
                 f = ((bytes[0] << 8) + bytes[1]) / 100f;

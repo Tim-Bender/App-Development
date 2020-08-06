@@ -219,7 +219,7 @@ public class PinLocation extends AppCompatActivity {
                 byte[] bytes = intent.getByteArrayExtra("bytes");
                 if (bytes != null) {
                     updateValues(bytes);
-                    if(shouldReadCharacteristic)
+                    if(shouldReadCharacteristic && mServer != null)
                         mServer.requestConnectorVoltage(pins);
                 }
                 getSupportActionBar().setIcon(R.drawable.bluetoothsymbol);

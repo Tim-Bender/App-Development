@@ -35,7 +35,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.Diagnostic.Spudnik.CustomObjects.Vehicle;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
@@ -69,7 +68,6 @@ public class ConnectorSelect extends AppCompatActivity {
         setTitle("Connector Selection");
         myvehicle = getIntent().getParcelableExtra("myvehicle"); //get our vehicle object as a parcelable extra
         Objects.requireNonNull(this.myvehicle).setPins(getIntent().getParcelableArrayListExtra("connections")); //get our list of connections as a parcelable extra
-        Snackbar.make(findViewById(R.id.connectorselectconstraintlayout),myvehicle.getVehicleId() + " Loaded", Snackbar.LENGTH_SHORT).show();
     }
 
 

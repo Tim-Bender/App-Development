@@ -19,7 +19,6 @@
 
 package com.Diagnostic.Spudnik.Bluetooth;
 
-import android.annotation.SuppressLint;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
@@ -43,7 +42,6 @@ import com.Diagnostic.Spudnik.CustomObjects.Pin;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class BluetoothLeService extends Service {
 
@@ -107,6 +105,7 @@ public class BluetoothLeService extends Service {
 
     public final static int SEARCHING = 1;
     public final static int CONNECTED = 2;
+    public final static int DISCONNECTED = 3;
     public static int STATUS;
 
     private static boolean USER_DISCONNECT = false;
@@ -195,7 +194,6 @@ public class BluetoothLeService extends Service {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             try {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
-                    status = CONNECTED;
                     server = gatt;
                     operationManager = new OperationManager(gatt);
                     broadcastUpdate(BroadcastActionConstants.ACTION_GATT_CONNECTED.getString());
@@ -203,7 +201,7 @@ public class BluetoothLeService extends Service {
                     refreshDeviceCache(gatt);
                     operationManager.request(new Operation(null, Operation.REQUEST_MTU, null));
                 } else if (newState != BluetoothProfile.STATE_CONNECTING) {
-                    status = 0;
+                    status = DISCONNECTED;
                     broadcastUpdate(BroadcastActionConstants.ACTION_GATT_DISCONNECTED.getString());
                     connecting = false;
                     System.out.println("CONNECTION STATE Disconnected");
@@ -221,6 +219,7 @@ public class BluetoothLeService extends Service {
                 if (status == BluetoothGatt.GATT_SUCCESS && operationManager != null) {
                     for (BluetoothGattService s : gatt.getServices()) {
                         if (s.getUuid().toString().equals(UUIDConstants.SERVICE_UUID.getFromString().toString())) {
+                            STATUS = CONNECTED;
                             operationManager.setService(s);
                         }
                     }
@@ -248,12 +247,8 @@ public class BluetoothLeService extends Service {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     System.out.println("CHARACTERISTIC READ SUCCESS");
                     FAILED_PACKET_BUFFER = 0;
-                    long[] l = new long[characteristic.getValue().length];
-                    for (int i = 0; i < characteristic.getValue().length; i++) {
-                        l[i] = characteristic.getValue()[i] % 0xFFFFFFFFL;
-                    }
-                    System.out.println("VALUE: " + Arrays.toString(l));
                     broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString(), characteristic);
+                    operationManager.request(new Operation(null, Operation.READ_RSSI, null));
                 } else {
                     FAILED_PACKET_BUFFER++;
                     if (FAILED_PACKET_BUFFER == FAILED_PACKET_MAXIMUM_BUFFER) {
@@ -350,22 +345,36 @@ public class BluetoothLeService extends Service {
     }
 
     public void requestConnectorVoltage(@NonNull ArrayList<Pin> pins) {
-        if (operationManager != null) {
+        if (operationManager != null && server != null && STATUS == CONNECTED) {
             ArrayList<UUIDConstants> uuids = getUuidSet(pins.get(0));
             Packet myPacket;
-            if(!WRITTEN){
+            if (!WRITTEN) {
                 myPacket = new Packet(buildPacket(pins));
                 System.out.println("SENDING WRITE REQUEST");
-                operationManager.request(new Operation(uuids.get(0).getFromString(),Operation.WRITE_CHARACTERISTIC,myPacket));
+                operationManager.request(new Operation(uuids.get(0).getFromString(), Operation.WRITE_CHARACTERISTIC, myPacket));
             }
             operationManager.request(new Operation(uuids.get(1).getFromString(), Operation.READ_CHARACTERISTIC, null));
         }
     }
 
+    public void writeConnectorVoltage(@NonNull ArrayList<Pin> pins, @NonNull Pin currentPin, @NonNull int insertionValue) {
+        if (operationManager != null && server != null) {
+            ArrayList<UUIDConstants> uuids = getUuidSet(pins.get(0));
+            byte[] bytes = buildPacket(pins);
+            bytes[getWritePosition(currentPin)] = (byte) insertionValue;
+            Packet myPacket = new Packet(bytes);
+            operationManager.request(new Operation(uuids.get(0).getFromString(), Operation.WRITE_CHARACTERISTIC, myPacket));
+        }
+    }
 
-    public byte[] buildPacket(@NonNull ArrayList<Pin> pins){
+    public int getWritePosition(@NonNull Pin p) {
+        return (getPinRelation(p) * 2) + 1;
+    }
+
+
+    public byte[] buildPacket(@NonNull ArrayList<Pin> pins) {
         byte[] defaultPacket = getDefaultPacket(pins.get(0)).getBytes();
-        for(Pin p : pins){
+        for (Pin p : pins) {
             defaultPacket[getArrayPosition(p)] = getType(p);
         }
         return defaultPacket;
@@ -386,7 +395,7 @@ public class BluetoothLeService extends Service {
                 col = 2;
                 break;
             default:
-                col = 3;
+                col = 1;
         }
         for (int[] arr : pinRelations) {
             if (arr[col] == s4) {
@@ -420,37 +429,6 @@ public class BluetoothLeService extends Service {
         return toReturn;
     }
 
-    @SuppressLint("DefaultLocale")
-    private String formatReading(@NonNull Pin currentPin, byte[] bytes) {
-        byte type = getType(currentPin);
-        int loc1 = Integer.parseInt(currentPin.getS4()) * 2 + 2;
-        int loc2 = loc1 + 1;
-        float value = bytes[loc1] + bytes[loc2];
-        System.out.println("VALUE: " + value);
-        switch (type) {
-            case IDLETYPE:
-                return "Off";
-            case FREQUENCYTYPE:
-                if (value >= 0 && value <= 10000)
-                    return (int) value / 10 + " Hz";
-                else if (value >= 33768 && value <= 42768)
-                    return ((int) value - 32768) + " Hz";
-            case ONOFFTYPE:
-                if (value == 0 || value == 1)
-                    return Float.toString(value);
-            case COUNTSTYPE:
-                if (value >= 0 && value < 10000)
-                    return (int) value + " counts";
-            case CURRENTTYPE:
-                if (value >= 0 && value <= 3000)
-                    return value / 100.0f + " mA";
-            case VOLTAGETYPE:
-                if (value >= 0 && value <= 7300)
-                    return value / 1000.0f + " volts";
-        }
-        return "null";
-    }
-
 
     private PacketConstants getDefaultPacket(@NonNull Pin c) {
         if (c.inout().equals("Input"))
@@ -462,9 +440,9 @@ public class BluetoothLeService extends Service {
         }
     }
 
-    private byte getType(@NonNull Pin c) {
+    public byte getType(@NonNull Pin c) {
         if (c.inout().equals("Input")) {
-            switch (c.getType().toLowerCase().trim()) {
+            switch (c.getUnits().toLowerCase().trim()) {
                 case "curr":
                     return CURRENTTYPE;
                 case "freq":
@@ -485,7 +463,7 @@ public class BluetoothLeService extends Service {
                     return IDLETYPE;
             }
         } else {
-            switch (c.getType().toLowerCase().trim()) {
+            switch (c.getUnits().toLowerCase().trim()) {
                 case "toggle":
                     return ONOFFTYPE;
                 case "pwm":
@@ -568,6 +546,11 @@ public class BluetoothLeService extends Service {
             e.printStackTrace();
             System.out.println("CACHE NOT CLEARED METHOD FAILURE");
         }
+    }
+
+    public void clearOperationManager() {
+        if (operationManager != null)
+            operationManager.reset();
     }
 
 }
