@@ -102,13 +102,11 @@ public class PinTest extends AppCompatActivity {
             filter.addAction(b.getString());
         receiver = new PinTest.BluetoothBroadcastReceiver();
         registerReceiver(receiver, filter);
-        if(BluetoothLeService.STATUS == BluetoothLeService.DISCONNECTED){
+        if (BluetoothLeService.STATUS == BluetoothLeService.DISCONNECTED) {
             getSupportActionBar().setIcon(R.drawable.bluetoothdisconnected);
-        }
-        else if(BluetoothLeService.STATUS == BluetoothLeService.CONNECTED){
+        } else if (BluetoothLeService.STATUS == BluetoothLeService.CONNECTED) {
             getSupportActionBar().setIcon(R.drawable.bluetoothsearching);
-        }
-        else if(BluetoothLeService.STATUS == BluetoothLeService.SEARCHING){
+        } else if (BluetoothLeService.STATUS == BluetoothLeService.SEARCHING) {
             getSupportActionBar().setIcon(R.drawable.bluetoothsearching);
         }
     }
@@ -162,8 +160,8 @@ public class PinTest extends AppCompatActivity {
             updatePwmStatus();
         });
         findViewById(R.id.buttonplus1).setOnClickListener(v -> {
-            if(!onOffType)
-            pwm = (pwm < 100) ? ++pwm : 100;
+            if (!onOffType)
+                pwm = (pwm < 100) ? ++pwm : 100;
             else
                 pwm = 1;
             updatePwmStatus();
@@ -192,6 +190,7 @@ public class PinTest extends AppCompatActivity {
             System.out.println("SERVICE CONNECTED");
             BluetoothLeService.LocalBinder mLocalBinder = ((BluetoothLeService.LocalBinder) service);
             mServer = mLocalBinder.getServerInstance();
+            updatePwmStatus();
             bounded = true;
         }
 
@@ -229,10 +228,13 @@ public class PinTest extends AppCompatActivity {
      */
     @SuppressLint("SetTextI18n")
     private void updatePwmStatus() {
-        if(!onOffType) {
+        if (mServer.getType(myPin) == mServer.FREQUENCYTYPE) {
+            pwmTextview.setText(pwm * 100 + "Hz");
+            seekBar.setProgress(pwm);
+        } else if (!onOffType) {
             pwmTextview.setText(pwm + " PWM");
             seekBar.setProgress(pwm);
-        }else{
+        } else {
             String text = (pwm == 0) ? "Off" : "On";
             pwmTextview.setText(text);
         }
@@ -248,7 +250,7 @@ public class PinTest extends AppCompatActivity {
         pinDescription.setText(myvehicle.getPinCount(myPin.getDirection()) + "p Analog\n" + myvehicle.inout() + " Connector");
         TextView pinNumber = findViewById(R.id.pintestpinnumber);
         pinNumber.setText("Pin " + myPin.getS4() + " Test");
-        if(onOffType){
+        if (onOffType) {
             findViewById(R.id.buttonminus5).setVisibility(View.INVISIBLE);
             findViewById(R.id.buttonplus5).setVisibility(View.INVISIBLE);
             findViewById(R.id.pintestseekbar).setVisibility(View.INVISIBLE);
@@ -257,8 +259,7 @@ public class PinTest extends AppCompatActivity {
             button = findViewById(R.id.buttonplus1);
             button.setText("On");
             pwmTextview.setText("Off");
-        }
-        else{
+        } else {
             findViewById(R.id.buttonminus5).setVisibility(View.VISIBLE);
             findViewById(R.id.buttonplus5).setVisibility(View.VISIBLE);
             findViewById(R.id.pintestseekbar).setVisibility(View.VISIBLE);
@@ -276,7 +277,7 @@ public class PinTest extends AppCompatActivity {
         loc = (loc == 0) ? pins.size() - 1 : --loc;
         myPin = pins.get(loc);
         onOffType = mServer.getType(myPin) == mServer.ONOFFTYPE;
-        if(onOffType)
+        if (onOffType)
             pwm = 0;
         updateTextFields();
     }
@@ -287,7 +288,7 @@ public class PinTest extends AppCompatActivity {
         loc = (loc++ == pins.size() - 1) ? 0 : loc++;
         myPin = pins.get(loc);
         onOffType = mServer.getType(myPin) == mServer.ONOFFTYPE;
-        if(onOffType)
+        if (onOffType)
             pwm = 0;
         updateTextFields();
     }

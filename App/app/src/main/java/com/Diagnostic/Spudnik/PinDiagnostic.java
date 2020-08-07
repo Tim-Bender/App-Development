@@ -176,49 +176,33 @@ public class PinDiagnostic extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     private void updateValues(@Nullable byte[] bytes) {
         String dir = myPin.inout();
+        String[] formatedOutput = new String[4];
+        myPin = uniquePins.get(loc);
         if (dir.equals("Output")) {
-            float supplyV = 0, pwmFreq = 0;
-            if (bytes != null) {
-                int[] ints = new int[4];
-                for (int i = 0; i < 4; i++) {
-                    ints[i] = (bytes[i] < 0) ? bytes[i] + 256 : bytes[i];
-                }
-                supplyV = ((ints[0] << 8) + ints[1]) / 100f;
-                pwmFreq = (ints[2] << 8) + ints[3];
+            if(mServer != null && bytes != null){
+                formatedOutput =  mServer.formatPwmOutput(myPin,bytes);
             }
-            myPin = uniquePins.get(loc);
             String temp = myPin.getDirection();
             String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
             direction.setText(s1 + temp.substring(1));
-            connectorinformation.setText(myvehicle.getPinCount(myPin.getDirection().toLowerCase()) + " " + myPin.inout() + " Connector\nSupply Voltage = " + supplyV + " VDC\n" + "PWM Frequency = " + pwmFreq + " HZ");
+            connectorinformation.setText(myvehicle.getPinCount(myPin.getDirection().toLowerCase()) + " " + myPin.inout() + " Connector\n"+ formatedOutput[0] + formatedOutput[1]);
             setTitle("Viewing Pin:" + myPin.getS4());
             TextView textView = findViewById(R.id.pindiagnosticpinnumber);
             textView.setText("Pin " + myPin.getS4());
             textView = findViewById(R.id.pindiagnosticpinname);
             textView.setText(myPin.getName());
-            float pwmValue = 0;
-            if (mServer != null && bytes != null) {
-                int readPosition = getReadPosition();
-                int[] nonNegatives = new int[bytes.length];
-                for (int i = 0; i < bytes.length; i++) {
-                    nonNegatives[i] = (bytes[i] < 0) ? bytes[i] + 256 : bytes[i];
-                }
-                pwmValue = (nonNegatives[readPosition] + nonNegatives[readPosition + 1] / 10f);
-            }
             textView = findViewById(R.id.pindiagnosticpwm);
-            textView.setText(pwmValue + " PWM");
+            textView.setText(formatedOutput[2]);
             textView = findViewById(R.id.pindiagnosticvdc);
-            textView.setText(supplyV * pwmValue + " VDC");
+            textView.setText(formatedOutput[3]);
         } else {
-            float f = 0;
-            if (bytes != null) {
-                f = ((bytes[0] << 8) + bytes[1]) / 100f;
+            if(mServer != null && bytes != null){
+                formatedOutput =  mServer.formatPwmOutput(myPin,bytes);
             }
-            myPin = uniquePins.get(loc);
             String temp = myPin.getDirection();
             String s1 = temp.substring(0, 1).toUpperCase(); //capitalize the first letter
             direction.setText(s1 + temp.substring(1));
-            connectorinformation.setText(myvehicle.getPinCount(myPin.getDirection().toLowerCase()) + " " + myPin.inout() + " Connector\nConnectorVoltage\n" + f + "v");
+            connectorinformation.setText(myvehicle.getPinCount(myPin.getDirection().toLowerCase()) + " " + myPin.inout() + " Connector\n" + formatedOutput[0]);
             setTitle("Viewing Pin:" + myPin.getS4());
             TextView textView = findViewById(R.id.pindiagnosticpinnumber);
             textView.setText("Pin " + myPin.getS4());
@@ -226,74 +210,7 @@ public class PinDiagnostic extends AppCompatActivity {
             textView.setText(myPin.getName());
             textView = findViewById(R.id.pindiagnosticpwm);
             if (mServer != null && bytes != null)
-                textView.setText(formatReading(bytes));
-        }
-    }
-
-    public final int IDLETYPE = 0;
-    public final int ONOFFTYPE = 1;
-    public final int CURRENTTYPE = 2;
-    public final int VOLTAGETYPE = 3;
-    public final int FREQUENCYTYPE = 4;
-    public final int COUNTSTYPE = 5;
-
-
-    @SuppressLint("DefaultLocale")
-    private String formatReading(byte[] bytesb) {
-        int type = mServer.getType(myPin);
-        int[] nonNegativeArray = new int[bytesb.length];
-        for (int i = 0; i < bytesb.length; i++) {
-            nonNegativeArray[i] = (bytesb[i] < 0) ? bytesb[i] + 256 : bytesb[i];
-        }
-        int loc1 = mServer.getPinRelation(myPin) * 2;
-        int loc2 = loc1 + 1;
-        float value = nonNegativeArray[loc1] + nonNegativeArray[loc2];
-        switch (type) {
-            case IDLETYPE:
-                return "Off";
-            case FREQUENCYTYPE:
-                if (value >= 0 && value <= 10000)
-                    return (int) value / 10 + " Hz";
-                else if (value >= 33768 && value <= 42768)
-                    return ((int) value - 32768) + " Hz";
-                break;
-            case ONOFFTYPE:
-                if (value == 0 || value == 1)
-                    return Float.toString(value);
-                break;
-            case COUNTSTYPE:
-                if (value >= 0 && value < 10000)
-                    return (int) value + " counts";
-                break;
-            case CURRENTTYPE:
-                if (value >= 0 && value <= 3000)
-                    return value / 100.0f + " mA";
-                break;
-            case VOLTAGETYPE:
-                if (value >= 0 && value <= 7300)
-                    return value / 1000.0f + " volts";
-                break;
-        }
-        return "null";
-    }
-
-    private int getReadPosition() {
-        int sensorNumber = mServer.getPinRelation(myPin);
-        if (myPin.inout().equals("Input")) {
-            return sensorNumber * 2 + 1;
-        } else {
-            int connectorNumber;
-            if (myPin.getDirection().contains("exp")) {
-                connectorNumber = 24;
-            } else
-                connectorNumber = Integer.parseInt(String.valueOf(myPin.getDirection().charAt(myPin.getDirection().length() - 1)));
-            if (connectorNumber < 4)
-                return 2 * sensorNumber + 2;
-            else if (connectorNumber % 2 == 0)
-                return 2;
-            else {
-                return 6;
-            }
+                textView.setText(formatedOutput[2]);
         }
     }
 

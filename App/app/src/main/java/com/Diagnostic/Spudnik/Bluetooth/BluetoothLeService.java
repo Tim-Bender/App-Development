@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 
 import androidx.annotation.NonNull;
@@ -42,6 +43,7 @@ import com.Diagnostic.Spudnik.CustomObjects.Pin;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class BluetoothLeService extends Service {
 
@@ -247,6 +249,7 @@ public class BluetoothLeService extends Service {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     System.out.println("CHARACTERISTIC READ SUCCESS");
                     FAILED_PACKET_BUFFER = 0;
+                    System.out.println(Arrays.toString(characteristic.getValue()));
                     broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC_READ.getString(), characteristic);
                     operationManager.request(new Operation(null, Operation.READ_RSSI, null));
                 } else {
@@ -278,6 +281,7 @@ public class BluetoothLeService extends Service {
                     WRITTEN = true;
                     FAILED_PACKET_BUFFER = 0;
                     System.out.println("WRITE CHARACTERISTIC SUCCESS");
+                    System.out.println("CHARACTERISTIC WRITE NEW VALUE  " + Arrays.toString(characteristic.getValue()));
                     broadcastUpdate(BroadcastActionConstants.ACTION_CHARACTERISTIC_WRITE.getString());
                     operationManager.request(new Operation(null, Operation.READ_RSSI, null));
                 } else {
@@ -350,10 +354,14 @@ public class BluetoothLeService extends Service {
             Packet myPacket;
             if (!WRITTEN) {
                 myPacket = new Packet(buildPacket(pins));
-                System.out.println("SENDING WRITE REQUEST");
+                System.out.println(Arrays.toString(buildPacket(pins)));
                 operationManager.request(new Operation(uuids.get(0).getFromString(), Operation.WRITE_CHARACTERISTIC, myPacket));
             }
-            operationManager.request(new Operation(uuids.get(1).getFromString(), Operation.READ_CHARACTERISTIC, null));
+            Handler handler = new Handler();
+            if (!WRITTEN)
+                handler.postDelayed(() -> operationManager.request(new Operation(uuids.get(1).getFromString(), Operation.READ_CHARACTERISTIC, null)), 2000);
+            else
+                operationManager.request(new Operation(uuids.get(1).getFromString(),Operation.READ_CHARACTERISTIC,null));
         }
     }
 
@@ -361,6 +369,7 @@ public class BluetoothLeService extends Service {
         if (operationManager != null && server != null) {
             ArrayList<UUIDConstants> uuids = getUuidSet(pins.get(0));
             byte[] bytes = buildPacket(pins);
+            System.out.println("WRITING PACKET: " + Arrays.toString(bytes));
             bytes[getWritePosition(currentPin)] = (byte) insertionValue;
             Packet myPacket = new Packet(bytes);
             operationManager.request(new Operation(uuids.get(0).getFromString(), Operation.WRITE_CHARACTERISTIC, myPacket));
@@ -368,7 +377,7 @@ public class BluetoothLeService extends Service {
     }
 
     public int getWritePosition(@NonNull Pin p) {
-        return (getPinRelation(p) * 2) + 1;
+        return (getPinRelation(p) * 2) - 1;
     }
 
 
@@ -376,6 +385,7 @@ public class BluetoothLeService extends Service {
         byte[] defaultPacket = getDefaultPacket(pins.get(0)).getBytes();
         for (Pin p : pins) {
             defaultPacket[getArrayPosition(p)] = getType(p);
+            System.out.println("TYPE OF PIN: " + getType(p));
         }
         return defaultPacket;
     }
@@ -385,7 +395,7 @@ public class BluetoothLeService extends Service {
     }
 
     public int getPinRelation(@NonNull Pin p) {
-        int pinCount = getPinCount(p.getDirection()), col;
+        int pinCount = getPinCount(p), col;
         int s4 = Integer.parseInt(p.getS4());
         switch (pinCount) {
             case 24:
@@ -395,7 +405,7 @@ public class BluetoothLeService extends Service {
                 col = 2;
                 break;
             default:
-                col = 1;
+                col = 3;
         }
         for (int[] arr : pinRelations) {
             if (arr[col] == s4) {
@@ -405,10 +415,11 @@ public class BluetoothLeService extends Service {
         return 1;
     }
 
-    public int getPinCount(String direction) throws NullPointerException {
+    public int getPinCount(Pin p) throws NullPointerException {
         int toReturn = 0;
+        String direction = p.getDirection();
         if (!direction.contains("exp")) {
-            int number = Integer.parseInt(String.valueOf(direction.charAt(direction.length() - 1)));
+            int number = p.getConnectionNumber();
             if (direction.contains("in")) {
                 if (number < 3)
                     toReturn = 14;
@@ -469,9 +480,105 @@ public class BluetoothLeService extends Service {
                 case "pwm":
                     return PULSEWIDTHTYPE;
                 case "freq":
-                    return FREQUENCYTYPE;
+                    if (!c.getDirection().contains("exp") && Integer.parseInt(String.valueOf(c.getDirection().charAt(c.getDirection().length() - 1))) > 3)
+                        return FREQUENCYTYPE;
                 default:
                     return IDLETYPE;
+            }
+        }
+    }
+
+    public String[] formatPwmOutput(@NonNull Pin myPin, @NonNull byte[] bytes){
+        String dir = myPin.inout();
+        String[] outputValue = new String[4];
+        if (dir.equals("Output")) {
+            float supplyV = 0, pwmFreq;
+            if (bytes != null) {
+                int[] ints = new int[4];
+                for (int i = 0; i < 4; i++) {
+                    ints[i] = (bytes[i] < 0) ? bytes[i] + 256 : bytes[i];
+                }
+                supplyV = ((ints[0] << 8) + ints[1]) / 100f;
+                pwmFreq = (ints[2] << 8) + ints[3];
+                outputValue[0] = "Supply Voltage = " + supplyV + " VDC\n";
+                outputValue[1] = "PWM Frequency "+ pwmFreq + "Hz";
+            }
+            float pwmValue = 0;
+            outputValue[2] = " 0 Pwm";
+            if (bytes != null) {
+                int readPosition = getReadPosition(myPin);
+                int[] nonNegatives = new int[bytes.length];
+                for (int i = 0; i < bytes.length; i++) {
+                    nonNegatives[i] = (bytes[i] < 0) ? bytes[i] + 256 : bytes[i];
+                }
+                pwmValue = ((nonNegatives[readPosition] << 8) + nonNegatives[readPosition + 1]) / 10f;
+                if (getType(myPin) == FREQUENCYTYPE)
+                    outputValue[2] = pwmValue + " Hz";
+                else
+                    outputValue[2] = pwmValue + " PWM";
+            }
+            outputValue[3] = (supplyV * pwmValue + "VDC");
+        } else {
+            float f = 0;
+            if (bytes != null) {
+                f = ((bytes[0] << 8) + bytes[1]) / 100f;
+            }
+            outputValue[0] = "Connector Voltage:  " + f +"v";
+            int type = getType(myPin);
+            int[] nonNegativeArray = new int[bytes.length];
+            for (int i = 0; i < bytes.length; i++) {
+                nonNegativeArray[i] = (bytes[i] < 0) ? bytes[i] + 256 : bytes[i];
+            }
+            int loc1 = getPinRelation(myPin) * 2;
+            int loc2 = loc1 + 1;
+            float value = nonNegativeArray[loc1] + nonNegativeArray[loc2];
+            switch (type) {
+                case IDLETYPE:
+                    outputValue[2] = "Off";
+                case FREQUENCYTYPE:
+                    if (value >= 0 && value <= 10000)
+                        outputValue[2] = (int) value / 10 + " Hz";
+                    else if (value >= 33768 && value <= 42768)
+                        outputValue[2] = ((int) value - 32768) + " Hz";
+                    break;
+                case ONOFFTYPE:
+                    if (value == 0 || value == 1)
+                        outputValue[2] = Float.toString(value);
+                    break;
+                case COUNTSTYPE:
+                    if (value >= 0 && value < 10000)
+                        outputValue[2] = (int) value + " counts";
+                    break;
+                case CURRENTTYPE:
+                    if (value >= 0 && value <= 3000)
+                        outputValue[2] = value / 100.0f + " mA";
+                    break;
+                case VOLTAGETYPE:
+                    if (value >= 0 && value <= 7300)
+                        outputValue[2] = value / 1000.0f + " volts";
+                    break;
+            }
+            outputValue[2] = "null";
+        }
+        return outputValue;
+    }
+
+    private int getReadPosition(@NonNull Pin myPin) {
+        int sensorNumber = getPinRelation(myPin);
+        if (myPin.inout().equals("Input")) {
+            return sensorNumber * 2 + 1;
+        } else {
+            int connectorNumber;
+            if (myPin.getDirection().contains("exp")) {
+                connectorNumber = 24;
+            } else
+                connectorNumber = Integer.parseInt(String.valueOf(myPin.getDirection().charAt(myPin.getDirection().length() - 1)));
+            if (connectorNumber < 4)
+                return 2 * sensorNumber + 2;
+            else if (connectorNumber % 2 == 0)
+                return 2;
+            else {
+                return 6;
             }
         }
     }
